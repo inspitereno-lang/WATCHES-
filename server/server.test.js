@@ -21,6 +21,7 @@ describe('T24 Watches CMS API Endpoints', () => {
       expect(res.body).toHaveProperty('specsBarItems');
       expect(res.body).toHaveProperty('newArrivals');
       expect(res.body).toHaveProperty('footerCopyright');
+      expect(res.body).toHaveProperty('footerContactImage');
     });
   });
 
@@ -72,7 +73,8 @@ describe('T24 Watches CMS API Endpoints', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           heroTitle: 'TEST TITLE MODIFICATION',
-          footerCopyright: '© 2026 Test Suite. All rights reserved.'
+          footerCopyright: '© 2026 Test Suite. All rights reserved.',
+          footerContactImage: 'https://res.cloudinary.com/test-image.jpg'
         })
         .expect(200);
 
@@ -82,6 +84,7 @@ describe('T24 Watches CMS API Endpoints', () => {
       const getRes = await request(app).get('/api/homepage');
       expect(getRes.body.heroTitle).toBe('TEST TITLE MODIFICATION');
       expect(getRes.body.footerCopyright).toBe('© 2026 Test Suite. All rights reserved.');
+      expect(getRes.body.footerContactImage).toBe('https://res.cloudinary.com/test-image.jpg');
     });
   });
 });
