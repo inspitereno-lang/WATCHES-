@@ -35,7 +35,7 @@ export default function Hero() {
     bodyDescription: 'Indulge in absolute luxury. Our hand-curated 1:1 Swiss Clone replica watches are visually and mechanically identical to the originals, engineered for those who demand uncompromising perfection.',
     ctaLabel: 'SHOP 1:1 CLONE WATCHES',
     ctaTarget: '#store',
-    watchImageUrl: '/hero-watch.png',
+    watchImageUrl: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171809/t24_watches_defaults/eehkzalmujmziwekwq9a.png',
     watchLabelLine1: 'AETERNA',
     watchLabelLine2: 'NOCTURNE',
     watchLabelLine3: 'ROSE GOLD',

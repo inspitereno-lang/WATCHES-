@@ -21,7 +21,7 @@ export default function MaisonAeterna({
   heritageDesc1 = 'At T24 Watches, we stand at the intersection of legendary horology design and accessibility. Our state-of-the-art custom watchmaking laboratory is dedicated to the micro-engineering and meticulous hand-assembly of premium 1:1 luxury replica watches. Every Swiss clone watch that leaves our workspace undergoes rigorous multi-point testing, guaranteeing weight distribution and sweeps that are indistinguishable from authentic luxury watches.',
   heritageDesc2 = 'Our atelier brings together skilled watch artisans who specialize in the tuning of clone movements (such as the Clean Factory Caliber 4130 and VSF VS3235). By disassembling, lubricating, and recalibrating each mechanical movement, we ensure that our first-copy watches operate with the exact same fluid sweep, tick rate, and long-term durability as genuine Swiss timepieces.',
   heritageDesc3 = 'From our custom Daytona configurations to complex NTPT carbon fiber casing, we push the boundaries of replica horology. We use only premium materials like 904L anti-corrosive Oystersteel, white gold electroplated fluted bezels, and double-sided anti-reflective sapphire crystals. We are proud to deliver the ultimate watch collecting experience directly to your doorstep in Dubai and worldwide.',
-  heritageImage = '/heritage-watchmaker.jpg',
+  heritageImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg',
   heritageCaptionLabel = 'FROM THE EYES OF THE ARTISAN',
   heritageCaptionText = 'Every custom T24 Swiss clone undergoes 100+ hours of calibration and pressure testing to ensure flawless precision',
 }: MaisonAeternaProps) {

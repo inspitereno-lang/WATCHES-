@@ -43,7 +43,7 @@ export default function Footer({
   footerWhatsAppMessage = "Hi T24 Watches! I'm visiting your website and would like to inquire about your premium 1:1 Swiss Clone watch collection.",
   footerLinks = defaultFooterLinks,
   footerCopyright = '© 2026 T24 Watches Dubai. All rights reserved. 1:1 Swiss Clone replica timepieces.',
-  footerContactImage = '/swiss-alps.jpg',
+  footerContactImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171812/t24_watches_defaults/hk3mfvm17mljab3czc5h.jpg',
 }: FooterProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const linksList = footerLinks && footerLinks.length > 0 ? footerLinks : defaultFooterLinks

@@ -35,7 +35,7 @@ const heroSchema = new mongoose.Schema(
     watchImageUrl: {
       type: String,
       required: true,
-      default: '/hero-watch.png',
+      default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171809/t24_watches_defaults/eehkzalmujmziwekwq9a.png',
     },
     watchLabelLine1: { type: String, default: 'AETERNA' },
     watchLabelLine2: { type: String, default: 'NOCTURNE' },
