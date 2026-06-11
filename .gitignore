@@ -36,3 +36,5 @@ server/.env
 !README.md
 !info.md
 
+# Allow public folder assets
+!public/**/*
