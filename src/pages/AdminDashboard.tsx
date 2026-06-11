@@ -106,7 +106,8 @@ export default function AdminDashboard() {
     footerWhatsAppNumber: '',
     footerWhatsAppMessage: '',
     footerLinks: [],
-    footerCopyright: ''
+    footerCopyright: '',
+    footerContactImage: ''
   })
   
   const [homepageLoading, setHomepageLoading] = useState(false)
@@ -1529,6 +1530,42 @@ export default function AdminDashboard() {
                           onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, footerCopyright: e.target.value }))}
                           className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white font-mono"
                         />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">CONTACT US BACKGROUND IMAGE (SWISS ALPS)</label>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="text"
+                            value={homepageForm.footerContactImage || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, footerContactImage: e.target.value }))}
+                            className="flex-1 px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white font-mono"
+                            placeholder="/swiss-alps.jpg"
+                          />
+                          <label className="cursor-pointer px-4 py-2 bg-gold hover:bg-gold/80 text-dark text-xs font-bold rounded uppercase tracking-wider transition-colors duration-200">
+                            {uploadLoadingField === 'footerContactImage' ? '...' : 'UPLOAD'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  handleFieldImageUpload(e.target.files[0], 'footerContactImage')
+                                }
+                              }}
+                              className="hidden"
+                              disabled={uploadLoadingField === 'footerContactImage'}
+                            />
+                          </label>
+                        </div>
+                        {homepageForm.footerContactImage && (
+                          <div className="mt-2 w-32 h-20 rounded border border-white/10 overflow-hidden relative">
+                            <img
+                              src={homepageForm.footerContactImage}
+                              alt="Contact Us Background Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 

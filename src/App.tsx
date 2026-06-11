@@ -124,6 +124,7 @@ export default function App() {
                 footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
                 footerLinks={homepageData?.footerLinks}
                 footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
               />
             </>
           } 
@@ -140,6 +141,7 @@ export default function App() {
                 footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
                 footerLinks={homepageData?.footerLinks}
                 footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
               />
             </>
           } 

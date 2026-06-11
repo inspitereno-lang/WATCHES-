@@ -15,6 +15,7 @@ interface FooterProps {
   footerWhatsAppMessage?: string
   footerLinks?: LinkGroup[]
   footerCopyright?: string
+  footerContactImage?: string
 }
 
 const defaultFooterLinks: LinkGroup[] = [
@@ -42,6 +43,7 @@ export default function Footer({
   footerWhatsAppMessage = "Hi T24 Watches! I'm visiting your website and would like to inquire about your premium 1:1 Swiss Clone watch collection.",
   footerLinks = defaultFooterLinks,
   footerCopyright = '© 2026 T24 Watches Dubai. All rights reserved. 1:1 Swiss Clone replica timepieces.',
+  footerContactImage = '/swiss-alps.jpg',
 }: FooterProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const linksList = footerLinks && footerLinks.length > 0 ? footerLinks : defaultFooterLinks
@@ -108,7 +110,7 @@ export default function Footer({
       {/* Mountain Banner Image */}
       <div className="relative h-[300px] lg:h-[400px] overflow-hidden">
         <img
-          src="/swiss-alps.jpg"
+          src={footerContactImage}
           alt="Swiss Alps"
           className="w-full h-full object-cover"
         />

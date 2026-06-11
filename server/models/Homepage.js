@@ -252,6 +252,7 @@ const homepageSchema = new mongoose.Schema(
     footerHeading: { type: String, default: 'CONTACT US' },
     footerWhatsAppNumber: { type: String, default: '971501234567' },
     footerWhatsAppMessage: { type: String, default: 'Hi T24 Watches! I\'m visiting your website and would like to inquire about your premium 1:1 Swiss Clone watch collection.' },
+    footerContactImage: { type: String, default: '/swiss-alps.jpg' },
     footerLinks: {
       type: [footerGroupSchema],
       default: [
