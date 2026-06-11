@@ -1591,10 +1591,9 @@ export default function AdminDashboard() {
         </section>
       </main>
 
-      {/* CREATE / EDIT DIALOG OVERLAY */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm p-4 md:p-12">
-          <div className="relative w-full max-w-3xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl mx-auto my-8">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 md:p-12 flex items-center justify-center">
+          <div className="relative w-full max-w-3xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
             
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/30 rounded-tl-2xl pointer-events-none" />
