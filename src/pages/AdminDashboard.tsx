@@ -23,6 +23,7 @@ interface Watch {
   id: number
   name: string
   brand: string
+  audience: 'Mens' | 'Womens'
   factory: string
   priceUSD: string
   priceAED: string
@@ -37,6 +38,12 @@ interface Watch {
   description: string
   features: string[]
   inStock: boolean
+  model?: string
+  reference?: string
+  material?: string
+  size?: string
+  caliber?: string
+  warranty?: string
 }
 
 export default function AdminDashboard() {
@@ -45,7 +52,7 @@ export default function AdminDashboard() {
   
   // Tab states
   const [activeTab, setActiveTab] = useState<'products' | 'homepage'>('products')
-  const [activeSubTab, setActiveSubTab] = useState<'hero' | 'arrivals' | 'details' | 'heritage' | 'testimonials' | 'footer'>('hero')
+  const [activeSubTab, setActiveSubTab] = useState<'hero' | 'arrivals' | 'heritage' | 'atelier' | 'catalogue' | 'testimonials' | 'footer'>('hero')
 
   // Notification states
   const [successMsg, setSuccessMsg] = useState('')
@@ -64,6 +71,7 @@ export default function AdminDashboard() {
     heroWatchLabelLine2: '',
     heroWatchLabelLine3: '',
     heroWatchLabelLine4: '',
+    heroStats: [],
     
     specsBarItems: [],
     
@@ -79,12 +87,6 @@ export default function AdminDashboard() {
     detailDesc2: '',
     detailSpecs: [],
     
-    lumeHeading1: '',
-    lumeHeading2: '',
-    lumeSubhead: '',
-    lumeBody: '',
-    lumeImage: '',
-    
     heritageHeading1: '',
     heritageHeading2: '',
     heritageDesc1: '',
@@ -93,6 +95,18 @@ export default function AdminDashboard() {
     heritageImage: '',
     heritageCaptionLabel: '',
     heritageCaptionText: '',
+
+    architectureHeading1: '',
+    architectureHeading2: '',
+    architectureSubhead: '',
+    architectureDesc: '',
+    architectureImage: '',
+    architectureImageAlt: '',
+
+    catalogueEyebrow: '',
+    catalogueHeading1: '',
+    catalogueHeading2: '',
+    catalogueDescription: '',
     
     testimonials: [],
     
@@ -107,10 +121,12 @@ export default function AdminDashboard() {
     footerWhatsAppMessage: '',
     footerLinks: [],
     footerCopyright: '',
-    footerContactImage: ''
+    footerContactImage: '',
+    salesReps: []
   })
   
   const [homepageLoading, setHomepageLoading] = useState(false)
+  const [expandedReps, setExpandedReps] = useState<number[]>([0])
   const [uploadLoadingField, setUploadLoadingField] = useState<string | null>(null)
 
   // Products table & search states
@@ -120,6 +136,7 @@ export default function AdminDashboard() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
   const [productsLoading, setProductsLoading] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null)
 
   // Product Form/Modal states
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -127,6 +144,7 @@ export default function AdminDashboard() {
   const [productForm, setProductForm] = useState<Omit<Watch, 'id'>>({
     name: '',
     brand: 'Rolex',
+    audience: 'Mens',
     factory: '',
     priceUSD: '',
     priceAED: '',
@@ -139,7 +157,13 @@ export default function AdminDashboard() {
     waterResistance: '50m waterproof vacuum tested',
     description: '',
     features: [],
-    inStock: true
+    inStock: true,
+    model: '',
+    reference: '',
+    material: '',
+    size: '',
+    caliber: '',
+    warranty: '2-Year Service Warranty'
   })
   
   const [newFeature, setNewFeature] = useState('')
@@ -168,7 +192,24 @@ export default function AdminDashboard() {
       const res = await fetch('/api/homepage')
       if (res.ok) {
         const data = await res.json()
-        setHomepageForm(data)
+        setHomepageForm({
+          ...data,
+          heroStats: data.heroStats?.length ? data.heroStats : [
+            { value: '904L', label: 'Oystersteel finish' },
+            { value: '1:1', label: 'Fine detailing' },
+            { value: 'DXB', label: 'Collector delivery' },
+          ],
+          architectureHeading1: data.architectureHeading1 || 'ARCHITECTURE',
+          architectureHeading2: data.architectureHeading2 || 'OF TIME',
+          architectureSubhead: data.architectureSubhead || 'CASE, DIAL, MOVEMENT',
+          architectureDesc: data.architectureDesc || 'Discover the best copy watches and super clone watches in Dubai, crafted with replica-watch detailing, refined case architecture, exposed movement depth, and polished gold finishing for collectors seeking premium replica watches in Dubai.',
+          architectureImage: data.architectureImage || 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp',
+          architectureImageAlt: data.architectureImageAlt || 'Watchmaker assembling a gold skeleton watch movement',
+          catalogueEyebrow: data.catalogueEyebrow || 'CURATED WATCH DIRECTORY',
+          catalogueHeading1: data.catalogueHeading1 || 'THE SIGNATURE',
+          catalogueHeading2: data.catalogueHeading2 || 'CATALOGUE',
+          catalogueDescription: data.catalogueDescription || 'Refined timepieces selected for balanced weight, smooth movement, and daily-wear precision.',
+        })
       }
     } catch (err) {
       console.error('Error fetching homepage settings:', err)
@@ -293,9 +334,18 @@ export default function AdminDashboard() {
   const openProductModal = (product: Watch | null = null) => {
     setEditingProduct(product)
     if (product) {
+      // Normalize legacy Gents/Ladies to Mens/Womens if needed
+      let normalizedAudience: 'Mens' | 'Womens' = 'Mens';
+      if ((product.audience as string) === 'Ladies' || (product.audience as string) === 'Womens') {
+        normalizedAudience = 'Womens';
+      } else {
+        normalizedAudience = 'Mens';
+      }
+
       setProductForm({
         name: product.name,
         brand: product.brand,
+        audience: normalizedAudience,
         factory: product.factory,
         priceUSD: product.priceUSD,
         priceAED: product.priceAED,
@@ -308,18 +358,25 @@ export default function AdminDashboard() {
         waterResistance: product.waterResistance,
         description: product.description,
         features: product.features || [],
-        inStock: product.inStock
+        inStock: product.inStock,
+        model: product.model || '',
+        reference: product.reference || '',
+        material: product.material || '',
+        size: product.size || '',
+        caliber: product.caliber || '',
+        warranty: product.warranty || '2-Year Service Warranty'
       })
     } else {
       setProductForm({
         name: '',
         brand: 'Rolex',
+        audience: 'Mens',
         factory: '',
         priceUSD: '$1,490.00',
         priceAED: 'AED 5,468',
         url: '',
         image: '',
-        movement: 'Swiss ETA Clone 3235 automatic sweep movement',
+        movement: 'Swiss ETA 3235 automatic sweep movement',
         casing: '904L anti-corrosive stainless steel casing',
         bezel: 'Hand-finished structural bezel',
         glass: 'Ultra-clear sapphire glass with anti-scratch',
@@ -330,7 +387,13 @@ export default function AdminDashboard() {
           'Sweeping second hand matching Swiss sweep speeds',
           'Super-LumiNova elements'
         ],
-        inStock: true
+        inStock: true,
+        model: '',
+        reference: '',
+        material: '',
+        size: '',
+        caliber: '',
+        warranty: '2-Year Service Warranty'
       })
     }
     setIsModalOpen(true)
@@ -393,8 +456,6 @@ export default function AdminDashboard() {
 
   // Delete product
   const handleDeleteProduct = async (id: number) => {
-    if (!confirm('Are you absolutely sure you want to delete this watch from the catalog? This action is irreversible.')) return
-
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
@@ -407,6 +468,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(data.error || 'Delete operation failed')
 
       showToast('success', 'Watch deleted successfully from database catalog.')
+      setDeleteConfirmId(null)
       fetchProducts()
     } catch (err: any) {
       showToast('error', err.message || 'Failed to delete watch.')
@@ -420,6 +482,8 @@ export default function AdminDashboard() {
       </div>
     )
   }
+
+  const watchToDelete = products.find((p) => p.id === deleteConfirmId)
 
   return (
     <div className="min-h-screen bg-[#070708] text-white flex flex-col font-sans">
@@ -484,8 +548,9 @@ export default function AdminDashboard() {
             {[
               { key: 'hero', label: 'HERO & SPECS BAR' },
               { key: 'arrivals', label: 'NEW ARRIVALS' },
-              { key: 'details', label: 'CLONE WATCH & LUME' },
-              { key: 'heritage', label: 'HERITAGE ATELIER & RM' },
+              { key: 'heritage', label: 'ARCHITECTURE & RM' },
+              { key: 'atelier', label: 'ATELIER SECTION' },
+              { key: 'catalogue', label: 'CATALOGUE HEADER' },
               { key: 'testimonials', label: 'CLIENT TESTIMONIALS' },
               { key: 'footer', label: 'FOOTER & CONTACTS' }
             ].map((sub) => (
@@ -518,7 +583,7 @@ export default function AdminDashboard() {
                 <div>
                   <h2 className="text-2xl font-light text-white">Catalogue Inventory</h2>
                   <p className="text-xs text-gray-500 font-mono mt-0.5">
-                    MANAGE WATCH DATA AND PRICES IN THE REDIS/MONGO BACKEND
+                    MANAGE WATCH DATA AND PRICES IN THE MONGODB BACKEND
                   </p>
                 </div>
                 <button
@@ -557,7 +622,8 @@ export default function AdminDashboard() {
                         <th className="pb-3 pl-4">Watch Preview</th>
                         <th className="pb-3">Model Name</th>
                         <th className="pb-3">Brand</th>
-                        <th className="pb-3">Factory</th>
+                        <th className="pb-3">Category</th>
+                        <th className="pb-3">Edition</th>
                         <th className="pb-3">Price USD</th>
                         <th className="pb-3">Price AED</th>
                         <th className="pb-3">Stock</th>
@@ -574,6 +640,11 @@ export default function AdminDashboard() {
                           </td>
                           <td className="font-semibold text-white max-w-[200px] truncate">{item.name}</td>
                           <td>{item.brand}</td>
+                          <td>
+                            <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] uppercase text-gray-300">
+                              {item.audience || 'Mens'}
+                            </span>
+                          </td>
                           <td><span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-gold">{item.factory}</span></td>
                           <td>{item.priceUSD}</td>
                           <td>{item.priceAED}</td>
@@ -594,7 +665,7 @@ export default function AdminDashboard() {
                                 <FileEdit className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleDeleteProduct(item.id)}
+                                onClick={() => setDeleteConfirmId(item.id)}
                                 className="p-2 border border-white/5 hover:border-red-500/30 hover:text-red-400 rounded transition-all duration-300 cursor-pointer"
                                 title="Delete model"
                               >
@@ -652,8 +723,9 @@ export default function AdminDashboard() {
                     Edit Homepage Content &bull; <span className="text-gold font-normal uppercase text-lg">
                       {activeSubTab === 'hero' && 'Hero & Specs'}
                       {activeSubTab === 'arrivals' && 'New Arrivals'}
-                      {activeSubTab === 'details' && 'Clone Watch & Lume'}
-                      {activeSubTab === 'heritage' && 'Heritage Atelier & RM'}
+                      {activeSubTab === 'heritage' && 'Architecture & RM'}
+                      {activeSubTab === 'atelier' && 'Atelier Section'}
+                      {activeSubTab === 'catalogue' && 'Catalogue Header'}
                       {activeSubTab === 'testimonials' && 'Client Testimonials'}
                       {activeSubTab === 'footer' && 'Footer & Contacts'}
                     </span>
@@ -718,36 +790,6 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider block mb-1">Hero Watch Image Showcase URL</label>
-                        <div className="flex gap-3">
-                          <input
-                            type="text"
-                            required
-                            value={homepageForm.heroWatchImageUrl || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heroWatchImageUrl: e.target.value }))}
-                            className="flex-1 px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:ring-1 focus:ring-gold/30 focus:outline-none transition-all duration-300 font-mono text-white"
-                          />
-                          <label className="px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-gold text-white text-xs font-mono font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shrink-0 select-none">
-                            {uploadLoadingField === 'heroWatchImageUrl' ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <ImageIcon className="w-3.5 h-3.5" />
-                            )}
-                            UPLOAD
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                  handleFieldImageUpload(e.target.files[0], 'heroWatchImageUrl')
-                                }
-                              }}
-                            />
-                          </label>
-                        </div>
-                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -791,6 +833,39 @@ export default function AdminDashboard() {
                           placeholder="Line 4 (Gold)"
                           className="px-3 py-2 text-xs rounded-lg bg-white/[0.02] border border-white/5 focus:border-gold focus:outline-none font-mono text-gold"
                         />
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
+                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Hero Bottom Stats</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {(homepageForm.heroStats || []).slice(0, 3).map((stat: any, statIdx: number) => (
+                          <div key={statIdx} className="space-y-2 p-3 bg-white/[0.02] border border-white/5 rounded-lg">
+                            <label className="text-[9px] text-gray-500 uppercase tracking-widest">Stat {statIdx + 1}</label>
+                            <input
+                              type="text"
+                              value={stat.value || ''}
+                              onChange={(e) => {
+                                const list = [...homepageForm.heroStats]
+                                list[statIdx].value = e.target.value
+                                setHomepageForm((prev: any) => ({ ...prev, heroStats: list }))
+                              }}
+                              placeholder="Value"
+                              className="w-full px-2 py-1 text-xs rounded bg-white/[0.01] border border-white/5 text-gold"
+                            />
+                            <input
+                              type="text"
+                              value={stat.label || ''}
+                              onChange={(e) => {
+                                const list = [...homepageForm.heroStats]
+                                list[statIdx].label = e.target.value
+                                setHomepageForm((prev: any) => ({ ...prev, heroStats: list }))
+                              }}
+                              placeholder="Label"
+                              className="w-full px-2 py-1 text-xs rounded bg-white/[0.01] border border-white/5 text-white"
+                            />
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -914,7 +989,7 @@ export default function AdminDashboard() {
                               />
                               <input
                                 type="text"
-                                placeholder="Sub-label Spec (e.g. Clean Factory)"
+                                placeholder="Sub-label Spec (e.g. Swiss Edition)"
                                 value={item.type}
                                 onChange={(e) => {
                                   const list = [...homepageForm.newArrivals]
@@ -1059,181 +1134,51 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* 3. Clone Watch Details Specs & Lume */}
-                {activeSubTab === 'details' && (
-                  <div className="space-y-6">
-                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
-                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Specs details section (e.g. Celestial Complication)</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">BRAND TITLE</label>
-                          <input
-                            type="text"
-                            value={homepageForm.detailBrand || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, detailBrand: e.target.value }))}
-                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">MODEL TITLE</label>
-                          <input
-                            type="text"
-                            value={homepageForm.detailModel || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, detailModel: e.target.value }))}
-                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                          />
-                        </div>
-                        <div className="space-y-1 col-span-2">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">DETAIL IMAGE SHOWCASE</label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={homepageForm.detailImage || ''}
-                              onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, detailImage: e.target.value }))}
-                              className="flex-1 px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                            />
-                            <label className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs rounded cursor-pointer select-none">
-                              {uploadLoadingField === 'detailImage' ? '...' : 'UPLOAD'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleFieldImageUpload(e.target.files[0], 'detailImage')
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">DESCRIPTION PARAGRAPH 1</label>
-                          <textarea rows={6}
-                            value={homepageForm.detailDesc1 || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, detailDesc1: e.target.value }))}
-                            className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">DESCRIPTION PARAGRAPH 2</label>
-                          <textarea rows={6}
-                            value={homepageForm.detailDesc2 || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, detailDesc2: e.target.value }))}
-                            className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
-                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Luminescence watch section (Nautilus Lume dial)</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">HEADING LINE 1 (WHITE)</label>
-                          <input
-                            type="text"
-                            value={homepageForm.lumeHeading1 || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, lumeHeading1: e.target.value }))}
-                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">HEADING LINE 2 (WHITE)</label>
-                          <input
-                            type="text"
-                            value={homepageForm.lumeHeading2 || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, lumeHeading2: e.target.value }))}
-                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">LUME SUBHEAD (GOLD)</label>
-                          <input
-                            type="text"
-                            value={homepageForm.lumeSubhead || ''}
-                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, lumeSubhead: e.target.value }))}
-                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">LUME PICTURE PREVIEW</label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={homepageForm.lumeImage || ''}
-                              onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, lumeImage: e.target.value }))}
-                              className="flex-1 px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                            />
-                            <label className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs rounded cursor-pointer select-none">
-                              {uploadLoadingField === 'lumeImage' ? '...' : 'UPLOAD'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleFieldImageUpload(e.target.files[0], 'lumeImage')
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">LUME BODY DESCRIPTION</label>
-                        <textarea rows={6}
-                          value={homepageForm.lumeBody || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, lumeBody: e.target.value }))}
-                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 4. Heritage Atelier & Richard Mille */}
+                {/* 3. Architecture of Time & Richard Mille */}
                 {activeSubTab === 'heritage' && (
                   <div className="space-y-6">
                     <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
-                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Atelier Heritage block (Maison Aeterna)</h4>
+                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Architecture of Time section</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input
                           type="text"
-                          value={homepageForm.heritageHeading1 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageHeading1: e.target.value }))}
+                          value={homepageForm.architectureHeading1 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, architectureHeading1: e.target.value }))}
                           placeholder="Heading Line 1"
                           className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5"
                         />
                         <input
                           type="text"
-                          value={homepageForm.heritageHeading2 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageHeading2: e.target.value }))}
+                          value={homepageForm.architectureHeading2 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, architectureHeading2: e.target.value }))}
                           placeholder="Heading Line 2"
                           className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5"
                         />
+                        <input
+                          type="text"
+                          value={homepageForm.architectureSubhead || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, architectureSubhead: e.target.value }))}
+                          placeholder="Subhead, e.g. CASE, DIAL, MOVEMENT"
+                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold col-span-2"
+                        />
                         <div className="space-y-1 col-span-2">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">HERITAGE IMAGE</label>
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">ARCHITECTURE IMAGE</label>
                           <div className="flex gap-2">
                             <input
                               type="text"
-                              value={homepageForm.heritageImage || ''}
-                              onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageImage: e.target.value }))}
+                              value={homepageForm.architectureImage || ''}
+                              onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, architectureImage: e.target.value }))}
                               className="flex-1 px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
                             />
                             <label className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs rounded cursor-pointer select-none">
-                              {uploadLoadingField === 'heritageImage' ? '...' : 'UPLOAD'}
+                              {uploadLoadingField === 'architectureImage' ? '...' : 'UPLOAD'}
                               <input
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
                                 onChange={(e) => {
                                   if (e.target.files && e.target.files[0]) {
-                                    handleFieldImageUpload(e.target.files[0], 'heritageImage')
+                                    handleFieldImageUpload(e.target.files[0], 'architectureImage')
                                   }
                                 }}
                               />
@@ -1244,38 +1189,19 @@ export default function AdminDashboard() {
                       
                       <div className="space-y-2">
                         <textarea rows={6}
-                          value={homepageForm.heritageDesc1 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageDesc1: e.target.value }))}
-                          placeholder="Paragraph 1"
-                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
-                        />
-                        <textarea rows={6}
-                          value={homepageForm.heritageDesc2 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageDesc2: e.target.value }))}
-                          placeholder="Paragraph 2"
-                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
-                        />
-                        <textarea rows={6}
-                          value={homepageForm.heritageDesc3 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageDesc3: e.target.value }))}
-                          placeholder="Paragraph 3"
+                          value={homepageForm.architectureDesc || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, architectureDesc: e.target.value }))}
+                          placeholder="Architecture body paragraph"
                           className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 pt-2">
+                      <div className="grid grid-cols-1 gap-3 pt-2">
                         <input
                           type="text"
-                          value={homepageForm.heritageCaptionLabel || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageCaptionLabel: e.target.value }))}
-                          placeholder="Image Caption Label"
-                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold"
-                        />
-                        <input
-                          type="text"
-                          value={homepageForm.heritageCaptionText || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageCaptionText: e.target.value }))}
-                          placeholder="Image Caption Detail text"
+                          value={homepageForm.architectureImageAlt || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, architectureImageAlt: e.target.value }))}
+                          placeholder="Image alt text"
                           className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
                         />
                       </div>
@@ -1342,6 +1268,154 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
+                {/* 4. T24 Atelier Section */}
+                {activeSubTab === 'atelier' && (
+                  <div className="space-y-6">
+                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
+                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">T24 Atelier section</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input
+                          type="text"
+                          value={homepageForm.heritageHeading1 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageHeading1: e.target.value }))}
+                          placeholder="Heading Line 1, e.g. T24"
+                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5"
+                        />
+                        <input
+                          type="text"
+                          value={homepageForm.heritageHeading2 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageHeading2: e.target.value }))}
+                          placeholder="Heading Line 2, e.g. ATELIER"
+                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5"
+                        />
+                        <div className="space-y-1 col-span-2">
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">ATELIER IMAGE</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={homepageForm.heritageImage || ''}
+                              onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageImage: e.target.value }))}
+                              className="flex-1 px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
+                            />
+                            <label className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs rounded cursor-pointer select-none">
+                              {uploadLoadingField === 'heritageImage' ? '...' : 'UPLOAD'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleFieldImageUpload(e.target.files[0], 'heritageImage')
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <textarea rows={5}
+                          value={homepageForm.heritageDesc1 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageDesc1: e.target.value }))}
+                          placeholder="Atelier paragraph 1"
+                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[120px] focus:border-gold focus:outline-none"
+                        />
+                        <textarea rows={5}
+                          value={homepageForm.heritageDesc2 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageDesc2: e.target.value }))}
+                          placeholder="Atelier paragraph 2"
+                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[120px] focus:border-gold focus:outline-none"
+                        />
+                        <textarea rows={5}
+                          value={homepageForm.heritageDesc3 || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageDesc3: e.target.value }))}
+                          placeholder="Atelier paragraph 3"
+                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[120px] focus:border-gold focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <input
+                          type="text"
+                          value={homepageForm.heritageCaptionLabel || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageCaptionLabel: e.target.value }))}
+                          placeholder="Image caption label"
+                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold"
+                        />
+                        <input
+                          type="text"
+                          value={homepageForm.heritageCaptionText || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heritageCaptionText: e.target.value }))}
+                          placeholder="Image caption text"
+                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Signature Catalogue Header */}
+                {activeSubTab === 'catalogue' && (
+                  <div className="space-y-6">
+                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
+                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">
+                        Signature catalogue header
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1 sm:col-span-2">
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">
+                            EYEBROW TEXT
+                          </label>
+                          <input
+                            type="text"
+                            value={homepageForm.catalogueEyebrow || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, catalogueEyebrow: e.target.value }))}
+                            placeholder="CURATED WATCH DIRECTORY"
+                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">
+                            HEADING LINE 1
+                          </label>
+                          <input
+                            type="text"
+                            value={homepageForm.catalogueHeading1 || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, catalogueHeading1: e.target.value }))}
+                            placeholder="THE SIGNATURE"
+                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">
+                            HEADING LINE 2
+                          </label>
+                          <input
+                            type="text"
+                            value={homepageForm.catalogueHeading2 || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, catalogueHeading2: e.target.value }))}
+                            placeholder="CATALOGUE"
+                            className="w-full px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold"
+                          />
+                        </div>
+                        <div className="space-y-1 sm:col-span-2">
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">
+                            DESCRIPTION
+                          </label>
+                          <textarea
+                            rows={5}
+                            value={homepageForm.catalogueDescription || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, catalogueDescription: e.target.value }))}
+                            placeholder="Refined timepieces selected for balanced weight, smooth movement, and daily-wear precision."
+                            className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[120px] focus:border-gold focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* 5. Client reviews and testimonials list */}
                 {activeSubTab === 'testimonials' && (
                   <div className="space-y-6">
@@ -1358,7 +1432,7 @@ export default function AdminDashboard() {
                               name: 'New Collector',
                               location: 'Dubai, UAE',
                               role: 'Enthusiast',
-                              watchBought: 'Rolex Submariner (Clean Factory)',
+                              watchBought: 'Rolex Submariner (Premium Edition)',
                               rating: 5,
                               quote: 'Exceptional details and weight distribution. Truly clone configurations.'
                             })
@@ -1449,21 +1523,37 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
 
-                              <div className="space-y-1">
-                                <label className="text-[11px] text-gray-400 font-mono uppercase tracking-wider block font-bold">Rating Score</label>
-                                <select
-                                  value={test.rating || 5}
-                                  onChange={(e) => {
-                                    const list = [...homepageForm.testimonials]
-                                    list[idx].rating = parseInt(e.target.value) || 5
-                                    setHomepageForm((prev: any) => ({ ...prev, testimonials: list }))
-                                  }}
-                                  className="w-full px-3 py-2.5 text-sm rounded-xl bg-[#0e0e11] border border-white/10 text-white font-mono focus:border-gold focus:outline-none transition-all"
-                                >
-                                  <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
-                                  <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
-                                  <option value={3}>⭐⭐⭐ (3 Stars)</option>
-                                </select>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="text-[11px] text-gray-400 font-mono uppercase tracking-wider block font-bold">Rating Score</label>
+                                  <select
+                                    value={test.rating || 5}
+                                    onChange={(e) => {
+                                      const list = [...homepageForm.testimonials]
+                                      list[idx].rating = parseInt(e.target.value) || 5
+                                      setHomepageForm((prev: any) => ({ ...prev, testimonials: list }))
+                                    }}
+                                    className="w-full px-3 py-2.5 text-sm rounded-xl bg-[#0e0e11] border border-white/10 text-white font-mono focus:border-gold focus:outline-none transition-all"
+                                  >
+                                    <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                                    <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
+                                    <option value={3}>⭐⭐⭐ (3 Stars)</option>
+                                  </select>
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[11px] text-gray-400 font-mono uppercase tracking-wider block font-bold">Client Avatar Image URL</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. https://images.unsplash.com/photo-..."
+                                    value={test.avatar || ''}
+                                    onChange={(e) => {
+                                      const list = [...homepageForm.testimonials]
+                                      list[idx].avatar = e.target.value
+                                      setHomepageForm((prev: any) => ({ ...prev, testimonials: list }))
+                                    }}
+                                    className="w-full px-3 py-2.5 text-sm rounded-xl bg-white/[0.01] border border-white/10 text-white font-mono focus:border-gold focus:outline-none transition-all"
+                                  />
+                                </div>
                               </div>
                             </div>
 
@@ -1503,7 +1593,7 @@ export default function AdminDashboard() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">WHATSAPP CALL NUMBER (NO SPACES)</label>
+                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">GLOBAL FALLBACK WHATSAPP NUMBER (NO SPACES)</label>
                           <input
                             type="text"
                             value={homepageForm.footerWhatsAppNumber || ''}
@@ -1520,6 +1610,152 @@ export default function AdminDashboard() {
                           onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, footerWhatsAppMessage: e.target.value }))}
                           className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
                         />
+                      </div>
+
+                      {/* Sales Representatives Rotation Management Section */}
+                      <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/5 pb-4 gap-2">
+                          <div>
+                            <h4 className="text-xs text-gold font-mono uppercase font-bold tracking-wider">Sales Representatives (WhatsApp Rotation)</h4>
+                            <p className="text-[10px] text-gray-400 font-mono mt-1">Add, update, or remove agents. Active agents are rotated automatically on buttons to distribute inquiries.</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const reps = homepageForm.salesReps ? [...homepageForm.salesReps] : [];
+                              reps.push({ name: 'New Agent', number: '', isActive: true, isFeatured: false });
+                              setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
+                              setExpandedReps((prev) => [...prev, reps.length - 1]);
+                            }}
+                            className="px-3 py-1.5 bg-gold hover:bg-gold/80 text-dark text-xs font-mono font-bold rounded uppercase tracking-wider transition-colors duration-200 self-start"
+                          >
+                            + Add Agent
+                          </button>
+                        </div>
+
+                        {/* Accordion List */}
+                        <div className="space-y-3">
+                          {!homepageForm.salesReps || homepageForm.salesReps.length === 0 ? (
+                            <div className="text-center py-6 text-xs text-gray-500 font-mono">No representatives configured. Will fall back to default number.</div>
+                          ) : (
+                            homepageForm.salesReps.map((rep: any, idx: number) => {
+                              const isExpanded = expandedReps.includes(idx);
+                              return (
+                                <div key={idx} className="border border-white/10 rounded-lg bg-white/[0.01] overflow-hidden transition-all duration-300 hover:border-gold/30">
+                                  {/* Accordion Header */}
+                                  <div 
+                                    onClick={() => {
+                                      setExpandedReps(prev => 
+                                        prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+                                      );
+                                    }}
+                                    className="flex items-center justify-between p-3.5 bg-white/[0.02] cursor-pointer select-none"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-xs font-mono font-bold text-white">{rep.name || `Unnamed Agent #${idx + 1}`}</span>
+                                      {rep.isFeatured && (
+                                        <span className="px-2 py-0.5 text-[9px] bg-gold/20 border border-gold/30 text-gold rounded font-mono font-bold uppercase">Featured</span>
+                                      )}
+                                      {!rep.isActive && (
+                                        <span className="px-2 py-0.5 text-[9px] bg-red-900/20 border border-red-500/30 text-red-400 rounded font-mono uppercase">Inactive</span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[10px] text-gray-500 font-mono">{rep.number || 'No number'}</span>
+                                      <svg
+                                        className={`w-4 h-4 text-gray-400 transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                      </svg>
+                                    </div>
+                                  </div>
+
+                                  {/* Accordion Body */}
+                                  {isExpanded && (
+                                    <div className="p-4 border-t border-white/5 bg-black/40 space-y-4 font-mono text-xs text-gray-300">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                          <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Representative Name</label>
+                                          <input
+                                            type="text"
+                                            value={rep.name}
+                                            onChange={(e) => {
+                                              const reps = [...homepageForm.salesReps];
+                                              reps[idx].name = e.target.value;
+                                              setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
+                                            }}
+                                            className="w-full px-3 py-2 rounded bg-white/[0.02] border border-white/10 text-white text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">WhatsApp Number (e.g. 971501234567)</label>
+                                          <input
+                                            type="text"
+                                            value={rep.number}
+                                            onChange={(e) => {
+                                              const reps = [...homepageForm.salesReps];
+                                              reps[idx].number = e.target.value.replace(/\s+/g, ''); // strip spaces
+                                              setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
+                                            }}
+                                            className="w-full px-3 py-2 rounded bg-white/[0.02] border border-white/10 text-white text-xs font-mono"
+                                            placeholder="971501234567"
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                                        <div className="flex gap-6">
+                                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                                            <input
+                                              type="checkbox"
+                                              checked={rep.isActive}
+                                              onChange={(e) => {
+                                                const reps = [...homepageForm.salesReps];
+                                                reps[idx].isActive = e.target.checked;
+                                                setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
+                                              }}
+                                              className="rounded border-white/10 bg-white/[0.02] text-gold focus:ring-0"
+                                            />
+                                            <span>Active (Included in rotation)</span>
+                                          </label>
+
+                                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                                            <input
+                                              type="checkbox"
+                                              checked={rep.isFeatured}
+                                              onChange={(e) => {
+                                                const reps = [...homepageForm.salesReps];
+                                                reps[idx].isFeatured = e.target.checked;
+                                                setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
+                                              }}
+                                              className="rounded border-white/10 bg-white/[0.02] text-gold focus:ring-0"
+                                            />
+                                            <span className="text-gold">Featured (Highlighted in UI)</span>
+                                          </label>
+                                        </div>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const reps = homepageForm.salesReps.filter((_: any, i: number) => i !== idx);
+                                            setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
+                                            setExpandedReps(prev => prev.filter(i => i !== idx).map(i => i > idx ? i - 1 : i));
+                                          }}
+                                          className="px-3 py-1 bg-red-950/40 hover:bg-red-900 border border-red-500/30 hover:border-red-500 text-red-400 hover:text-white rounded uppercase font-bold text-[10px] tracking-wider transition-all duration-200"
+                                        >
+                                          Delete Agent
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
                       </div>
 
                       <div className="space-y-1">
@@ -1684,11 +1920,33 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Factory build</label>
+                    <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Category</label>
+                    <div className="grid grid-cols-2 gap-2 rounded-xl bg-white/[0.03] border border-white/10 p-1">
+                      {(['Mens', 'Womens'] as const).map((category) => (
+                        <button
+                          key={category}
+                          type="button"
+                          onClick={() => setProductForm(prev => ({ ...prev, audience: category }))}
+                          className={`px-3 py-2.5 rounded-lg text-xs font-bold tracking-wider transition-all duration-300 ${
+                            productForm.audience === category
+                              ? 'bg-gold text-black shadow-md shadow-gold/10'
+                              : 'text-gray-400 hover:text-white hover:bg-white/5'
+                          }`}
+                        >
+                          {category.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Edition / Maker</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Clean / VSF / 3KF"
+                      placeholder="e.g. Swiss Edition / Premium"
                       value={productForm.factory}
                       onChange={(e) => setProductForm(prev => ({ ...prev, factory: e.target.value }))}
                       className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
@@ -1821,8 +2079,74 @@ export default function AdminDashboard() {
                   />
                 </div>
 
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Model / Series</label>
+                  <input
+                    type="text"
+                    value={productForm.model || ''}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, model: e.target.value }))}
+                    placeholder="e.g. Daytona 116500LN"
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Reference Number</label>
+                  <input
+                    type="text"
+                    value={productForm.reference || ''}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, reference: e.target.value }))}
+                    placeholder="e.g. Ref 116500LN"
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Material Composition</label>
+                  <input
+                    type="text"
+                    value={productForm.material || ''}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, material: e.target.value }))}
+                    placeholder="e.g. 904L Oystersteel / Solid 18k Rose Gold"
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Diameter Size</label>
+                  <input
+                    type="text"
+                    value={productForm.size || ''}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, size: e.target.value }))}
+                    placeholder="e.g. 40mm"
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Engine Caliber</label>
+                  <input
+                    type="text"
+                    value={productForm.caliber || ''}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, caliber: e.target.value }))}
+                    placeholder="e.g. Rolex Caliber 4130 Super Clone"
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Warranty Term</label>
+                  <input
+                    type="text"
+                    value={productForm.warranty || '2-Year Service Warranty'}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, warranty: e.target.value }))}
+                    placeholder="e.g. 2-Year Service Warranty"
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
                 <div className="space-y-1 flex flex-col justify-end">
-                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1 mb-1">Availability status</label>
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Availability status</label>
                   <label className="flex items-center gap-3.5 px-3 py-2 bg-white/[0.02] border border-white/5 rounded-lg cursor-pointer select-none hover:border-gold/20">
                     <input
                       type="checkbox"
@@ -1920,6 +2244,51 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirmId !== null && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 flex items-center justify-center">
+          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
+            {/* Corner styling borders */}
+            <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-red-500/30 rounded-tl-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-red-500/30 rounded-tr-2xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-red-500/30 rounded-bl-2xl pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-red-500/30 rounded-br-2xl pointer-events-none" />
+
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Confirm Watch Deletion</h3>
+                <p className="text-gray-400 mt-2">
+                  Are you sure you want to delete <span className="text-gold font-bold">{watchToDelete?.name || 'this watch'}</span>?
+                </p>
+                <p className="text-[10px] text-red-400 uppercase mt-2">
+                  This action is irreversible and will delete the watch from the catalogue.
+                </p>
+              </div>
+
+              <div className="flex gap-3 w-full pt-4">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteProduct(deleteConfirmId)}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-900/30"
+                >
+                  DELETE
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

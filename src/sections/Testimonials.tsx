@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Star, Quote, UserCheck } from 'lucide-react'
+import { translate } from '../utils/translate'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -13,6 +14,7 @@ interface Testimonial {
   watchBought: string
   rating: number
   quote: string
+  avatar?: string
 }
 
 const defaultTestimonials: Testimonial[] = [
@@ -21,27 +23,30 @@ const defaultTestimonials: Testimonial[] = [
     name: 'Faisal Al-Mansoori',
     location: 'Dubai Marina, UAE',
     role: 'Watch Collector',
-    watchBought: 'Rolex Daytona Panda (Clean Factory)',
+    watchBought: 'Rolex Daytona Panda',
     rating: 5,
     quote: 'Absolutely mind-blowing. I own a genuine Datejust, but I wanted a Daytona for daily wear without the risk. The weight, bezel luster, and mechanical chronograph sweep are identical. Hand-delivered in Dubai within 4 hours!',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
   },
   {
     id: 2,
     name: 'Marcus Sterling',
     location: 'London, UK',
     role: 'Finance Director',
-    watchBought: 'Patek Philippe Nautilus 5711 (3KF)',
+    watchBought: 'Patek Philippe Nautilus 5711',
     rating: 5,
-    quote: 'I was skeptical about the 8.3mm thickness, but 3K Factory nailed it. It fits exactly like my friend\'s authentic 5711. The blue-grey gradient dial shifts beautifully in direct light. Direct WhatsApp ordering was fast and smooth.',
+    quote: 'I was skeptical about the 8.3mm thickness, but the proportions are excellent. It fits beautifully on wrist. The blue-grey gradient dial shifts beautifully in direct light. Direct WhatsApp ordering was fast and smooth.',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face'
   },
   {
     id: 3,
     name: 'Sarah Jenkins',
     location: 'Los Angeles, USA',
     role: 'Creative Director',
-    watchBought: 'Rolex Datejust 41 Wimbledon (Clean Factory)',
+    watchBought: 'Rolex Datejust 41 Wimbledon',
     rating: 5,
-    quote: 'The Wimbledon slate Roman dial dial is a masterpiece of precision. The fluted bezel catches light like real gold. The Clean Factory bezel luster is superb. Incredible premium customer service from their Dubai desk!',
+    quote: 'The Wimbledon slate Roman dial is a masterpiece of precision. The fluted bezel catches light beautifully. Incredible premium customer service from their Dubai desk!',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face'
   },
   {
     id: 4,
@@ -51,12 +56,14 @@ const defaultTestimonials: Testimonial[] = [
     watchBought: 'Audemars Piguet Royal Oak 15500 (ZF)',
     rating: 5,
     quote: 'Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%!',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
   }
 ]
 
 export default function Testimonials({ items }: { items?: Testimonial[] }) {
   const sectionRef = useRef<HTMLElement>(null)
   const testimonialsList = items && items.length > 0 ? items : defaultTestimonials
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   useEffect(() => {
     const section = sectionRef.current
@@ -131,16 +138,16 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
         {/* Header */}
         <div className="mb-16 lg:mb-20">
           <p className="test-label font-body text-xs tracking-[0.3em] text-gold mb-4 uppercase">
-            CONCIERGE REVIEWS
+            {translate('CONCIERGE REVIEWS', currentLang)}
           </p>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <h2 className="test-heading font-display text-4xl sm:text-5xl lg:text-6xl text-white leading-[0.95] font-light">
-              REPUTATION IS
+              {translate('REPUTATION IS', currentLang)}
               <br />
-              <span className="text-gold font-bold">EVERYTHING</span>
+              <span className="text-gold font-bold">{translate('EVERYTHING', currentLang)}</span>
             </h2>
             <p className="font-body text-xs text-silver tracking-widest max-w-sm lg:mb-2 leading-relaxed">
-              Read verified testimonials from real watch collectors and enthusiasts who trusted our custom 1:1 clone configurations.
+              {translate('Read verified testimonials from real watch collectors and enthusiasts who trusted our custom watch configurations.', currentLang)}
             </p>
           </div>
         </div>
@@ -174,9 +181,18 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
               {/* User Bio */}
               <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gold">
-                    <UserCheck size={18} />
-                  </div>
+                  {test.avatar ? (
+                    <img
+                      src={test.avatar}
+                      alt={test.name}
+                      className="w-10 h-10 rounded-full object-cover border border-gold/20 group-hover:border-gold/50 transition-colors"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gold">
+                      <UserCheck size={18} />
+                    </div>
+                  )}
                   <div>
                     <h4 className="font-body text-sm font-semibold text-white tracking-wide">
                       {test.name}

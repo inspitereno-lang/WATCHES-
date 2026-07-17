@@ -11,8 +11,8 @@ interface Spec {
 
 const defaultSpecs: Spec[] = [
   {
-    title: '1:1 SWISS MOVEMENT',
-    details: ['VS3235 & Caliber 4130 Clones', 'Flawless Sweep & Chronograph'],
+    title: 'SWISS MOVEMENT',
+    details: ['Automatic Sweep Movement', 'Flawless Sweep & Chronograph'],
   },
   {
     title: '904L OYSTERSTEEL',

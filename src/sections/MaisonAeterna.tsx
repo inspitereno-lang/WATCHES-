@@ -18,12 +18,12 @@ interface MaisonAeternaProps {
 export default function MaisonAeterna({
   heritageHeading1 = 'T24',
   heritageHeading2 = 'ATELIER',
-  heritageDesc1 = 'At T24 Watches, we stand at the intersection of legendary horology design and accessibility. Our state-of-the-art custom watchmaking laboratory is dedicated to the micro-engineering and meticulous hand-assembly of premium 1:1 luxury replica watches. Every Swiss clone watch that leaves our workspace undergoes rigorous multi-point testing, guaranteeing weight distribution and sweeps that are indistinguishable from authentic luxury watches.',
-  heritageDesc2 = 'Our atelier brings together skilled watch artisans who specialize in the tuning of clone movements (such as the Clean Factory Caliber 4130 and VSF VS3235). By disassembling, lubricating, and recalibrating each mechanical movement, we ensure that our first-copy watches operate with the exact same fluid sweep, tick rate, and long-term durability as genuine Swiss timepieces.',
-  heritageDesc3 = 'From our custom Daytona configurations to complex NTPT carbon fiber casing, we push the boundaries of replica horology. We use only premium materials like 904L anti-corrosive Oystersteel, white gold electroplated fluted bezels, and double-sided anti-reflective sapphire crystals. We are proud to deliver the ultimate watch collecting experience directly to your doorstep in Dubai and worldwide.',
+  heritageDesc1 = 'At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.',
+  heritageDesc2 = 'As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.',
+  heritageDesc3 = 'From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.',
   heritageImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg',
   heritageCaptionLabel = 'FROM THE EYES OF THE ARTISAN',
-  heritageCaptionText = 'Every custom T24 Swiss clone undergoes 100+ hours of calibration and pressure testing to ensure flawless precision',
+  heritageCaptionText = 'Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision',
 }: MaisonAeternaProps) {
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -35,12 +35,10 @@ export default function MaisonAeterna({
       const heading = section.querySelector('.maison-heading')
       const paragraphs = section.querySelectorAll('.maison-text')
       const image = section.querySelector('.maison-image')
-      const caption = section.querySelector('.maison-caption')
 
       gsap.set(heading, { opacity: 0, y: 50 })
       gsap.set(paragraphs, { opacity: 0, y: 30 })
       gsap.set(image, { opacity: 0, x: 50 })
-      gsap.set(caption, { opacity: 0, y: 20 })
 
       gsap.to(heading, {
         opacity: 1,
@@ -79,18 +77,6 @@ export default function MaisonAeterna({
         },
       })
 
-      gsap.to(caption, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 45%',
-          toggleActions: 'play none none none',
-        },
-      })
-
       // Image parallax
       if (image) {
         gsap.to(image.querySelector('img'), {
@@ -112,54 +98,48 @@ export default function MaisonAeterna({
   return (
     <section
       ref={sectionRef}
-      id="heritage"
-      className="relative bg-charcoal py-20 lg:py-32"
+      id="atelier"
+      className="relative overflow-hidden bg-[#050403] py-16 text-white lg:py-28"
     >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_4%_70%,rgba(217,165,32,0.14),transparent_24%),linear-gradient(180deg,#050403_0%,#070604_100%)]" />
       <div className="w-full px-6 lg:px-12 xl:px-20">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-          {/* Left Column - Text */}
-          <div className="lg:w-1/2">
-            <h2 className="maison-heading font-display text-4xl sm:text-5xl lg:text-6xl text-gold leading-[0.95] mb-10 uppercase font-light">
+        <div className="relative flex flex-col items-center gap-10 lg:flex-row lg:gap-14">
+          <div className="lg:w-[50%]">
+            <h2 className="maison-heading font-display text-[clamp(3.5rem,5.5vw,5.75rem)] uppercase leading-[0.86] text-white">
               {heritageHeading1}
               <br />
-              <span className="font-bold text-white">{heritageHeading2}</span>
+              <span className="font-bold text-gold">{heritageHeading2}</span>
             </h2>
 
-            <div className="space-y-6">
-              <p className="maison-text font-body text-sm text-silver leading-relaxed font-light">
+            <div className="mt-8 max-w-2xl space-y-5">
+              <p className="maison-text font-body text-sm leading-7 text-white/55 sm:text-[15px]">
                 {heritageDesc1}
               </p>
-
-              <p className="maison-text font-body text-sm text-silver leading-relaxed font-light">
+              <p className="maison-text font-body text-sm leading-7 text-white/55 sm:text-[15px]">
                 {heritageDesc2}
               </p>
-
-              <p className="maison-text font-body text-sm text-silver leading-relaxed font-light">
+              <p className="maison-text font-body text-sm leading-7 text-white/55 sm:text-[15px]">
                 {heritageDesc3}
               </p>
             </div>
           </div>
 
-          {/* Right Column - Image */}
-          <div className="lg:w-1/2 relative">
-            <div className="maison-image relative overflow-hidden rounded-lg">
+          <div className="relative lg:w-[50%]">
+            <div className="maison-image relative overflow-hidden rounded-[1.25rem] border border-gold/15 bg-black">
               <img
                 src={heritageImage}
-                alt="Master watchmaker calibrating movements"
-                className="w-full h-auto object-cover max-h-[500px]"
+                alt={heritageCaptionText}
+                className="h-auto max-h-[430px] w-full object-cover"
               />
-              {/* Dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-            </div>
-
-            {/* Caption overlay */}
-            <div className="maison-caption absolute bottom-6 left-6 right-6">
-              <p className="font-body text-[10px] tracking-[0.3em] text-gold mb-1 uppercase font-semibold">
-                {heritageCaptionLabel}
-              </p>
-              <p className="font-body text-xs text-white/80 font-light">
-                {heritageCaptionText}
-              </p>
+              <div className="absolute inset-x-0 bottom-0 p-6">
+                <p className="font-body text-xs font-bold uppercase tracking-[0.34em] text-gold">
+                  {heritageCaptionLabel}
+                </p>
+                <p className="mt-2 font-body text-sm leading-relaxed text-white/75">
+                  {heritageCaptionText}
+                </p>
+              </div>
             </div>
           </div>
         </div>

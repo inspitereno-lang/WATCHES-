@@ -19,11 +19,42 @@ const productSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    audience: {
+      type: String,
+      enum: ['Womens', 'Mens', 'Ladies', 'Gents'],
+      required: true,
+      default: 'Mens',
+      index: true,
+    },
     factory: {
       type: String,
       required: true,
       trim: true,
       index: true,
+    },
+    model: {
+      type: String,
+      default: '',
+    },
+    reference: {
+      type: String,
+      default: '',
+    },
+    material: {
+      type: String,
+      default: '',
+    },
+    size: {
+      type: String,
+      default: '',
+    },
+    caliber: {
+      type: String,
+      default: '',
+    },
+    warranty: {
+      type: String,
+      default: '2-Year Service Warranty',
     },
     priceUSD: {
       type: String,
@@ -80,7 +111,7 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-productSchema.index({ name: 'text', factory: 'text', brand: 'text' });
+productSchema.index({ name: 'text', factory: 'text', brand: 'text', audience: 'text' });
 
 export const Product = mongoose.model('Product', productSchema);
 export default Product;

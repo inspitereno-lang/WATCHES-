@@ -4,6 +4,25 @@ import app from './server.js';
 
 describe('T24 Watches CMS API Endpoints', () => {
   let token = '';
+  beforeAll(async () => {
+    // Seed the isolated test database with the test admin and homepage defaults
+    const User = mongoose.model('User');
+    const Homepage = mongoose.model('Homepage');
+
+    await User.deleteMany({});
+    await Homepage.deleteMany({});
+
+    const bcrypt = await import('bcryptjs');
+    const salt = await bcrypt.default.genSalt(10);
+    const passwordHash = await bcrypt.default.hash('admin12345', salt);
+    await User.create({
+      username: 'admin',
+      email: 'admin@t24watches.com',
+      passwordHash: passwordHash
+    });
+
+    await Homepage.create({});
+  });
 
   afterAll(async () => {
     // Cleanly close the Mongoose connection after all tests run
@@ -85,6 +104,87 @@ describe('T24 Watches CMS API Endpoints', () => {
       expect(getRes.body.heroTitle).toBe('TEST TITLE MODIFICATION');
       expect(getRes.body.footerCopyright).toBe('© 2026 Test Suite. All rights reserved.');
       expect(getRes.body.footerContactImage).toBe('https://res.cloudinary.com/test-image.jpg');
+    });
+  });
+
+  // 5. Product Specs CRUD and Category Normalization
+  describe('Product Specs CRUD & Filtering', () => {
+    let createdProduct = null;
+
+    it('should create a new product with specification fields and normalize audience', async () => {
+      const res = await request(app)
+        .post('/api/products')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Submariner Date 41mm Spec Test',
+          brand: 'Rolex',
+          factory: 'VSF',
+          audience: 'Gents', // Should normalize to Mens
+          priceUSD: '$1,450.00',
+          priceAED: 'AED 5,320',
+          image: 'https://res.cloudinary.com/test-watch.jpg',
+          movement: 'VS3235 Automatic',
+          casing: 'Oystersteel',
+          bezel: 'Ceramic bezel',
+          glass: 'Sapphire glass',
+          waterResistance: '100m waterproof',
+          description: 'A test watch with high accuracy caliber.',
+          model: 'Submariner Date',
+          reference: '126610LN',
+          material: '904L anti-corrosive stainless steel',
+          size: '41 mm',
+          caliber: 'VS3235',
+          warranty: '2-Year Service Warranty'
+        })
+        .expect(201);
+
+      expect(res.body).toHaveProperty('product');
+      expect(res.body.product.audience).toBe('Mens'); // Normalized!
+      expect(res.body.product.model).toBe('Submariner Date');
+      expect(res.body.product.reference).toBe('126610LN');
+      expect(res.body.product.caliber).toBe('VS3235');
+      createdProduct = res.body.product;
+    });
+
+    it('should fetch products and filter correctly by normalized categories', async () => {
+      const res = await request(app)
+        .get('/api/products?audience=Mens')
+        .expect(200);
+
+      expect(res.body).toHaveProperty('products');
+      const testProduct = res.body.products.find(p => p.id === createdProduct.id);
+      expect(testProduct).toBeDefined();
+      expect(testProduct.audience).toBe('Mens');
+    });
+
+    it('should update product specifications via PUT', async () => {
+      const res = await request(app)
+        .put(`/api/products/${createdProduct.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          reference: '126610LN-UPDATED',
+          size: '42 mm',
+          audience: 'Ladies' // Should normalize to Womens
+        })
+        .expect(200);
+
+      expect(res.body.product.reference).toBe('126610LN-UPDATED');
+      expect(res.body.product.size).toBe('42 mm');
+      expect(res.body.product.audience).toBe('Womens'); // Normalized!
+    });
+
+    it('should delete the test product', async () => {
+      await request(app)
+        .delete(`/api/products/${createdProduct.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const res = await request(app)
+        .get('/api/products')
+        .expect(200);
+
+      const deletedProduct = res.body.products.find(p => p.id === createdProduct.id);
+      expect(deletedProduct).toBeUndefined();
     });
   });
 });

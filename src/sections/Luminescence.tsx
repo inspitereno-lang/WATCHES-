@@ -13,11 +13,11 @@ interface LuminescenceProps {
 }
 
 export default function Luminescence({
-  lumeHeading1 = 'PATEK',
-  lumeHeading2 = 'NAUTILUS',
-  lumeSubhead = 'DIW ALL CARBON BLACK ORANGE',
-  lumeBody = 'A customized, ultra-modern carbon-forged masterpiece by DIW. Extremely light, durable, featuring dynamic orange luminous hour markers and indicators that absorb UV light during the day to emit a soft, enduring glow in total darkness.',
-  lumeImage = 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2024%2F10%2FIMG_0394-300x300.webp',
+  lumeHeading1 = 'ARCHITECTURE',
+  lumeHeading2 = 'OF TIME',
+  lumeSubhead = 'CASE, DIAL, MOVEMENT',
+  lumeBody = 'Discover the best copy watches and super clone watches in Dubai, crafted with replica-watch detailing, refined case architecture, exposed movement depth, and polished gold finishing for collectors seeking premium replica watches in Dubai.',
+  lumeImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp',
 }: LuminescenceProps) {
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -103,16 +103,19 @@ export default function Luminescence({
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#0A0A0A] py-20 lg:py-32 overflow-hidden"
+      id="architecture"
+      className="relative overflow-hidden bg-black py-20 lg:py-32"
     >
+      <div className="absolute left-[-16rem] top-1/3 h-[30rem] w-[30rem] rounded-full bg-[#d9a520]/10 blur-3xl" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e8c264]/30 to-transparent" />
+
       <div className="w-full px-6 lg:px-12 xl:px-20">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          {/* Left - Typography */}
+        <div className="relative z-10 flex flex-col items-center gap-12 lg:flex-row lg:gap-20">
           <div className="lg:w-1/2">
             <h2 className="lume-heading font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl text-white leading-[0.95] mb-8 uppercase font-light">
               {lumeHeading1}
               <br />
-              <span className="font-bold">{lumeHeading2}</span>
+              <span className="font-bold text-[#e8c264]">{lumeHeading2}</span>
             </h2>
 
             <h3 className="lume-subhead font-body text-xl lg:text-2xl tracking-[0.1em] text-gold mb-6 uppercase">
@@ -124,15 +127,14 @@ export default function Luminescence({
             </p>
           </div>
 
-          {/* Right - Image */}
           <div className="lg:w-1/2">
-            <div className="lume-image relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] p-4 flex items-center justify-center">
+            <div className="lume-image relative flex items-center justify-center overflow-hidden rounded-[2rem] border border-[#ebcb7a]/15 bg-white/[0.02] p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6)]">
               <img
                 src={lumeImage}
-                alt={`${lumeHeading1} ${lumeHeading2} Orange Lume Dial`}
-                className="w-full h-auto object-cover max-h-[500px]"
+                alt="Watch architecture case and movement study"
+                className="h-auto max-h-[560px] w-full object-cover"
+                loading="lazy"
               />
-              {/* Glow overlay effect */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>

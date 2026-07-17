@@ -5,6 +5,11 @@ const specItemSchema = new mongoose.Schema({
   details: [{ type: String }]
 });
 
+const heroStatSchema = new mongoose.Schema({
+  value: { type: String, required: true },
+  label: { type: String, required: true }
+});
+
 const newArrivalSchema = new mongoose.Schema({
   id: { type: Number, required: true },
   name: { type: String, required: true },
@@ -34,7 +39,8 @@ const testimonialSchema = new mongoose.Schema({
   role: { type: String, required: true },
   watchBought: { type: String, required: true },
   rating: { type: Number, default: 5 },
-  quote: { type: String, required: true }
+  quote: { type: String, required: true },
+  avatar: { type: String }
 });
 
 const footerGroupSchema = new mongoose.Schema({
@@ -42,33 +48,48 @@ const footerGroupSchema = new mongoose.Schema({
   links: [{ type: String }]
 });
 
+const salesRepSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  number: { type: String, required: true },
+  isActive: { type: Boolean, default: true },
+  isFeatured: { type: Boolean, default: false }
+});
+
 const homepageSchema = new mongoose.Schema(
   {
+    // SALES REPRESENTATIVES ROTATION
+    salesReps: {
+      type: [salesRepSchema],
+      default: [
+        { name: 'Faisal (Senior Concierge)', number: '971501234567', isActive: true, isFeatured: true },
+        { name: 'Marcus (Support Desk)', number: '971507654321', isActive: true, isFeatured: false }
+      ]
+    },
     // HERO SECTION
     heroTitle: {
       type: String,
       required: true,
-      default: 'THE ART OF | 1:1 SWISS CLONES',
+      default: 'SWISS | PRECISION',
     },
     heroSubtitleLabel: {
       type: String,
       required: true,
-      default: 'T24 WATCHES DUBAI:',
+      default: 'SUPER CLONE WATCHES DUBAI',
     },
     heroSubtitleDesc: {
       type: String,
       required: true,
-      default: 'Indistinguishable Swiss movements & 904L Oystersteel',
+      default: 'Best replica watches in Dubai. Master copy watches & clone watches.',
     },
     heroBodyDescription: {
       type: String,
       required: true,
-      default: 'Specializing in the custom curation and assembly of premium 1:1 luxury replica watches. Hand-calibrated in our Dubai laboratory with sweeping seconds, exact casing weights, and genuine sapphire glass.',
+      default: "Dubai's ultimate boutique for 1:1 super clone watches. Hand-calibrated with flawless sweep movements, premium Oystersteel, and sapphire crystals. Cash on delivery available.",
     },
     heroCtaLabel: {
       type: String,
       required: true,
-      default: 'EXPLORE THE CATALOGUE',
+      default: 'VIEW COLLECTION',
     },
     heroCtaTarget: {
       type: String,
@@ -80,10 +101,18 @@ const homepageSchema = new mongoose.Schema(
       required: true,
       default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171809/t24_watches_defaults/eehkzalmujmziwekwq9a.png',
     },
-    heroWatchLabelLine1: { type: String, default: 'AUDEMARS PIGUET' },
-    heroWatchLabelLine2: { type: String, default: 'ROYAL OAK DOUBLE BALANCE' },
-    heroWatchLabelLine3: { type: String, default: 'SKELETON FLUTE' },
-    heroWatchLabelLine4: { type: String, default: 'VSF BUILD' },
+    heroWatchLabelLine1: { type: String, default: 'SWISS' },
+    heroWatchLabelLine2: { type: String, default: 'DUBAI EDITION' },
+    heroWatchLabelLine3: { type: String, default: 'PREMIUM OYSTERSTEEL' },
+    heroWatchLabelLine4: { type: String, default: '1:1 BUILD' },
+    heroStats: {
+      type: [heroStatSchema],
+      default: [
+        { value: 'FREE', label: 'Same-day delivery' },
+        { value: '2 YR', label: 'Service warranty' },
+        { value: 'COD', label: 'Multiple payments' }
+      ]
+    },
 
     // SPECS BAR
     specsBarItems: {
@@ -111,16 +140,16 @@ const homepageSchema = new mongoose.Schema(
       type: [newArrivalSchema],
       default: [
         {
-          id: 133,
+          id: 138,
           name: 'Daytona Pikachu 126518LN Gold',
-          type: 'Clean Factory 1:1 Swiss Clone',
+          type: '1:1 Swiss Master Copy Edition',
           image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F02%2FIMG_0913-300x300.webp',
           label: 'BEST SELLER',
         },
         {
-          id: 121,
+          id: 119,
           name: 'Patek Philippe Celestial Blue',
-          type: '3K Factory 1:1 Swiss Clone',
+          type: '1:1 Swiss Master Copy Edition',
           image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3594-300x300.webp',
           label: 'NEW ARRIVAL',
         }
@@ -130,12 +159,12 @@ const homepageSchema = new mongoose.Schema(
       type: [craftImageSchema],
       default: [
         { 
-          id: 108, 
+          id: 125, 
           image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F03%2FIMG_2868-300x300.webp', 
           alt: 'Richard Mille Mother Of Pearl Rose Gold' 
         },
         { 
-          id: 120, 
+          id: 156, 
           image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2025%2F11%2FIMG_4627-300x300.webp', 
           alt: 'Audemars Piguet Frosted Double Balance Wheel' 
         }
@@ -147,7 +176,7 @@ const homepageSchema = new mongoose.Schema(
     detailModel: { type: String, default: 'CELESTIAL' },
     detailImage: { type: String, default: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3594-300x300.webp' },
     detailDesc1: { type: String, default: 'The Patek Philippe Celestial represents the absolute zenith of grand complication horology. Its deep-sky chart dial captures the mesmerizing, slow progression of the stars and the moon in the Northern Hemisphere, bringing cosmic mechanics to your wrist.' },
-    detailDesc2: { type: String, default: 'This 3K Factory Swiss clone execution features a multi-layered dial disk, sapphire dial apertures, and the micro-rotor Calibre 240 LU CL C movement. Fine-tuned and pressure tested by our workshop for seamless mechanical sweeps and identical weight parameters.' },
+    detailDesc2: { type: String, default: 'This premium Swiss master copy execution features a multi-layered dial disk, sapphire dial apertures, and the micro-rotor Calibre 240 LU CL C movement. Fine-tuned and pressure tested by our workshop for seamless mechanical sweeps and identical weight parameters.' },
     detailSpecs: {
       type: [detailCategorySchema],
       default: [
@@ -191,12 +220,26 @@ const homepageSchema = new mongoose.Schema(
     // HERITAGE SECTION (Maison Atelier)
     heritageHeading1: { type: String, default: 'T24' },
     heritageHeading2: { type: String, default: 'ATELIER' },
-    heritageDesc1: { type: String, default: 'At T24 Watches, we stand at the intersection of legendary horology design and accessibility. Our state-of-the-art custom watchmaking laboratory is dedicated to the micro-engineering and meticulous hand-assembly of premium 1:1 luxury replica watches. Every Swiss clone watch that leaves our workspace undergoes rigorous multi-point testing, guaranteeing weight distribution and sweeps that are indistinguishable from authentic luxury watches.' },
-    heritageDesc2: { type: String, default: 'Our atelier brings together skilled watch artisans who specialize in the tuning of clone movements (such as the Clean Factory Caliber 4130 and VSF VS3235). By disassembling, lubricating, and recalibrating each mechanical movement, we ensure that our first-copy watches operate with the exact same fluid sweep, tick rate, and long-term durability as genuine Swiss timepieces.' },
-    heritageDesc3: { type: String, default: 'From our custom Daytona configurations to complex NTPT carbon fiber casing, we push the boundaries of replica horology. We use only premium materials like 904L anti-corrosive Oystersteel, white gold electroplated fluted bezels, and double-sided anti-reflective sapphire crystals. We are proud to deliver the ultimate watch collecting experience directly to your doorstep in Dubai and worldwide.' },
+    heritageDesc1: { type: String, default: 'At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.' },
+    heritageDesc2: { type: String, default: 'As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.' },
+    heritageDesc3: { type: String, default: 'From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.' },
     heritageImage: { type: String, default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg' },
     heritageCaptionLabel: { type: String, default: 'FROM THE EYES OF THE ARTISAN' },
-    heritageCaptionText: { type: String, default: 'Every custom T24 Swiss clone undergoes 100+ hours of calibration and pressure testing to ensure flawless precision' },
+    heritageCaptionText: { type: String, default: 'Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision' },
+
+    // ARCHITECTURE OF TIME SECTION
+    architectureHeading1: { type: String, default: 'ARCHITECTURE' },
+    architectureHeading2: { type: String, default: 'OF TIME' },
+    architectureSubhead: { type: String, default: 'CASE, DIAL, MOVEMENT' },
+    architectureDesc: { type: String, default: 'Discover the ultimate collection of superclone watches and superclone watches in Dubai. At T24, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.' },
+    architectureImage: { type: String, default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp' },
+    architectureImageAlt: { type: String, default: 'Watchmaker assembling a gold skeleton watch movement' },
+
+    // SIGNATURE CATALOGUE HEADER
+    catalogueEyebrow: { type: String, default: 'CURATED WATCH DIRECTORY' },
+    catalogueHeading1: { type: String, default: 'THE SIGNATURE' },
+    catalogueHeading2: { type: String, default: 'CATALOGUE' },
+    catalogueDescription: { type: String, default: 'Refined timepieces selected for balanced weight, smooth movement, and daily-wear precision.' },
 
     // TESTIMONIALS SECTION
     testimonials: {
@@ -207,36 +250,40 @@ const homepageSchema = new mongoose.Schema(
           name: 'Faisal Al-Mansoori',
           location: 'Dubai Marina, UAE',
           role: 'Watch Collector',
-          watchBought: 'Rolex Daytona Panda (Clean Factory)',
+          watchBought: 'Rolex Daytona Panda (Premium Edition)',
           rating: 5,
           quote: 'Absolutely mind-blowing. I own a genuine Datejust, but I wanted a Daytona for daily wear without the risk. The weight, bezel luster, and mechanical chronograph sweep are identical. Hand-delivered in Dubai within 4 hours!',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
         },
         {
           id: 2,
           name: 'Marcus Sterling',
           location: 'London, UK',
           role: 'Finance Director',
-          watchBought: 'Patek Philippe Nautilus 5711 (3KF)',
+          watchBought: 'Patek Philippe Nautilus 5711 (Premium Edition)',
           rating: 5,
-          quote: 'I was skeptical about the 8.3mm thickness, but 3K Factory nailed it. It fits exactly like my friend\'s authentic 5711. The blue-grey gradient dial shifts beautifully in direct light. Direct WhatsApp ordering was fast and smooth.',
+          quote: 'I was skeptical about the 8.3mm thickness, but our workshop nailed it. It fits exactly like my friend\'s authentic 5711. The blue-grey gradient dial shifts beautifully in direct light. Direct WhatsApp ordering was fast and smooth.',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face'
         },
         {
           id: 3,
           name: 'Sarah Jenkins',
           location: 'Los Angeles, USA',
           role: 'Creative Director',
-          watchBought: 'Rolex Datejust 41 Wimbledon (Clean Factory)',
+          watchBought: 'Rolex Datejust 41 Wimbledon (Premium Edition)',
           rating: 5,
-          quote: 'The Wimbledon slate Roman dial dial is a masterpiece of precision. The fluted bezel catches light like real gold. The Clean Factory bezel luster is superb. Incredible premium customer service from their Dubai desk!',
+          quote: 'The Wimbledon slate Roman dial dial is a masterpiece of precision. The fluted bezel catches light like real gold. The master copy bezel luster is superb. Incredible premium customer service from their Dubai desk!',
+          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face'
         },
         {
           id: 4,
           name: 'Khalid Bin-Fahd',
           location: 'Riyadh, Saudi Arabia',
           role: 'Business Owner',
-          watchBought: 'Audemars Piguet Royal Oak 15500 (ZF)',
+          watchBought: 'Audemars Piguet Royal Oak 15500 (Premium Edition)',
           rating: 5,
           quote: 'Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%!',
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
         }
       ]
     },
@@ -244,21 +291,21 @@ const homepageSchema = new mongoose.Schema(
     // NOCTURNE SECTION (Richard Mille)
     nocturneHeading1: { type: String, default: 'RICHARD' },
     nocturneHeading2: { type: String, default: 'MILLE' },
-    nocturneCopy: { type: String, default: 'An exact 1:1 replica of the RM 68-01 Cyril Kongo Tourbillon, blending haute horlogerie with street art aesthetics.' },
-    nocturneBuildSpec: { type: String, default: 'KV FACTORY BUILD SPEC' },
+    nocturneCopy: { type: String, default: 'Discover the finest Richard Mille replica watches Dubai collection. From the ultra-thin RM 67-01 replica in Dubai and RM 67-02 replica in Dubai to complex skeleton dials, each Richard Mille super clone in Dubai is crafted with carbon casings and exact details, making them the ultimate Richard Mille replica watches in Dubai.' },
+    nocturneBuildSpec: { type: String, default: 'RICHARD MILLE SUPER CLONE IN DUBAI' },
     nocturneImage: { type: String, default: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3434-300x300.webp' },
 
     // FOOTER SECTION
     footerHeading: { type: String, default: 'CONTACT US' },
     footerWhatsAppNumber: { type: String, default: '971501234567' },
-    footerWhatsAppMessage: { type: String, default: 'Hi T24 Watches! I\'m visiting your website and would like to inquire about your premium 1:1 Swiss Clone watch collection.' },
+    footerWhatsAppMessage: { type: String, default: 'Hi T24 Watches! I\'m visiting your website and would like to inquire about your premium 1:1 Master Copy watch collection.' },
     footerContactImage: { type: String, default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171812/t24_watches_defaults/hk3mfvm17mljab3czc5h.jpg' },
     footerLinks: {
       type: [footerGroupSchema],
       default: [
         {
           title: 'COLLECTIONS',
-          links: ['Rolex 1:1 Clones', 'Patek Philippe Clones', 'Audemars Piguet Clones', 'Richard Mille Clones', 'Vacheron Constantin'],
+          links: ['Rolex 1:1 Master Copies', 'Patek Philippe Master Copies', 'Audemars Piguet Master Copies', 'Richard Mille Master Copies', 'Vacheron Constantin'],
         },
         {
           title: 'OUR SPECIFICATIONS',
@@ -274,7 +321,7 @@ const homepageSchema = new mongoose.Schema(
         }
       ]
     },
-    footerCopyright: { type: String, default: '© 2026 T24 Watches Dubai. All rights reserved. 1:1 Swiss Clone replica timepieces.' }
+    footerCopyright: { type: String, default: '© 2026 T24 Watches Dubai. All rights reserved. Premium 1:1 Master Copy replica timepieces.' }
   },
   {
     timestamps: true,

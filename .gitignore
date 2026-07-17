@@ -38,3 +38,7 @@ server/.env
 
 # Allow public folder assets
 !public/**/*
+
+# Ignore scratch files
+scratch/
+

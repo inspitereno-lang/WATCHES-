@@ -5,7 +5,7 @@ const heroSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      default: 'THE ART OF 1:1 SWISS CLONES',
+      default: 'THE ART OF 1:1 MASTER COPIES',
     },
     subtitleLabel: {
       type: String,
@@ -20,12 +20,12 @@ const heroSchema = new mongoose.Schema(
     bodyDescription: {
       type: String,
       required: true,
-      default: 'Indulge in absolute luxury. Our hand-curated 1:1 Swiss Clone replica watches are visually and mechanically identical to the originals, engineered for those who demand uncompromising perfection.',
+      default: 'Indulge in absolute luxury. Our hand-curated 1:1 Master Copy replica watches are visually and mechanically identical to the originals, engineered for those who demand uncompromising perfection.',
     },
     ctaLabel: {
       type: String,
       required: true,
-      default: 'SHOP 1:1 CLONE WATCHES',
+      default: 'SHOP 1:1 MASTER COPY WATCHES',
     },
     ctaTarget: {
       type: String,

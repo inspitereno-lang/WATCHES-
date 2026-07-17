@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://watches-production.up.railway.app/api/:path*"
+      "destination": "https://aeterna-geneve-backend-production.up.railway.app/api/:path*"
     },
     {
       "source": "/(.*)",
