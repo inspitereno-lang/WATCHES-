@@ -88,7 +88,7 @@ export default function ArabicLocalizer() {
       return
     }
 
-    const language = localStorage.getItem('t24_lang') || 'ar'
+    const language = localStorage.getItem('t24_lang') || 'en'
     document.documentElement.lang = language
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
     document.body.classList.toggle('is-arabic', language === 'ar')

@@ -5,13 +5,13 @@ import Seo from '../components/Seo'
 import type { BlogPost } from '../types/blog'
 
 export default function BlogPage() {
-  const isArabic = (localStorage.getItem('t24_lang') || 'ar') === 'ar'
+  const isArabic = (localStorage.getItem('t24_lang') || 'en') === 'ar'
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('All')
 
   useEffect(() => {
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     fetch(`/api/blogs?lang=${lang}`)
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load journal')

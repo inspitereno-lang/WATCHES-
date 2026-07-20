@@ -5,7 +5,7 @@ import Seo from '../components/Seo'
 import { translate } from '../utils/translate'
 
 export default function CollectionsPage() {
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isArabic = currentLang === 'ar'
   return (
     <div className="min-h-screen bg-[#050505] text-white">

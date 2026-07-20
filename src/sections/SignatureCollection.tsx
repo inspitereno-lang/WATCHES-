@@ -94,7 +94,7 @@ export default function SignatureCollection({
   const [selectedModel, setSelectedModel] = useState('')
   const [showMoreBrands, setShowMoreBrands] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
   const selectedAudience = activeAudienceFilter !== undefined ? activeAudienceFilter : selectedAudienceState
@@ -129,7 +129,7 @@ export default function SignatureCollection({
       const audienceQuery = audience === 'ALL' ? '' : encodeURIComponent(audience)
       const searchQuery = encodeURIComponent(search)
       const modelQuery = encodeURIComponent(model)
-      const lang = localStorage.getItem('t24_lang') || 'ar'
+      const lang = localStorage.getItem('t24_lang') || 'en'
       const res = await fetch(`/api/products?brand=${brandQuery}&audience=${audienceQuery}&search=${searchQuery}&model=${modelQuery}&page=${pageNum}&limit=6&lang=${lang}`)
       if (!res.ok) throw new Error('API request failed')
       const data = await res.json()

@@ -24,11 +24,40 @@ interface FooterProps {
 const defaultFooterLinks: LinkGroup[] = [
   {
     title: 'COLLECTIONS',
-    links: ['Rolex Watches', 'Patek Philippe Watches', 'Audemars Piguet Watches', 'Richard Mille Watches', 'Vacheron Constantin'],
+    links: [
+      'Rolex 1:1 Clones',
+      'Patek Philippe Clones',
+      'Audemars Piguet Clones',
+      'Richard Mille Clones',
+      'Vacheron Constantin',
+    ],
+  },
+  {
+    title: 'OUR SPECIFICATIONS',
+    links: [
+      'Clone Caliber Movement',
+      '904L Anti-Corrosive Steel',
+      'Bespoke Bezel Finishes',
+      'Ultra-Clear Sapphire Glass',
+    ],
   },
   {
     title: 'CUSTOMER SERVICE',
-    links: ['WhatsApp Order Desk', 'QC Photo Review', 'GCC Secure Delivery', 'Secure Packaging'],
+    links: [
+      'WhatsApp Order Desk',
+      'QC Photo Review',
+      'GCC Secure Delivery',
+      'Secure Packaging',
+    ],
+  },
+  {
+    title: 'T24 REPLICA ASSURANCE',
+    links: [
+      '1:1 Weight Guarantee',
+      'AAA+ Precision Sweeping',
+      'Indistinguishable Engravings',
+      'Dual Waterproof Seals',
+    ],
   },
 ]
 
@@ -43,7 +72,7 @@ export default function Footer({
 }: FooterProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const linksList = footerLinks && footerLinks.length > 0 ? footerLinks : defaultFooterLinks
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   const [selectedRep, setSelectedRep] = useState<SalesRep | null>(null)
 
@@ -149,7 +178,7 @@ export default function Footer({
       <div className="bg-dark py-16 lg:py-20">
         <div className="w-full px-6 lg:px-12 xl:px-20">
           {/* Links Grid */}
-          <div className="footer-links grid grid-cols-2 gap-8 mb-16">
+          <div className="footer-links grid grid-cols-2 sm:grid-cols-4 gap-8 mb-16">
             {linksList.map((group, idx) => (
               <div key={idx}>
                 <h4 className="font-body text-[10px] tracking-[0.2em] text-gold mb-4 uppercase font-semibold">

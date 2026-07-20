@@ -80,11 +80,11 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
 export default function CelebrityWatches() {
   const sectionRef = useRef<HTMLElement>(null)
   const [matches, setMatches] = useState<CelebrityMatch[]>(FALLBACK_MATCHES)
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   useEffect(() => {
     let active = true
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     fetch(`/api/collections/celebrity-matches?lang=${lang}`)
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load editorial collection')

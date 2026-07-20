@@ -83,7 +83,7 @@ const defaultTestimonials: Testimonial[] = [
 export default function Testimonials({ items }: { items?: Testimonial[] }) {
   const sectionRef = useRef<HTMLElement>(null)
   const testimonialsList = items && items.length > 0 ? items : defaultTestimonials
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   useEffect(() => {
     const section = sectionRef.current

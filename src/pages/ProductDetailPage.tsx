@@ -72,7 +72,7 @@ export default function ProductDetailPage({
   const imageContainerRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   // Refresh ScrollTrigger when content finishes loading to ensure footer and other elements animate correctly
   useEffect(() => {
@@ -188,7 +188,7 @@ export default function ProductDetailPage({
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     fetch(`/api/products/${id}?lang=${lang}`)
       .then((res) => {
         if (!res.ok) throw new Error('Product not found')
@@ -210,7 +210,7 @@ export default function ProductDetailPage({
   useEffect(() => {
     if (!watch) return
 
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     
     // 1. Fetch Suggestions By Brand
     fetch(`/api/products?brand=${encodeURIComponent(watch.brand)}&limit=12&lang=${lang}`)

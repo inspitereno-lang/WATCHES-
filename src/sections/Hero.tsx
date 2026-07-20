@@ -55,7 +55,7 @@ export default function Hero({
   const markerRef = useRef<HTMLDivElement>(null)
 
   const [currentSlide, setCurrentSlide] = useState(0)
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
   const slideshowImages = Array.from(

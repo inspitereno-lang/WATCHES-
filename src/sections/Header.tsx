@@ -25,7 +25,7 @@ export default function Header({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('t24_lang') || 'ar')
+  const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('t24_lang') || 'en')
   const [selectedRep, setSelectedRep] = useState<SalesRep | null>(null)
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function Header({
   }, [salesReps, defaultWhatsAppNumber])
 
   useEffect(() => {
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     setCurrentLang(lang)
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   }, [])

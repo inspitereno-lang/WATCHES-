@@ -50,7 +50,7 @@ export default function App() {
       return
     }
 
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     document.documentElement.lang = lang
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
     fetch(`/api/homepage?lang=${lang}`)

@@ -38,7 +38,7 @@ const deliveryBenefits = [
 import { translate } from '../utils/translate'
 
 export default function DeliveryPromise() {
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   return (
     <section

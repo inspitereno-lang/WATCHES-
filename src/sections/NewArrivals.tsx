@@ -89,7 +89,7 @@ export default function NewArrivals({
 }: NewArrivalsProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isHovered, setIsHovered] = useState(false)
-  const currentLang = localStorage.getItem('t24_lang') || 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   // Merge API and fallbacks so there are always up to 24 items (12 arrivals, 12 craftsmanship)
   const mergedArrivals = [...apiNewArrivals, ...defaultArrivals.filter(d => !apiNewArrivals.some(a => a.id === d.id))].slice(0, 12)

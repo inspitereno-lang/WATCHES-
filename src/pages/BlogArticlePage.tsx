@@ -5,7 +5,7 @@ import Seo from '../components/Seo'
 import type { BlogPost } from '../types/blog'
 
 export default function BlogArticlePage() {
-  const isArabic = (localStorage.getItem('t24_lang') || 'ar') === 'ar'
+  const isArabic = (localStorage.getItem('t24_lang') || 'en') === 'ar'
   const { slug } = useParams()
   const [post, setPost] = useState<BlogPost | null>(null)
   const [loading, setLoading] = useState(true)
@@ -13,7 +13,7 @@ export default function BlogArticlePage() {
   useEffect(() => {
     if (!slug) return
     setLoading(true)
-    const lang = localStorage.getItem('t24_lang') || 'ar'
+    const lang = localStorage.getItem('t24_lang') || 'en'
     fetch(`/api/blogs/${encodeURIComponent(slug)}?lang=${lang}`)
       .then((response) => {
         if (!response.ok) throw new Error('Article not found')
