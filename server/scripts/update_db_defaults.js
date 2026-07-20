@@ -98,6 +98,84 @@ async function migrate() {
       settings.footerWhatsAppMessage = 'Hi T24 Watches! I\'m visiting your website and would like to inquire about your premium 1:1 Master Copy watch collection.';
     }
 
+    // Overwrite all Ticker24 references with real background-free DubaiWatchStores products
+    console.log('Purging legacy Ticker24 references from Homepage settings...');
+    const daytona = await Product.findOne({ name: /Daytona/i });
+    const rmBubba = await Product.findOne({ name: /Bubba Watson/i }) || await Product.findOne({ name: /RM 055/i });
+    const datejust = await Product.findOne({ name: /Datejust/i });
+    const rmRose = await Product.findOne({ name: /67-01/i }) || await Product.findOne({ name: /RM 67/i });
+    const apSkeleton = await Product.findOne({ name: /Skeleton/i }) || await Product.findOne({ brand: 'Audemars Piguet' });
+    const rmBarshim = await Product.findOne({ name: /Mutaz/i }) || await Product.findOne({ brand: 'Richard Mille' });
+    const patekCelestial = await Product.findOne({ name: /Celestial/i }) || await Product.findOne({ brand: 'Patek Philippe' });
+
+    if (daytona && rmBubba && datejust && rmRose) {
+      settings.newArrivals = [
+        {
+          id: daytona.id,
+          name: daytona.name,
+          type: '1:1 Swiss Master Copy Edition',
+          image: daytona.image,
+          label: 'BEST SELLER',
+        },
+        {
+          id: rmBubba.id,
+          name: rmBubba.name,
+          type: '1:1 Swiss Master Copy Edition',
+          image: rmBubba.image,
+          label: 'NEW ARRIVAL',
+        },
+        {
+          id: datejust.id,
+          name: datejust.name,
+          type: '1:1 Master Copy Edition',
+          image: datejust.image,
+          label: 'EXQUISITE',
+        },
+        {
+          id: rmRose.id,
+          name: rmRose.name,
+          type: '1:1 Flyback Chrono Master Copy',
+          image: rmRose.image,
+          label: 'CRAFTSMANSHIP',
+        }
+      ];
+    }
+
+    if (apSkeleton && rmBarshim && rmBubba && datejust) {
+      settings.craftsmanshipImages = [
+        { 
+          id: apSkeleton.id, 
+          image: apSkeleton.image, 
+          alt: apSkeleton.name 
+        },
+        { 
+          id: rmBarshim.id, 
+          image: rmBarshim.image, 
+          alt: rmBarshim.name 
+        },
+        { 
+          id: rmBubba.id, 
+          image: rmBubba.image, 
+          alt: rmBubba.name 
+        },
+        { 
+          id: datejust.id, 
+          image: datejust.image, 
+          alt: datejust.name 
+        }
+      ];
+    }
+
+    if (patekCelestial) {
+      settings.detailImage = patekCelestial.image;
+    }
+    if (daytona) {
+      settings.lumeImage = daytona.image;
+    }
+    if (rmBarshim) {
+      settings.nocturneImage = rmBarshim.image;
+    }
+
     await settings.save();
     console.log('\nMigration of Homepage completed successfully!');
 

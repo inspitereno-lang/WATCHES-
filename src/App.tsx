@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Routes, Route } from 'react-router'
+import { Routes, Route, useLocation } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from '@studio-freight/lenis'
@@ -11,12 +11,17 @@ import Luminescence from './sections/Luminescence'
 import SignatureCollection from './sections/SignatureCollection'
 import Testimonials from './sections/Testimonials'
 import MaisonAeterna from './sections/MaisonAeterna'
-import Nocturne from './sections/Nocturne'
+import DeliveryPromise from './sections/DeliveryPromise'
 import Footer from './sections/Footer'
 import ProductDetailPage from './pages/ProductDetailPage'
+import WatchesPage from './pages/WatchesPage'
+import CollectionsPage from './pages/CollectionsPage'
+import BlogPage from './pages/BlogPage'
+import BlogArticlePage from './pages/BlogArticlePage'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import ScrollToTop from './components/ScrollToTop'
+import ArabicLocalizer from './components/ArabicLocalizer'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -24,6 +29,7 @@ const ARCHITECTURE_IMAGE_URL = 'https://res.cloudinary.com/dwqxzzqpn/image/uploa
 const HERITAGE_IMAGE_URL = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg'
 
 export default function App() {
+  const { pathname } = useLocation()
   const lenisRef = useRef<Lenis | null>(null)
   const [homepageData, setHomepageData] = useState<any>(null)
   const [activeAudienceFilter, setActiveAudienceFilter] = useState<'ALL' | 'Mens' | 'Womens'>('ALL')
@@ -36,7 +42,17 @@ export default function App() {
 
   // Fetch central homepage configuration from Express
   useEffect(() => {
-    const lang = localStorage.getItem('t24_lang') || 'en'
+    const isAdminRoute = pathname.startsWith('/admin')
+    if (isAdminRoute) {
+      document.documentElement.lang = 'en'
+      document.documentElement.dir = 'ltr'
+      document.body.classList.remove('is-arabic')
+      return
+    }
+
+    const lang = localStorage.getItem('t24_lang') || 'ar'
+    document.documentElement.lang = lang
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
     fetch(`/api/homepage?lang=${lang}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load homepage configuration')
@@ -44,7 +60,7 @@ export default function App() {
       })
       .then((data) => setHomepageData(data))
       .catch((err) => console.error('Homepage settings retrieval failed:', err))
-  }, [])
+  }, [pathname])
 
   useEffect(() => {
     // Initialize Lenis smooth scroll
@@ -77,6 +93,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      <ArabicLocalizer />
       <ScrollToTop />
       <Routes>
         <Route 
@@ -136,13 +153,7 @@ export default function App() {
                   heritageCaptionLabel={homepageData?.heritageCaptionLabel}
                   heritageCaptionText={homepageData?.heritageCaptionText}
                 />
-                <Nocturne 
-                  nocturneHeading1={homepageData?.nocturneHeading1}
-                  nocturneHeading2={homepageData?.nocturneHeading2}
-                  nocturneCopy={homepageData?.nocturneCopy}
-                  nocturneBuildSpec={homepageData?.nocturneBuildSpec}
-                  nocturneImage={homepageData?.nocturneImage}
-                />
+                <DeliveryPromise />
               </main>
               <Footer 
                 footerHeading={homepageData?.footerHeading}
@@ -156,6 +167,30 @@ export default function App() {
             </>
           } 
         />
+        <Route
+          path="/collections"
+          element={
+            <>
+              <Header
+                salesReps={homepageData?.salesReps}
+                defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                defaultWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+              />
+              <main>
+                <CollectionsPage />
+              </main>
+              <Footer
+                footerHeading={homepageData?.footerHeading}
+                footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+                footerLinks={homepageData?.footerLinks}
+                footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
+                salesReps={homepageData?.salesReps}
+              />
+            </>
+          }
+        />
         <Route 
           path="/watches" 
           element={
@@ -165,15 +200,8 @@ export default function App() {
                 defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
                 defaultWhatsAppMessage={homepageData?.footerWhatsAppMessage}
               />
-              <main className="pt-20">
-                <SignatureCollection
-                  catalogueEyebrow={homepageData?.catalogueEyebrow}
-                  catalogueHeading1={homepageData?.catalogueHeading1}
-                  catalogueHeading2={homepageData?.catalogueHeading2}
-                  catalogueDescription={homepageData?.catalogueDescription}
-                  activeAudienceFilter={activeAudienceFilter}
-                  onAudienceFilterChange={setActiveAudienceFilter}
-                />
+              <main>
+                <WatchesPage />
               </main>
               <Footer 
                 footerHeading={homepageData?.footerHeading}
@@ -186,6 +214,54 @@ export default function App() {
               />
             </>
           } 
+        />
+        <Route
+          path="/blog"
+          element={
+            <>
+              <Header
+                salesReps={homepageData?.salesReps}
+                defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                defaultWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+              />
+              <main>
+                <BlogPage />
+              </main>
+              <Footer
+                footerHeading={homepageData?.footerHeading}
+                footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+                footerLinks={homepageData?.footerLinks}
+                footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
+                salesReps={homepageData?.salesReps}
+              />
+            </>
+          }
+        />
+        <Route
+          path="/blog/:slug"
+          element={
+            <>
+              <Header
+                salesReps={homepageData?.salesReps}
+                defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                defaultWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+              />
+              <main>
+                <BlogArticlePage />
+              </main>
+              <Footer
+                footerHeading={homepageData?.footerHeading}
+                footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+                footerLinks={homepageData?.footerLinks}
+                footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
+                salesReps={homepageData?.salesReps}
+              />
+            </>
+          }
         />
         <Route 
           path="/product/:id" 

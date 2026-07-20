@@ -141,6 +141,8 @@ async function seed() {
         priceAED: item.priceAED || 'AED 5,468',
         url: item.url || '',
         image: item.image,
+        thumbnail: item.thumbnail || item.image || '',
+        images: item.images || [item.image],
         movement: cleanBrandingText(parsed.movement || item.movement || 'Clone Caliber Swiss movement'),
         casing: cleanBrandingText(parsed.material || item.casing || '904L anti-corrosive stainless steel casing'),
         bezel: cleanBrandingText(item.bezel || 'Hand-finished structural bezel'),

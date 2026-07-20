@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { ShieldAlert, KeyRound, User, Loader2 } from 'lucide-react'
 
@@ -8,6 +8,12 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.dir = 'ltr'
+    document.documentElement.lang = 'en'
+    document.body.classList.remove('is-arabic')
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +45,12 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070708] flex items-center justify-center px-4 relative overflow-hidden font-sans">
+    <div
+      dir="ltr"
+      lang="en"
+      data-no-translate
+      className="min-h-screen bg-[#070708] flex items-center justify-center px-4 relative overflow-hidden font-sans"
+    >
       {/* Background glowing gold orb */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
 

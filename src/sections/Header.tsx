@@ -4,10 +4,10 @@ import { useNavigate, useLocation } from 'react-router'
 import { translate } from '../utils/translate'
 import { getSelectedRep, getWhatsAppUrl, type SalesRep } from '../utils/whatsapp'
 
-const navLinks = [
-  { label: 'COLLECTIONS', sectionId: 'collections' },
-  { label: 'WATCHES', sectionId: 'store' },
-  { label: 'TESTIMONIALS', sectionId: 'testimonials' },
+const navLinks: Array<{ label: string; path?: string; sectionId?: string }> = [
+  { label: 'COLLECTIONS', path: '/collections' },
+  { label: 'WATCHES', path: '/watches' },
+  { label: 'BLOG', path: '/blog' },
 ]
 
 interface HeaderProps {
@@ -25,7 +25,7 @@ export default function Header({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const [currentLang, setCurrentLang] = useState('en')
+  const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('t24_lang') || 'ar')
   const [selectedRep, setSelectedRep] = useState<SalesRep | null>(null)
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function Header({
   }, [salesReps, defaultWhatsAppNumber])
 
   useEffect(() => {
-    const lang = localStorage.getItem('t24_lang') || 'en'
+    const lang = localStorage.getItem('t24_lang') || 'ar'
     setCurrentLang(lang)
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   }, [])
@@ -54,6 +54,13 @@ export default function Header({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
+
   const scrollToSection = (sectionId: string) => {
     const el = document.getElementById(sectionId)
     if (el) {
@@ -61,20 +68,19 @@ export default function Header({
     }
   }
 
-  const handleNavClick = (e: React.MouseEvent, sectionId: string) => {
+  const handleNavClick = (e: React.MouseEvent, link: (typeof navLinks)[number]) => {
     e.preventDefault()
     setMobileMenuOpen(false)
 
-    if (sectionId === 'store') {
-      navigate('/watches')
+    if (link.path) {
+      navigate(link.path)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
+    } else if (link.sectionId) {
       if (location.pathname !== '/') {
-        // Navigate to home page first, then scroll to section after render
         navigate('/')
-        setTimeout(() => scrollToSection(sectionId), 400)
+        setTimeout(() => scrollToSection(link.sectionId!), 400)
       } else {
-        scrollToSection(sectionId)
+        scrollToSection(link.sectionId)
       }
     }
   }
@@ -130,13 +136,18 @@ export default function Header({
           </a>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-7">
             {navLinks.map((link) => (
               <a
                 key={link.label}
-                href={`/#${link.sectionId}`}
-                onClick={(e) => handleNavClick(e, link.sectionId)}
-                className="nav-link font-body text-[11px] tracking-[0.15em] text-silver hover:text-white transition-colors duration-300"
+                href={link.path || `/#${link.sectionId}`}
+                onClick={(e) => handleNavClick(e, link)}
+                className={`nav-link font-body text-[10px] tracking-[0.14em] transition-colors duration-300 ${
+                  link.path &&
+                  (location.pathname === link.path || location.pathname.startsWith(`${link.path}/`))
+                    ? 'text-gold'
+                    : 'text-silver hover:text-white'
+                }`}
               >
                 {translate(link.label, currentLang)}
               </a>
@@ -166,11 +177,7 @@ export default function Header({
               } rounded-full transition-all duration-300 font-body text-[10px] tracking-wider`}
             >
               <MessageCircle size={14} className={selectedRep?.isFeatured ? 'text-gold' : 'animate-pulse'} />
-              <span>
-                {selectedRep 
-                  ? `${translate('WHATSAPP', currentLang)}: ${selectedRep.name}`
-                  : translate('WHATSAPP SUPPORT', currentLang)}
-              </span>
+              <span>{translate('WHATSAPP SUPPORT', currentLang)}</span>
             </button>
 
             <button
@@ -196,48 +203,35 @@ export default function Header({
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden absolute top-full left-0 right-0 bg-dark/95 backdrop-blur-lg border-b border-white/5 transition-all duration-500 overflow-hidden ${
-          mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+        className={`lg:hidden absolute top-full left-0 right-0 bg-[#070707] border-b border-white/10 shadow-2xl transition-all duration-300 overflow-hidden ${
+          mobileMenuOpen ? 'max-h-[320px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
       >
-        <nav className="flex flex-col py-6 px-6">
+        <nav className="flex flex-col px-6 pb-5 pt-3">
           {navLinks.map((link) => (
             <a
               key={link.label}
-              href={`/#${link.sectionId}`}
+              href={link.path || `/#${link.sectionId}`}
               className="py-3 font-body text-sm tracking-[0.15em] text-silver hover:text-gold transition-colors duration-300 border-b border-white/5 block w-full"
-              onClick={(e) => handleNavClick(e, link.sectionId)}
+              onClick={(e) => handleNavClick(e, link)}
             >
               {translate(link.label, currentLang)}
             </a>
           ))}
-          <div className="flex gap-4 mt-4">
+          <div className="mt-4">
             <button
               onClick={() => {
                 handleWhatsAppChat()
                 setMobileMenuOpen(false)
               }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 ${
+              className={`flex w-full items-center justify-center gap-2 py-3 ${
                 selectedRep?.isFeatured
                   ? 'bg-gold text-dark hover:bg-gold/90'
                   : 'bg-emerald-600 hover:bg-emerald-500 text-white'
               } font-body text-xs tracking-wider rounded-full transition-colors`}
             >
               <MessageCircle size={16} />
-              <span>
-                {selectedRep 
-                  ? `${translate('WHATSAPP', currentLang)}: ${selectedRep.name}`
-                  : translate('WHATSAPP', currentLang)}
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                toggleLanguage()
-                setMobileMenuOpen(false)
-              }}
-              className="px-6 py-3 border border-white/10 rounded-full text-xs font-mono font-bold text-white uppercase tracking-wider bg-white/5"
-            >
-              {currentLang === 'en' ? 'العربية' : 'English'}
+              <span>{translate('WHATSAPP SUPPORT', currentLang)}</span>
             </button>
           </div>
         </nav>

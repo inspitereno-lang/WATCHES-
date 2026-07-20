@@ -10,6 +10,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import Product from './models/Product.js';
 import Homepage from './models/Homepage.js';
 import User from './models/User.js';
+import BlogPost from './models/BlogPost.js';
+import { DEFAULT_BLOG_POSTS } from './data/blogPosts.js';
 import auth from './middleware/auth.js';
 
 dotenv.config();
@@ -53,9 +55,38 @@ const normalizeHomepageSettings = (settings) => {
   }
   if (!settings.salesReps || settings.salesReps.length === 0) {
     settings.salesReps = [
-      { name: 'Faisal (Senior Concierge)', number: '971501234567', isActive: true, isFeatured: true },
-      { name: 'Marcus (Support Desk)', number: '971507654321', isActive: true, isFeatured: false }
+      { name: 'WhatsApp', number: '971501234567', isActive: true, isFeatured: true },
+      { name: 'WhatsApp', number: '971507654321', isActive: true, isFeatured: false }
     ];
+  } else {
+    settings.salesReps = settings.salesReps.map(rep => {
+      let newName = rep.name;
+      if (newName.includes('Faisal') || newName.includes('Faisle') || newName.includes('Marcus')) {
+        newName = 'WhatsApp';
+      }
+      if (newName.includes('(Support Desk)')) {
+        newName = newName.replace('(Support Desk)', '(WhatsApp)');
+      }
+      if (newName.includes('(Senior Concierge)')) {
+        newName = newName.replace('(Senior Concierge)', '(WhatsApp)');
+      }
+      if (newName.includes('Concierge')) {
+        newName = newName.replace('Concierge', 'WhatsApp Support');
+      }
+      return { ...rep, name: newName };
+    });
+  }
+  if (settings.testimonials && Array.isArray(settings.testimonials)) {
+    settings.testimonials = settings.testimonials.map(t => {
+      let name = t.name || '';
+      if (name.includes('Faisal') || name.includes('Faisle')) {
+        name = name.replace('Faisal', 'Fahad').replace('Faisle', 'Fahad');
+      }
+      if (name.includes('Marcus')) {
+        name = name.replace('Marcus', 'Lucas');
+      }
+      return { ...t, name };
+    });
   }
   return settings;
 };
@@ -66,7 +97,10 @@ if (process.env.NODE_ENV === 'test' && dbUri) {
   dbUri = dbUri.replace('/t24watches', '/t24watches_test');
 }
 mongoose.connect(dbUri)
-  .then(() => console.log(`Connected to MongoDB successfully (${process.env.NODE_ENV === 'test' ? 'TEST' : 'PRODUCTION'} DB).`))
+  .then(() => {
+    console.log(`Connected to MongoDB successfully (${process.env.NODE_ENV === 'test' ? 'TEST' : 'PRODUCTION'} DB).`);
+    autoTranslateExistingProducts();
+  })
   .catch(err => console.error('MongoDB connection error:', err));
 
 // =========================================================================
@@ -112,8 +146,59 @@ app.get('/api/homepage', async (req, res) => {
       await settings.save();
     }
     let data = settings;
+
+    // Fetch latest 12 in-stock products to dynamically populate/fill New Arrivals
+    const latestProducts = await Product.find({
+      inStock: true,
+      isVisible: { $ne: false },
+    })
+      .sort({ id: -1 })
+      .limit(12);
+
+    const dynamicArrivals = latestProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      type: p.movement || '1:1 Master Copy Edition',
+      image: p.image,
+      label: p.brand.toUpperCase(),
+      priceUSD: p.priceUSD,
+      priceAED: p.priceAED
+    }));
+
+    let plainSettings = settings.toObject ? settings.toObject() : settings;
+    const configuredArrivalIds = (plainSettings.newArrivals || [])
+      .map((item) => item.id)
+      .filter((id) => Number.isFinite(id));
+    const visibleConfiguredProducts = configuredArrivalIds.length
+      ? await Product.find({
+          id: { $in: configuredArrivalIds },
+          isVisible: { $ne: false },
+        }).select('id')
+      : [];
+    const visibleConfiguredIds = new Set(
+      visibleConfiguredProducts.map((product) => product.id)
+    );
+    plainSettings.newArrivals = (plainSettings.newArrivals || []).filter((item) =>
+      visibleConfiguredIds.has(item.id)
+    );
+    if (!plainSettings.newArrivals || plainSettings.newArrivals.length <= 2) {
+      plainSettings.newArrivals = dynamicArrivals;
+    } else {
+      const customIds = new Set(plainSettings.newArrivals.map(item => item.id));
+      const filledArrivals = [...plainSettings.newArrivals];
+      for (const dynamicItem of dynamicArrivals) {
+        if (filledArrivals.length >= 12) break;
+        if (!customIds.has(dynamicItem.id)) {
+          filledArrivals.push(dynamicItem);
+        }
+      }
+      plainSettings.newArrivals = filledArrivals;
+    }
+
+    data = plainSettings;
+
     if (req.query.lang === 'ar') {
-      data = await translateHomepage(settings, 'ar');
+      data = await translateHomepage(plainSettings, 'ar');
     }
     return res.status(200).json(data);
   } catch (err) {
@@ -184,11 +269,69 @@ const withAudience = (product) => {
 };
 
 const translationCache = new Map();
+const STATIC_AR_TRANSLATIONS = new Map([
+  ['Buying Guides', 'أدلة الشراء'],
+  ['Reference Guides', 'أدلة المراجع'],
+  ['Watch Care', 'العناية بالساعات'],
+  ['Watch Knowledge', 'ثقافة الساعات'],
+  ['Style Guides', 'أدلة الأناقة'],
+  ['Collector Guides', 'أدلة هواة الجمع'],
+  ['T24 Editorial', 'تحرير تي 24'],
+  ['Begin with the exact reference', 'ابدأ بالرقم المرجعي الدقيق'],
+  ['Inspect the dial and crystal', 'افحص الميناء والزجاج'],
+  ['Test the movement and controls', 'اختبر الحركة وعناصر التحكم'],
+  ['Evaluate finishing, weight, and comfort', 'قيّم التشطيب والوزن والراحة'],
+  ['Choose transparent delivery and service', 'اختر خدمة وتوصيلًا بشروط واضحة'],
+  ['Understand the Daytona silhouette', 'تعرّف إلى تصميم دايتونا'],
+  ['Choose the reference before the colour', 'اختر الرقم المرجعي قبل اللون'],
+  ['Read the chronograph dial', 'اقرأ ميناء الكرونوغراف'],
+  ['Assess fit on the wrist', 'قيّم الملاءمة على المعصم'],
+  ['Pick a configuration for your lifestyle', 'اختر التكوين المناسب لأسلوب حياتك'],
+  ['Build a two-minute after-wear routine', 'اتبع روتين عناية لدقيقتين بعد الارتداء'],
+  ['Manage heat and rapid temperature changes', 'تعامل مع الحرارة والتغير السريع في درجات الحرارة'],
+  ['Treat water resistance as a tested condition', 'تعامل مع مقاومة الماء كحالة تحتاج إلى اختبار'],
+  ['Protect the watch from impact and magnetism', 'احمِ الساعة من الصدمات والمغناطيسية'],
+  ['Store and service it intelligently', 'خزّن الساعة وصُنها بطريقة ذكية'],
+  ['Mechanical versus quartz', 'الميكانيكية مقارنة بالكوارتز'],
+  ['How automatic winding works', 'كيف يعمل التعبئة الأوتوماتيكية'],
+  ['Power reserve and beat rate', 'احتياطي الطاقة ومعدل النبض'],
+  ['What jewels and finishing do', 'دور الجواهر والتشطيبات'],
+  ['Use and maintain a mechanical movement', 'استخدام الحركة الميكانيكية وصيانتها'],
+  ['Case diameter is only the beginning', 'قطر العلبة ليس سوى البداية'],
+  ['Lug-to-lug controls wrist coverage', 'المسافة بين العروات تحدد تغطية المعصم'],
+  ['Thickness changes comfort', 'السماكة تؤثر في الراحة'],
+  ['Bracelet and strap sizing matter', 'مقاس السوار والحزام مهم'],
+  ['Choose proportion, not a rule', 'اختر التناسب لا قاعدة ثابتة'],
+  ['Start with your real calendar', 'ابدأ بجدول حياتك الحقيقي'],
+  ['Watch one: the dependable daily piece', 'الساعة الأولى: خيار يومي موثوق'],
+  ['Watch two: the refined option', 'الساعة الثانية: الخيار الأنيق'],
+  ['Watch three: the expressive piece', 'الساعة الثالثة: القطعة الجريئة'],
+  ['Make every addition earn its place', 'اجعل كل إضافة تستحق مكانها'],
+  ['master copy', 'ماستر كوبي'],
+  ['Master Copy', 'ماستر كوبي'],
+  ['1:1 Master Copy Edition', 'إصدار ماستر كوبي ١:١'],
+  ['1:1 Swiss Master Copy Edition', 'إصدار ماستر كوبي سويسري ١:١'],
+  ['1:1 Flyback Chrono Master Copy', 'كرونوغراف فلايباك ماستر كوبي ١:١'],
+  ['Automatic Swiss Clone', 'ساعة كلون سويسرية أوتوماتيكية'],
+  ['Swiss QC Standards Guaranteed', 'معايير الجودة السويسرية مضمونة'],
+  ['Same-day delivery', 'توصيل في نفس اليوم'],
+  ['Service warranty', 'ضمان الخدمة'],
+  ['Multiple payments', 'دفعات متعددة'],
+  ['At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.', 'في تي ٢٤ للساعات، نقدم أفضل الساعات التقليدية في دبي. يتخصص مشغل الساعات المخصص لدينا في اختيار ومعايرة وضبط ساعات السوبر كلون ١:١ التي يفضلها جامعو الساعات في دبي. كل ساعة سوبر كلون في دبي نقوم بتسليمها يدويًا مصممة باستخدام توزيع وزن متطابق وحركات مسح سويسرية خالية من العيوب.'],
+  ['As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.', 'بصفتنا مصدرًا رئيسيًا لساعات الكوبي في دبي، يتخصص صانعو الساعات لدينا في ضبط وإعادة معايرة حركات الفيرست كوبي. من التفكيك إلى التشحيم، يتم تحسين كل ساعة لتكرار عمليات المسح الانسيابية ومعدلات التكتكة ومتانة الماركات الفاخرة الأصلية.'],
+  ['From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.', 'من تكوينات دايتونا إلى إصدارات ألياف الكربون NTPT المعقدة، نحن نمثل قمة ساعات الماستر كوبي التي تقدمها دبي. نحن نستخدم فولاذ 904L الراقي المقاوم للتآكل، وزجاج السافير، والأساور الثقيلة لضمان تميز مجموعة الساعات الكلون في دبي.'],
+  ['FROM THE EYES OF THE ARTISAN', 'من منظور الحرفي'],
+  ['Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision', 'تخضع كل ساعة مخصصة من تي ٢٤ للمعايرة واختبار الضغط لضمان الدقة اليومية الموثوقة'],
+  ['Discover the ultimate collection of superclone watches and superclone watches in Dubai. At T24, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.', 'اكتشف المجموعة النهائية من ساعات السوبر كلون وساعات السوبر كلون في دبي. في تي ٢٤، نقدم أفضل ساعات السوبر كلون التي شهدتها دبي على الإطلاق، والمصممة بتفاصيل ساعات تقليدية ١:١، وهيكل علبة راقٍ، وعمق حركة ميكانيكي مكشوف، وتشطيب ذهبي مصقول. نحن المصدر الرائد لهواة جمع الساعات الباحثين عن ساعات تقليدية ممتاز في دبي وساعات دبي التقليدية ذات الوزن الأصلي والمعايرة بالكامل لدقة الارتداء اليومي.'],
+]);
 
 async function translateText(text, to = 'ar') {
   if (!text || typeof text !== 'string') return text;
   if (text.startsWith('http://') || text.startsWith('https://') || text.startsWith('/') || text.includes('/upload/')) {
     return text;
+  }
+  if (to === 'ar' && STATIC_AR_TRANSLATIONS.has(text)) {
+    return STATIC_AR_TRANSLATIONS.get(text);
   }
   const cacheKey = `${to}:${text}`;
   if (translationCache.has(cacheKey)) {
@@ -198,7 +341,35 @@ async function translateText(text, to = 'ar') {
     const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${to}&dt=t&q=${encodeURIComponent(text)}`);
     if (!response.ok) return text;
     const data = await response.json();
-    const translatedText = data[0].map(item => item[0]).join('');
+    let translatedText = data[0].map(item => item[0]).join('');
+    
+    // Apply Arabic terminology post-processing for "master copy"
+    if (to === 'ar') {
+      translatedText = translatedText
+        .replace(/النسخة الرئيسية/g, 'ماستر كوبي')
+        .replace(/نسخة رئيسية/g, 'ماستر كوبي')
+        .replace(/النسخة الماستر/g, 'ماستر كوبي')
+        .replace(/نسخة ماستر/g, 'ماستر كوبي')
+        .replace(/نسخ رئيسية/g, 'ماستر كوبي')
+        .replace(/النسخ الرئيسية/g, 'ماستر كوبي')
+        .replace(/نسخة الكوبي/g, 'ماستر كوبي')
+        .replace(/ساعة تقليدية/g, 'ساعة ماستر كوبي')
+        .replace(/ساعات تقليدية/g, 'ساعات ماستر كوبي')
+        .replace(/ساعة سوبر كلون/g, 'ساعة سوبر كلون ماستر كوبي')
+        .replace(/ساعات سوبر كلون/g, 'ساعات سوبر كلون ماستر كوبي')
+        .replace(/١:١/g, '1:1')
+        .replace(/1: 1/g, '1:1')
+        .replace(/Master Copy/gi, 'ماستر كوبي')
+        .replace(/master copy/gi, 'ماستر كوبي')
+        .replace(/master copies/gi, 'ماستر كوبي')
+        .replace(/super clone/gi, 'سوبر كلون')
+        .replace(/superclone/gi, 'سوبر كلون')
+        .replace(/clone/gi, 'كلون')
+        .replace(/replica/gi, 'ماستر كوبي')
+        .replace(/replicas/gi, 'ماستر كوبي')
+        .replace(/T24/gi, 'تي ٢٤');
+    }
+    
     translationCache.set(cacheKey, translatedText);
     return translatedText;
   } catch (err) {
@@ -206,6 +377,55 @@ async function translateText(text, to = 'ar') {
     return text;
   }
 }
+
+async function populateProductArabicFields(product) {
+  try {
+    product.nameAr = await translateText(product.name, 'ar');
+    product.brandAr = await translateText(product.brand, 'ar');
+    product.modelAr = await translateText(product.model, 'ar');
+    product.materialAr = await translateText(product.material, 'ar');
+    product.movementAr = await translateText(product.movement, 'ar');
+    product.casingAr = await translateText(product.casing, 'ar');
+    product.bezelAr = await translateText(product.bezel, 'ar');
+    product.glassAr = await translateText(product.glass, 'ar');
+    product.waterResistanceAr = await translateText(product.waterResistance, 'ar');
+    product.descriptionAr = await translateText(product.description, 'ar');
+    product.warrantyAr = await translateText(product.warranty, 'ar');
+
+    if (Array.isArray(product.features)) {
+      product.featuresAr = await Promise.all(
+        product.features.map(f => translateText(f, 'ar'))
+      );
+    }
+  } catch (err) {
+    console.error('Failed to populate Arabic fields for product:', err);
+  }
+}
+
+async function autoTranslateExistingProducts() {
+  try {
+    const products = await Product.find({
+      $or: [
+        { nameAr: { $exists: false } },
+        { nameAr: '' },
+        { descriptionAr: { $exists: false } },
+        { descriptionAr: '' }
+      ]
+    });
+    if (products.length > 0) {
+      console.log(`🌍 Found ${products.length} products missing Arabic translations. Auto-translating now...`);
+      for (const product of products) {
+        await populateProductArabicFields(product);
+        await product.save();
+        console.log(`✅ Translated Product ID ${product.id} to Arabic.`);
+      }
+      console.log('🌍 Auto-translation complete.');
+    }
+  } catch (err) {
+    console.error('Error auto-translating existing products:', err);
+  }
+}
+
 
 async function translateHomepage(homepage, to = 'ar') {
   if (!homepage) return homepage;
@@ -251,15 +471,20 @@ async function translateHomepage(homepage, to = 'ar') {
   if (Array.isArray(plain.specsBarItems)) {
     plain.specsBarItems = await Promise.all(plain.specsBarItems.map(async (item) => ({
       ...item,
-      label: await translateText(item.label, to),
-      value: await translateText(item.value, to)
+      title: await translateText(item.title, to),
+      details: Array.isArray(item.details)
+        ? await Promise.all(item.details.map((detail) => translateText(detail, to)))
+        : item.details
     })));
   }
 
   if (Array.isArray(plain.footerLinks)) {
     plain.footerLinks = await Promise.all(plain.footerLinks.map(async (item) => ({
       ...item,
-      label: await translateText(item.label, to)
+      title: await translateText(item.title, to),
+      links: Array.isArray(item.links)
+        ? await Promise.all(item.links.map((link) => translateText(link, to)))
+        : item.links
     })));
   }
 
@@ -289,6 +514,33 @@ async function translateProduct(product, to = 'ar') {
   return plain;
 }
 
+async function translateBlogPost(post, to = 'ar', includeSections = true) {
+  if (!post) return post;
+  const plain = typeof post.toObject === 'function' ? post.toObject() : { ...post };
+  const fields = ['title', 'excerpt', 'category', 'author', 'seoTitle', 'seoDescription'];
+
+  await Promise.all(fields.map(async (field) => {
+    if (plain[field]) plain[field] = await translateText(plain[field], to);
+  }));
+
+  if (Array.isArray(plain.keywords)) {
+    plain.keywords = await Promise.all(plain.keywords.map((keyword) => translateText(keyword, to)));
+  }
+  if (includeSections && Array.isArray(plain.sections)) {
+    plain.sections = await Promise.all(plain.sections.map(async (section) => ({
+      ...section,
+      heading: await translateText(section.heading, to),
+      paragraphs: Array.isArray(section.paragraphs)
+        ? await Promise.all(section.paragraphs.map((paragraph) => translateText(paragraph, to)))
+        : section.paragraphs,
+      bullets: Array.isArray(section.bullets)
+        ? await Promise.all(section.bullets.map((bullet) => translateText(bullet, to)))
+        : section.bullets,
+    })));
+  }
+  return plain;
+}
+
 // GET /api/translate
 app.get('/api/translate', async (req, res) => {
   try {
@@ -306,12 +558,32 @@ app.get('/api/translate', async (req, res) => {
   }
 });
 
+app.post('/api/translate/batch', async (req, res) => {
+  try {
+    const { texts = [], to = 'ar' } = req.body || {};
+    if (!Array.isArray(texts)) {
+      return res.status(400).json({ error: 'Texts must be an array.' });
+    }
+    const safeTexts = [...new Set(texts)]
+      .filter((text) => typeof text === 'string' && text.trim())
+      .slice(0, 200);
+    const translations = {};
+    await Promise.all(safeTexts.map(async (text) => {
+      translations[text] = await translateText(text, to);
+    }));
+    return res.status(200).json({ translations });
+  } catch (err) {
+    console.error('Batch translation error:', err);
+    return res.status(500).json({ error: 'Failed to translate interface text.' });
+  }
+});
+
 // 2. Fetch Catalogue (supports brand/category pills filter, query search, pagination)
 app.get('/api/products', async (req, res) => {
   try {
     const { brand, audience, search, model, page = 1, limit = 6 } = req.query;
     const query = {};
-    const andConditions = [];
+    const andConditions = [{ isVisible: { $ne: false } }];
 
     if (brand && brand !== 'ALL BRANDS') {
       andConditions.push({ brand: new RegExp('^' + brand + '$', 'i') });
@@ -360,9 +632,15 @@ app.get('/api/products', async (req, res) => {
       .limit(itemLimit);
 
     // Compute dynamic category counts matching the current search & brand filters
-    const countsQueryAll = {};
-    const countsQueryLadies = { audience: { $in: ['Ladies', 'Womens'] } };
-    const countsQueryGents = { audience: { $in: ['Gents', 'Mens'] } };
+    const countsQueryAll = { isVisible: { $ne: false } };
+    const countsQueryLadies = {
+      isVisible: { $ne: false },
+      audience: { $in: ['Ladies', 'Womens'] },
+    };
+    const countsQueryGents = {
+      isVisible: { $ne: false },
+      audience: { $in: ['Gents', 'Mens'] },
+    };
 
     const brandSearchConditions = [];
     if (brand && brand !== 'ALL BRANDS') {
@@ -409,11 +687,146 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+const celebrityMatches = [
+  {
+    celebrity: 'Rafael Nadal',
+    productId: 100,
+    reference: 'Richard Mille RM 27-04 Tourbillon Rafael Nadal',
+    image: 'https://media.gq.com.mx/photos/61f1c2e9c981b856e36972ff/16:9/w_1600,c_limit/PR27-04.jpg',
+    imagePosition: 'center center',
+    source: 'https://www.gq.com.mx/relojes/articulo/rafael-nadal-tiene-un-nuevo-reloj-richard-mille',
+    sourceLabel: 'GQ',
+  },
+  {
+    celebrity: 'Alexander Zverev',
+    productId: 118,
+    reference: 'Richard Mille RM 67-02 Alexander Zverev',
+    image: 'https://watchpaparazzi.com/img/pairings/8cb9b89f-0326-40df-84b0-86ed75542157.jpg',
+    imagePosition: 'left center',
+    imageScale: 1.55,
+    captionAlign: 'right',
+    source: 'https://watchpaparazzi.com/spotted.php?id=8cb9b89f-0326-40df-84b0-86ed75542157',
+    sourceLabel: 'Watch Paparazzi',
+  },
+  {
+    celebrity: 'Lewis Hamilton',
+    productId: 259,
+    reference: 'Patek Philippe Nautilus 5980/1R Rose Gold',
+    image: 'https://watchpaparazzi.com/img/pairings/907a07b1-f845-4a94-b1d8-3ef95dc0d56c.jpg',
+    imagePosition: 'left center',
+    imageScale: 1.55,
+    source: 'https://watchpaparazzi.com/spotted.php?id=907a07b1-f845-4a94-b1d8-3ef95dc0d56c',
+    sourceLabel: 'Watch Paparazzi',
+  },
+  {
+    celebrity: 'Lando Norris',
+    productId: 116,
+    reference: 'Richard Mille RM 67-02 McLaren',
+    image: 'https://oracleoftime.com/wp-content/uploads/2023/02/Lando-Norris-Mclaren-Richard-Mille-RM-67-02-Automatic-Extra-Flat.jpg',
+    imagePosition: 'center 24%',
+    source: 'https://oracleoftime.com/f1-drivers-watches-2023/',
+    sourceLabel: 'Oracle Time',
+  },
+];
+
+app.get('/api/collections/celebrity-matches', async (req, res) => {
+  try {
+    const productIds = celebrityMatches.map((match) => match.productId);
+    const products = await Product.find({
+      id: { $in: productIds },
+      isVisible: { $ne: false },
+    });
+    const productsById = new Map(products.map((product) => [product.id, withAudience(product)]));
+
+    let matches = celebrityMatches
+        .filter((match) => productsById.has(match.productId))
+        .map((match) => ({
+          ...match,
+          product: productsById.get(match.productId),
+        }));
+    if (req.query.lang === 'ar') {
+      matches = await Promise.all(matches.map(async (match) => ({
+        ...match,
+        celebrity: await translateText(match.celebrity, 'ar'),
+        reference: await translateText(match.reference, 'ar'),
+        product: await translateProduct(match.product, 'ar'),
+      })));
+    }
+    return res.status(200).json({ matches });
+  } catch (err) {
+    console.error('GET /api/collections/celebrity-matches error:', err);
+    return res.status(500).json({ error: 'Server error loading editorial collection.' });
+  }
+});
+
+async function ensureDefaultBlogPosts() {
+  const slugs = DEFAULT_BLOG_POSTS.map((post) => post.slug);
+  const currentPosts = await BlogPost.find({ slug: { $in: slugs } }).select('slug seedVersion');
+  const currentVersions = new Map(
+    currentPosts.map((post) => [post.slug, Number(post.seedVersion || 0)])
+  );
+  const operations = DEFAULT_BLOG_POSTS
+    .filter((post) => (currentVersions.get(post.slug) ?? -1) < post.seedVersion)
+    .map((post) => ({
+      updateOne: {
+        filter: { slug: post.slug },
+        update: { $set: post },
+        upsert: true,
+      },
+    }));
+
+  if (operations.length > 0) {
+    await BlogPost.bulkWrite(operations);
+  }
+}
+
+app.get('/api/blogs', async (req, res) => {
+  try {
+    await ensureDefaultBlogPosts();
+    const query = { published: true };
+    if (req.query.category) {
+      query.category = new RegExp(`^${req.query.category}$`, 'i');
+    }
+    const limit = Math.min(parseInt(req.query.limit || '20'), 50);
+    let posts = await BlogPost.find(query)
+      .sort({ publishedAt: -1 })
+      .limit(limit)
+      .select('-sections');
+    if (req.query.lang === 'ar') {
+      posts = await Promise.all(posts.map((post) => translateBlogPost(post, 'ar', false)));
+    }
+    return res.status(200).json({ posts });
+  } catch (err) {
+    console.error('GET /api/blogs error:', err);
+    return res.status(500).json({ error: 'Server error loading journal posts.' });
+  }
+});
+
+app.get('/api/blogs/:slug', async (req, res) => {
+  try {
+    await ensureDefaultBlogPosts();
+    let post = await BlogPost.findOne({ slug: req.params.slug, published: true });
+    if (!post) {
+      return res.status(404).json({ error: 'Journal article not found.' });
+    }
+    if (req.query.lang === 'ar') {
+      post = await translateBlogPost(post, 'ar', true);
+    }
+    return res.status(200).json(post);
+  } catch (err) {
+    console.error('GET /api/blogs/:slug error:', err);
+    return res.status(500).json({ error: 'Server error loading journal article.' });
+  }
+});
+
 // 3. Fetch specific watch details
 app.get('/api/products/:id', async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
-    const watch = await Product.findOne({ id: productId });
+    const watch = await Product.findOne({
+      id: productId,
+      isVisible: { $ne: false },
+    });
     if (!watch) {
       return res.status(404).json({ error: 'Requested watch model not found in catalogue.' });
     }
@@ -468,6 +881,77 @@ app.post('/api/admin/login', async (req, res) => {
   } catch (err) {
     console.error('Admin login error:', err);
     return res.status(500).json({ error: 'Server authentication failure.' });
+  }
+});
+
+app.get('/api/admin/products', auth, async (req, res) => {
+  try {
+    const { search = '', page = 1, limit = 10 } = req.query;
+    const query = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { brand: { $regex: search, $options: 'i' } },
+            { factory: { $regex: search, $options: 'i' } },
+            { model: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {};
+    const currentPage = Math.max(parseInt(page), 1);
+    const itemLimit = Math.min(Math.max(parseInt(limit), 1), 100);
+    const skip = (currentPage - 1) * itemLimit;
+
+    const [totalItems, products] = await Promise.all([
+      Product.countDocuments(query),
+      Product.find(query).sort({ id: -1 }).skip(skip).limit(itemLimit),
+    ]);
+
+    return res.status(200).json({
+      products: products.map(withAudience),
+      pagination: {
+        currentPage,
+        totalPages: Math.max(Math.ceil(totalItems / itemLimit), 1),
+        totalItems,
+      },
+    });
+  } catch (err) {
+    console.error('GET /api/admin/products error:', err);
+    return res.status(500).json({ error: 'Server error loading admin catalogue.' });
+  }
+});
+
+app.post('/api/admin/blogs', auth, async (req, res) => {
+  try {
+    const post = await BlogPost.create(req.body);
+    return res.status(201).json({ message: 'Journal article created.', post });
+  } catch (err) {
+    console.error('POST /api/admin/blogs error:', err);
+    return res.status(400).json({ error: 'Unable to create journal article.' });
+  }
+});
+
+app.put('/api/admin/blogs/:id', auth, async (req, res) => {
+  try {
+    const post = await BlogPost.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!post) return res.status(404).json({ error: 'Journal article not found.' });
+    return res.status(200).json({ message: 'Journal article updated.', post });
+  } catch (err) {
+    console.error('PUT /api/admin/blogs/:id error:', err);
+    return res.status(400).json({ error: 'Unable to update journal article.' });
+  }
+});
+
+app.delete('/api/admin/blogs/:id', auth, async (req, res) => {
+  try {
+    const post = await BlogPost.findByIdAndDelete(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Journal article not found.' });
+    return res.status(200).json({ message: 'Journal article deleted.' });
+  } catch (err) {
+    console.error('DELETE /api/admin/blogs/:id error:', err);
+    return res.status(500).json({ error: 'Unable to delete journal article.' });
   }
 });
 
@@ -545,9 +1029,43 @@ app.post('/api/admin/upload', auth, upload.single('image'), async (req, res) => 
       return res.status(400).json({ error: 'Please upload an image file.' });
     }
 
+    let bufferToUpload = req.file.buffer;
+    let folderName = 't24_watches_catalogue';
+
+    if (req.query.removeBg === 'true' && process.env.REMOVEBG_API_KEY) {
+      try {
+        console.log('🎨 Requesting remove.bg API to remove background...');
+        const removeBgForm = new FormData();
+        const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
+        removeBgForm.append('image_file', blob, req.file.originalname);
+        removeBgForm.append('size', 'auto');
+        removeBgForm.append('format', 'png');
+
+        const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+          method: 'POST',
+          headers: {
+            'X-Api-Key': process.env.REMOVEBG_API_KEY,
+          },
+          body: removeBgForm,
+        });
+
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          bufferToUpload = Buffer.from(arrayBuffer);
+          folderName = 't24_watches_clean';
+          console.log('✅ Background removed successfully via API.');
+        } else {
+          const errMsg = await response.text();
+          console.warn(`⚠️ remove.bg API returned error: ${response.status} - ${errMsg}. Uploading original image.`);
+        }
+      } catch (bgError) {
+        console.error('❌ Background removal failed, uploading original image instead:', bgError);
+      }
+    }
+
     // Stream upload buffer to Cloudinary
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 't24_watches_catalogue' },
+      { folder: folderName },
       (error, result) => {
         if (error) {
           console.error('Cloudinary stream upload error:', error);
@@ -557,7 +1075,7 @@ app.post('/api/admin/upload', auth, upload.single('image'), async (req, res) => 
       }
     );
 
-    uploadStream.end(req.file.buffer);
+    uploadStream.end(bufferToUpload);
   } catch (err) {
     console.error('Upload API error:', err);
     return res.status(500).json({ error: 'Server upload error.' });
@@ -576,6 +1094,8 @@ app.post('/api/products', auth, async (req, res) => {
       priceAED,
       url,
       image,
+      thumbnail,
+      images,
       movement,
       casing,
       bezel,
@@ -584,6 +1104,7 @@ app.post('/api/products', auth, async (req, res) => {
       description,
       features,
       inStock,
+      isVisible,
       model,
       reference,
       material,
@@ -615,6 +1136,8 @@ app.post('/api/products', auth, async (req, res) => {
       priceAED,
       url: url || '',
       image,
+      thumbnail: thumbnail || image || '',
+      images: images || [image],
       movement,
       casing: casing || '904L anti-corrosive stainless steel casing',
       bezel: bezel || 'Hand-finished structural bezel',
@@ -623,6 +1146,7 @@ app.post('/api/products', auth, async (req, res) => {
       description,
       features: features || [],
       inStock: inStock !== undefined ? inStock : true,
+      isVisible: isVisible !== undefined ? isVisible : true,
       model: model || '',
       reference: reference || '',
       material: material || '',
@@ -631,6 +1155,7 @@ app.post('/api/products', auth, async (req, res) => {
       warranty: warranty || '2-Year Service Warranty'
     });
 
+    await populateProductArabicFields(newProduct);
     await newProduct.save();
     return res.status(201).json({ message: 'Watch added successfully to catalogue.', product: newProduct });
   } catch (err) {
@@ -657,6 +1182,8 @@ app.put('/api/products/:id', auth, async (req, res) => {
       priceAED,
       url,
       image,
+      thumbnail,
+      images,
       movement,
       casing,
       bezel,
@@ -665,6 +1192,7 @@ app.put('/api/products/:id', auth, async (req, res) => {
       description,
       features,
       inStock,
+      isVisible,
       model,
       reference,
       material,
@@ -688,6 +1216,8 @@ app.put('/api/products/:id', auth, async (req, res) => {
     watch.priceAED = priceAED || watch.priceAED;
     watch.url = url !== undefined ? url : watch.url;
     watch.image = image || watch.image;
+    watch.thumbnail = thumbnail !== undefined ? thumbnail : (image ? image : watch.thumbnail);
+    watch.images = images !== undefined ? images : (image ? [image] : watch.images);
     watch.movement = movement || watch.movement;
     watch.casing = casing || watch.casing;
     watch.bezel = bezel || watch.bezel;
@@ -696,6 +1226,7 @@ app.put('/api/products/:id', auth, async (req, res) => {
     watch.description = description || watch.description;
     watch.features = features || watch.features;
     watch.inStock = inStock !== undefined ? inStock : watch.inStock;
+    watch.isVisible = isVisible !== undefined ? isVisible : watch.isVisible;
     watch.model = model !== undefined ? model : watch.model;
     watch.reference = reference !== undefined ? reference : watch.reference;
     watch.material = material !== undefined ? material : watch.material;
@@ -703,11 +1234,40 @@ app.put('/api/products/:id', auth, async (req, res) => {
     watch.caliber = caliber !== undefined ? caliber : watch.caliber;
     watch.warranty = warranty !== undefined ? warranty : watch.warranty;
 
+    await populateProductArabicFields(watch);
     await watch.save();
     return res.status(200).json({ message: 'Watch specs updated successfully.', product: watch });
   } catch (err) {
     console.error('PUT /api/products/:id error:', err);
     return res.status(500).json({ error: 'Server error updating watch specs.' });
+  }
+});
+
+app.patch('/api/admin/products/:id/visibility', auth, async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    if (typeof req.body.isVisible !== 'boolean') {
+      return res.status(400).json({ error: 'isVisible must be true or false.' });
+    }
+
+    const product = await Product.findOneAndUpdate(
+      { id: productId },
+      { $set: { isVisible: req.body.isVisible } },
+      { new: true, runValidators: true }
+    );
+    if (!product) {
+      return res.status(404).json({ error: 'Watch not found.' });
+    }
+
+    return res.status(200).json({
+      message: req.body.isVisible
+        ? 'Watch is now visible on the storefront.'
+        : 'Watch is now hidden from the storefront.',
+      product: withAudience(product),
+    });
+  } catch (err) {
+    console.error('PATCH /api/admin/products/:id/visibility error:', err);
+    return res.status(500).json({ error: 'Server error updating storefront visibility.' });
   }
 });
 
@@ -723,6 +1283,35 @@ app.delete('/api/products/:id', auth, async (req, res) => {
   } catch (err) {
     console.error('DELETE /api/products/:id error:', err);
     return res.status(500).json({ error: 'Server error deleting product.' });
+  }
+});
+
+// 7. Image proxy to bypass CORS for white background removal
+app.get('/api/proxy-image', async (req, res) => {
+  try {
+    const imageUrl = req.query.url;
+    if (!imageUrl) {
+      return res.status(400).json({ error: 'URL parameter is required' });
+    }
+
+    if (!imageUrl.startsWith('https://dubaiwatchstores.com/')) {
+      return res.status(400).json({ error: 'Untrusted image source' });
+    }
+
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      return res.status(response.status).send('Failed to fetch image');
+    }
+
+    const contentType = response.headers.get('content-type');
+    res.setHeader('Content-Type', contentType || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return res.send(buffer);
+  } catch (err) {
+    console.error('Image proxy error:', err);
+    return res.status(500).send('Server error proxying image');
   }
 });
 

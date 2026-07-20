@@ -11,6 +11,7 @@ import {
   Check, 
   AlertCircle,
   Eye,
+  EyeOff,
   Sliders,
   Database,
   PlusCircle,
@@ -29,6 +30,8 @@ interface Watch {
   priceAED: string
   url: string
   image: string
+  thumbnail?: string
+  images?: string[]
   movement: string
   casing?: string
   case?: string
@@ -38,6 +41,7 @@ interface Watch {
   description: string
   features: string[]
   inStock: boolean
+  isVisible: boolean
   model?: string
   reference?: string
   material?: string
@@ -150,6 +154,7 @@ export default function AdminDashboard() {
     priceAED: '',
     url: '',
     image: '',
+    images: [],
     movement: '',
     casing: '904L anti-corrosive stainless steel casing',
     bezel: 'Hand-finished structural bezel',
@@ -158,6 +163,7 @@ export default function AdminDashboard() {
     description: '',
     features: [],
     inStock: true,
+    isVisible: true,
     model: '',
     reference: '',
     material: '',
@@ -168,10 +174,13 @@ export default function AdminDashboard() {
   
   const [newFeature, setNewFeature] = useState('')
   const [productLoading, setProductLoading] = useState(false)
-  const [productUploadLoading, setProductUploadLoading] = useState(false)
+  const [galleryUploadLoading, setGalleryUploadLoading] = useState(false)
 
-  // Auth Guard check
+  // Auth Guard check & force LTR for dashboard layout
   useEffect(() => {
+    document.documentElement.dir = 'ltr'
+    document.documentElement.lang = 'en'
+    document.body.classList.remove('is-arabic')
     const adminToken = localStorage.getItem('adminToken')
     if (!adminToken) {
       navigate('/admin/login')
@@ -179,6 +188,18 @@ export default function AdminDashboard() {
       setToken(adminToken)
     }
   }, [navigate])
+
+  // Prevent body scrolling when modal or delete confirmation is open
+  useEffect(() => {
+    if (isModalOpen || deleteConfirmId !== null) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isModalOpen, deleteConfirmId])
 
   // Fetch Homepage copy & Catalogue data
   useEffect(() => {
@@ -219,7 +240,11 @@ export default function AdminDashboard() {
   const fetchProducts = async () => {
     setProductsLoading(true)
     try {
-      const res = await fetch(`/api/products?search=${encodeURIComponent(searchTerm)}&page=${page}&limit=10`)
+      const res = await fetch(`/api/admin/products?search=${encodeURIComponent(searchTerm)}&page=${page}&limit=10`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       if (res.ok) {
         const data = await res.json()
         setProducts(data.products)
@@ -278,9 +303,11 @@ export default function AdminDashboard() {
     }
   }
 
-  // Product specification photo upload
-  const handleProductPhotoUpload = async (file: File) => {
-    setProductUploadLoading(true)
+
+
+  // Product secondary gallery photo upload
+  const handleGalleryPhotoUpload = async (file: File) => {
+    setGalleryUploadLoading(true)
     const formData = new FormData()
     formData.append('image', file)
 
@@ -296,12 +323,18 @@ export default function AdminDashboard() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to upload image')
 
-      setProductForm(prev => ({ ...prev, image: data.url }))
-      showToast('success', 'Watch image uploaded successfully to Cloudinary.')
+      setProductForm(prev => {
+        const currentImages = prev.images || []
+        return {
+          ...prev,
+          images: [...currentImages, data.url]
+        }
+      })
+      showToast('success', 'Gallery image uploaded successfully to Cloudinary.')
     } catch (err: any) {
       showToast('error', err.message || 'Image upload failed.')
     } finally {
-      setProductUploadLoading(false)
+      setGalleryUploadLoading(false)
     }
   }
 
@@ -351,6 +384,7 @@ export default function AdminDashboard() {
         priceAED: product.priceAED,
         url: product.url,
         image: product.image,
+        images: product.images || [product.image],
         movement: product.movement,
         casing: product.casing || product.case || '904L anti-corrosive stainless steel casing',
         bezel: product.bezel,
@@ -359,6 +393,7 @@ export default function AdminDashboard() {
         description: product.description,
         features: product.features || [],
         inStock: product.inStock,
+        isVisible: product.isVisible !== false,
         model: product.model || '',
         reference: product.reference || '',
         material: product.material || '',
@@ -376,6 +411,7 @@ export default function AdminDashboard() {
         priceAED: 'AED 5,468',
         url: '',
         image: '',
+        images: [],
         movement: 'Swiss ETA 3235 automatic sweep movement',
         casing: '904L anti-corrosive stainless steel casing',
         bezel: 'Hand-finished structural bezel',
@@ -388,6 +424,7 @@ export default function AdminDashboard() {
           'Super-LumiNova elements'
         ],
         inStock: true,
+        isVisible: true,
         model: '',
         reference: '',
         material: '',
@@ -475,6 +512,36 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleToggleVisibility = async (product: Watch) => {
+    const nextVisibility = product.isVisible === false
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}/visibility`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ isVisible: nextVisibility })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Visibility update failed')
+
+      setProducts((current) =>
+        current.map((item) =>
+          item.id === product.id ? { ...item, isVisible: nextVisibility } : item
+        )
+      )
+      showToast(
+        'success',
+        nextVisibility
+          ? 'Watch is now visible on the storefront.'
+          : 'Watch has been hidden from the storefront.'
+      )
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to update storefront visibility.')
+    }
+  }
+
   if (!token) {
     return (
       <div className="min-h-screen bg-[#070708] flex items-center justify-center text-white">
@@ -486,7 +553,12 @@ export default function AdminDashboard() {
   const watchToDelete = products.find((p) => p.id === deleteConfirmId)
 
   return (
-    <div className="min-h-screen bg-[#070708] text-white flex flex-col font-sans">
+    <div
+      dir="ltr"
+      lang="en"
+      data-no-translate
+      className="min-h-screen bg-[#070708] text-white flex flex-col font-sans"
+    >
       
       {/* Toast notifications */}
       {successMsg && (
@@ -548,7 +620,7 @@ export default function AdminDashboard() {
             {[
               { key: 'hero', label: 'HERO & SPECS BAR' },
               { key: 'arrivals', label: 'NEW ARRIVALS' },
-              { key: 'heritage', label: 'ARCHITECTURE & RM' },
+              { key: 'heritage', label: 'ARCHITECTURE' },
               { key: 'atelier', label: 'ATELIER SECTION' },
               { key: 'catalogue', label: 'CATALOGUE HEADER' },
               { key: 'testimonials', label: 'CLIENT TESTIMONIALS' },
@@ -627,16 +699,31 @@ export default function AdminDashboard() {
                         <th className="pb-3">Price USD</th>
                         <th className="pb-3">Price AED</th>
                         <th className="pb-3">Stock</th>
+                        <th className="pb-3">Storefront</th>
                         <th className="pb-3 text-right pr-4">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {products.map((item) => (
-                        <tr key={item.id} className="hover:bg-white/[0.01] transition-colors duration-200">
+                        <tr
+                          key={item.id}
+                          className={`hover:bg-white/[0.01] transition-all duration-200 ${
+                            item.isVisible === false ? 'opacity-55' : ''
+                          }`}
+                        >
                           <td className="py-4 pl-4">
-                            <div className="w-12 h-12 rounded bg-black border border-white/5 p-1 flex items-center justify-center">
-                              <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
-                            </div>
+                            <a 
+                              href={item.image} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="group/thumb relative block w-12 h-12 rounded bg-black border border-white/5 p-1 flex items-center justify-center cursor-zoom-in"
+                              title="Click to view full size"
+                            >
+                              <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover/thumb:scale-110" />
+                              <div className="hidden group-hover/thumb:block absolute left-24 top-0 z-[100] w-48 h-48 p-2 bg-[#0e0e11] border border-white/10 rounded-xl shadow-2xl pointer-events-none">
+                                <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                              </div>
+                            </a>
                           </td>
                           <td className="font-semibold text-white max-w-[200px] truncate">{item.name}</td>
                           <td>{item.brand}</td>
@@ -655,8 +742,37 @@ export default function AdminDashboard() {
                               <span className="text-red-400 text-[10px] bg-red-500/10 px-2 py-0.5 rounded-full uppercase font-bold">Sold Out</span>
                             )}
                           </td>
+                          <td>
+                            {item.isVisible !== false ? (
+                              <span className="inline-flex items-center gap-1.5 text-sky-300 text-[10px] bg-sky-500/10 px-2 py-0.5 rounded-full uppercase font-bold">
+                                <Eye className="h-3 w-3" />
+                                Visible
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 text-gray-400 text-[10px] bg-white/5 px-2 py-0.5 rounded-full uppercase font-bold">
+                                <EyeOff className="h-3 w-3" />
+                                Hidden
+                              </span>
+                            )}
+                          </td>
                           <td className="py-4 text-right pr-4">
                             <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleToggleVisibility(item)}
+                                className={`p-2 border rounded transition-all duration-300 cursor-pointer ${
+                                  item.isVisible !== false
+                                    ? 'border-white/5 hover:border-amber-400/30 hover:text-amber-300'
+                                    : 'border-emerald-500/20 text-emerald-400 hover:border-emerald-400/50'
+                                }`}
+                                title={item.isVisible !== false ? 'Hide from storefront' : 'Show on storefront'}
+                                aria-label={item.isVisible !== false ? `Hide ${item.name} from storefront` : `Show ${item.name} on storefront`}
+                              >
+                                {item.isVisible !== false ? (
+                                  <EyeOff className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Eye className="w-3.5 h-3.5" />
+                                )}
+                              </button>
                               <button
                                 onClick={() => openProductModal(item)}
                                 className="p-2 border border-white/5 hover:border-gold/30 hover:text-gold rounded transition-all duration-300 cursor-pointer"
@@ -1134,7 +1250,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* 3. Architecture of Time & Richard Mille */}
+                {/* 3. Architecture of Time */}
                 {activeSubTab === 'heritage' && (
                   <div className="space-y-6">
                     <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
@@ -1207,64 +1323,6 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
-                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Nocturne section (Richard Mille Kongo)</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <input
-                          type="text"
-                          value={homepageForm.nocturneHeading1 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, nocturneHeading1: e.target.value }))}
-                          placeholder="Heading Line 1"
-                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5"
-                        />
-                        <input
-                          type="text"
-                          value={homepageForm.nocturneHeading2 || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, nocturneHeading2: e.target.value }))}
-                          placeholder="Heading Line 2"
-                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5"
-                        />
-                        <input
-                          type="text"
-                          value={homepageForm.nocturneBuildSpec || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, nocturneBuildSpec: e.target.value }))}
-                          placeholder="Build Specification Tag"
-                          className="px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-gold col-span-2"
-                        />
-                        <div className="space-y-1 col-span-2">
-                          <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">NOCTURNE PICTURE PREVIEW</label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={homepageForm.nocturneImage || ''}
-                              onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, nocturneImage: e.target.value }))}
-                              className="flex-1 px-3 py-2 text-xs rounded bg-white/[0.02] border border-white/5 text-white"
-                            />
-                            <label className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs rounded cursor-pointer select-none">
-                              {uploadLoadingField === 'nocturneImage' ? '...' : 'UPLOAD'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleFieldImageUpload(e.target.files[0], 'nocturneImage')
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">NOCTURNE COPY TEXT</label>
-                        <textarea rows={6}
-                          value={homepageForm.nocturneCopy || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, nocturneCopy: e.target.value }))}
-                          className="w-full px-4 py-3.5 text-sm rounded-xl bg-white/[0.03] border border-white/10 text-white font-mono resize-y min-h-[140px] focus:border-gold focus:outline-none"
-                        />
-                      </div>
-                    </div>
                   </div>
                 )}
 
@@ -1466,7 +1524,7 @@ export default function AdminDashboard() {
                                   <label className="text-[11px] text-gray-400 font-mono uppercase tracking-wider block font-bold">Client Name</label>
                                   <input
                                     type="text"
-                                    placeholder="e.g. Faisal Al-Mansoori"
+                                    placeholder="e.g. Fahad Al-Mansoori"
                                     value={test.name}
                                     onChange={(e) => {
                                       const list = [...homepageForm.testimonials]
@@ -1865,8 +1923,8 @@ export default function AdminDashboard() {
       </main>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 md:p-12 flex items-center justify-center">
-          <div className="relative w-full max-w-3xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 md:p-12 overflow-y-auto flex items-start justify-center" data-lenis-prevent>
+          <div className="relative w-full max-w-3xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl mx-auto my-8">
             
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/30 rounded-tl-2xl pointer-events-none" />
@@ -1979,44 +2037,211 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Watch Photo URL</label>
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      required
-                      value={productForm.image}
-                      onChange={(e) => setProductForm(prev => ({ ...prev, image: e.target.value }))}
-                      placeholder="/watch-image.png or Cloudinary URL"
-                      className="flex-1 px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
-                    />
-                    <label className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs font-mono rounded-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shrink-0 select-none">
-                      {productUploadLoading ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <ImageIcon className="w-3.5 h-3.5" />
-                      )}
-                      UPLOAD
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            handleProductPhotoUpload(e.target.files[0])
-                          }
-                        }}
-                      />
-                    </label>
+                {/* Watch Photos & Gallery Manager */}
+                <div className="space-y-3 p-5 rounded-2xl bg-white/[0.02] border border-white/5 font-mono sm:col-span-2">
+                  <div>
+                    <h4 className="text-gold uppercase tracking-wider text-xs font-bold">
+                      Watch Photos & Gallery Manager
+                    </h4>
+                    <p className="text-[10px] text-gray-400 mt-1 leading-relaxed">
+                      Manage all photos for this watch. The photo marked as <span className="text-gold font-bold">Main Cover</span> will be the primary catalog cover image. Other photos will appear in the slider on the watch detail page.
+                    </p>
                   </div>
-                  {productForm.image && (
-                    <div className="mt-2 flex items-center gap-3">
-                      <div className="w-14 h-14 bg-black border border-white/5 p-1 rounded">
-                        <img src={productForm.image} className="h-full w-full object-contain" />
+
+                  {/* Grid / List of Images */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    {(productForm.images || []).map((imgUrl, index) => {
+                      const isMain = productForm.image === imgUrl;
+                      return (
+                        <div 
+                          key={index}
+                          className={`flex items-center gap-3 p-3 bg-black/40 border rounded-xl transition-all duration-300 ${
+                            isMain ? 'border-gold/50 shadow-[0_0_15px_rgba(217,165,32,0.1)]' : 'border-white/5'
+                          }`}
+                        >
+                          <div className="w-16 h-16 bg-black border border-white/10 rounded-lg p-1 flex items-center justify-center shrink-0 overflow-hidden relative group/item">
+                            <img src={imgUrl} className="max-h-full max-w-full object-contain" />
+                            <a 
+                              href={imgUrl} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center text-[8px] text-white transition-opacity duration-200"
+                            >
+                              VIEW FULL
+                            </a>
+                          </div>
+                          
+                          <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] bg-white/10 text-gray-300 px-1.5 py-0.5 rounded font-bold uppercase">
+                                #{index + 1}
+                              </span>
+                              {isMain ? (
+                                <span className="text-[9px] bg-gold/25 text-gold border border-gold/45 px-1.5 py-0.5 rounded font-black tracking-wider uppercase animate-pulse">
+                                  Main Cover
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setProductForm(prev => ({ ...prev, image: imgUrl }))}
+                                  className="text-[9px] text-gray-400 hover:text-gold border border-white/10 hover:border-gold/30 px-1.5 py-0.5 rounded transition-all duration-200 uppercase"
+                                >
+                                  Make Main
+                                </button>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-gray-500 truncate mt-1.5 block font-mono" title={imgUrl}>
+                              {imgUrl}
+                            </span>
+                          </div>
+
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              setProductForm(prev => {
+                                const newImages = (prev.images || []).filter((_, i) => i !== index);
+                                // If we removed the main image, make the first available image the main image (or empty if none left)
+                                let nextMain = prev.image;
+                                if (prev.image === imgUrl) {
+                                  nextMain = newImages[0] || '';
+                                }
+                                return {
+                                  ...prev,
+                                  images: newImages,
+                                  image: nextMain
+                                };
+                              });
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 shrink-0"
+                            title="Remove Photo"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                    {/* Auto Sync State */}
+                    {productForm.image && !(productForm.images || []).includes(productForm.image) && (
+                      <div 
+                        className="flex items-center gap-3 p-3 bg-black/40 border border-gold/50 shadow-[0_0_15px_rgba(217,165,32,0.1)] rounded-xl transition-all duration-300"
+                      >
+                        <div className="w-16 h-16 bg-black border border-white/10 rounded-lg p-1 flex items-center justify-center shrink-0 overflow-hidden relative group/item">
+                          <img src={productForm.image} className="max-h-full max-w-full object-contain" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] bg-gold/25 text-gold border border-gold/45 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                              Main Cover
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setProductForm(prev => ({ ...prev, images: [...(prev.images || []), prev.image] }))}
+                              className="text-[9px] text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/40 px-1.5 py-0.5 rounded transition-all duration-200 uppercase"
+                            >
+                              Add to Gallery
+                            </button>
+                          </div>
+                          <span className="text-[9px] text-gray-500 truncate mt-1.5 block font-mono">
+                            {productForm.image}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[10px] text-gray-500 truncate max-w-[300px]">{productForm.image}</span>
+                    )}
+
+                    {(productForm.images || []).length === 0 && !productForm.image && (
+                      <div className="sm:col-span-2 py-6 text-center border border-dashed border-white/10 rounded-xl bg-white/[0.005]">
+                        <ImageIcon className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                        <p className="text-[11px] text-gray-500 italic">No watch photos uploaded yet. Upload a main photo or gallery photos below.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Inputs for adding new images */}
+                  <div className="mt-4 pt-4 border-t border-white/5">
+                    <label className="text-[10px] text-gray-300 font-bold block mb-2 uppercase">
+                      Add New Photo to Gallery
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1 flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Paste image URL (Cloudinary or web link) & press Enter..."
+                          id="newGalleryImageUrlInput"
+                          className="flex-1 px-4 py-3 text-xs rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const target = e.currentTarget;
+                              const val = target.value.trim();
+                              if (val) {
+                                setProductForm(prev => {
+                                  const currentImages = prev.images || [];
+                                  const nextMain = prev.image || val;
+                                  if (!currentImages.includes(val)) {
+                                    return { 
+                                      ...prev, 
+                                      images: [...currentImages, val],
+                                      image: nextMain
+                                    };
+                                  }
+                                  return prev;
+                                });
+                                target.value = '';
+                              }
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const inputEl = document.getElementById('newGalleryImageUrlInput') as HTMLInputElement;
+                            if (inputEl) {
+                              const val = inputEl.value.trim();
+                              if (val) {
+                                setProductForm(prev => {
+                                  const currentImages = prev.images || [];
+                                  const nextMain = prev.image || val;
+                                  if (!currentImages.includes(val)) {
+                                    return { 
+                                      ...prev, 
+                                      images: [...currentImages, val],
+                                      image: nextMain
+                                    };
+                                  }
+                                  return prev;
+                                });
+                                inputEl.value = '';
+                              }
+                            }
+                          }}
+                          className="px-4 bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center"
+                        >
+                          ADD
+                        </button>
+                      </div>
+
+                      <label className="px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shrink-0 select-none">
+                        {galleryUploadLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-gold" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 text-gold" />
+                        )}
+                        <span>UPLOAD NEW PHOTO</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleGalleryPhotoUpload(e.target.files[0]);
+                            }
+                          }}
+                        />
+                      </label>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 <div className="space-y-1">
@@ -2158,6 +2383,22 @@ export default function AdminDashboard() {
                   </label>
                 </div>
 
+                <div className="space-y-1 flex flex-col justify-end">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Storefront visibility</label>
+                  <label className="flex items-center gap-3.5 px-3 py-2 bg-white/[0.02] border border-white/5 rounded-lg cursor-pointer select-none hover:border-gold/20">
+                    <input
+                      type="checkbox"
+                      checked={productForm.isVisible !== false}
+                      onChange={(e) => setProductForm(prev => ({ ...prev, isVisible: e.target.checked }))}
+                      className="accent-gold w-4 h-4 text-gold"
+                    />
+                    <span className="text-[10px] text-white font-mono">SHOW THIS WATCH ON THE STOREFRONT</span>
+                  </label>
+                  <p className="text-[9px] leading-4 text-gray-500">
+                    Hidden watches remain in the admin catalogue but disappear from public pages.
+                  </p>
+                </div>
+
               </div>
 
               <div className="space-y-1">
@@ -2249,7 +2490,7 @@ export default function AdminDashboard() {
       )}
 
       {deleteConfirmId !== null && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 flex items-center justify-center" data-lenis-prevent>
           <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-red-500/30 rounded-tl-2xl pointer-events-none" />

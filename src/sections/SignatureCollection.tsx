@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Search, Compass, Loader2, SlidersHorizontal, X, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { translate } from '../utils/translate'
+import { WatchImage } from '../components/WatchImage'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -15,6 +17,8 @@ interface Watch {
   factory: string
   model?: string
   image: string
+  thumbnail?: string
+  images?: string[]
   priceAED: string
   priceUSD: string
   movement: string
@@ -23,6 +27,11 @@ interface Watch {
   waterResistance: string
   description: string
   features: string[]
+  nameAr?: string
+  brandAr?: string
+  modelAr?: string
+  movementAr?: string
+  descriptionAr?: string
 }
 
 const PRIMARY_BRANDS = [
@@ -85,7 +94,7 @@ export default function SignatureCollection({
   const [selectedModel, setSelectedModel] = useState('')
   const [showMoreBrands, setShowMoreBrands] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-  const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const currentLang = localStorage.getItem('t24_lang') || 'ar'
   const isRtl = currentLang === 'ar'
 
   const selectedAudience = activeAudienceFilter !== undefined ? activeAudienceFilter : selectedAudienceState
@@ -120,7 +129,7 @@ export default function SignatureCollection({
       const audienceQuery = audience === 'ALL' ? '' : encodeURIComponent(audience)
       const searchQuery = encodeURIComponent(search)
       const modelQuery = encodeURIComponent(model)
-      const lang = localStorage.getItem('t24_lang') || 'en'
+      const lang = localStorage.getItem('t24_lang') || 'ar'
       const res = await fetch(`/api/products?brand=${brandQuery}&audience=${audienceQuery}&search=${searchQuery}&model=${modelQuery}&page=${pageNum}&limit=6&lang=${lang}`)
       if (!res.ok) throw new Error('API request failed')
       const data = await res.json()
@@ -163,6 +172,22 @@ export default function SignatureCollection({
 
     return () => clearTimeout(delayDebounceFn)
   }, [searchTerm, selectedBrand, selectedAudience, selectedModel])
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileFiltersOpen(false)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [mobileFiltersOpen])
 
   // Load next page
   const handleLoadMore = () => {
@@ -213,12 +238,14 @@ export default function SignatureCollection({
             placeholder={translate("Search by model, brand, category, or style...", currentLang)}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-4 pr-10 py-3 text-xs bg-white/[0.02] border border-white/10 hover:border-gold/30 focus:border-gold focus:outline-none transition-all duration-300 rounded-lg text-white font-mono"
+            className={`w-full py-3 text-xs bg-white/[0.02] border border-white/10 hover:border-gold/30 focus:border-gold focus:outline-none transition-all duration-300 rounded-lg text-white font-mono ${
+              isRtl ? 'pl-10 pr-4' : 'pl-4 pr-10'
+            }`}
           />
           {loading ? (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gold w-3.5 h-3.5 animate-spin" />
+            <Loader2 className={`absolute top-1/2 -translate-y-1/2 text-gold w-3.5 h-3.5 animate-spin ${isRtl ? 'left-3' : 'right-3'}`} />
           ) : (
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-3.5 h-3.5" />
+            <Search className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-3.5 h-3.5 ${isRtl ? 'left-3' : 'right-3'}`} />
           )}
         </div>
       </div>
@@ -416,20 +443,23 @@ export default function SignatureCollection({
         </div>
 
         {/* Mobile Filters Toggle Button */}
-        <div className="lg:hidden flex items-center justify-between mb-6 bg-white/[0.02] border border-white/5 rounded-xl p-4">
-          <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded={mobileFiltersOpen}
+          onClick={() => setMobileFiltersOpen(true)}
+          className="mb-6 flex w-full items-center justify-between rounded-xl border border-gold/20 bg-white/[0.03] p-4 text-start shadow-lg transition hover:border-gold/40 lg:hidden"
+        >
+          <span className="flex min-w-0 items-center gap-3">
             <SlidersHorizontal className="w-4 h-4 text-gold" />
-            <span className="text-xs font-mono text-white uppercase tracking-wider">
+            <span className="truncate text-xs font-mono text-white uppercase tracking-wider">
               {translate("Filter by Brand", currentLang)}
             </span>
-          </div>
-          <button
-            onClick={() => setMobileFiltersOpen(true)}
-            className="px-4 py-2 rounded-lg bg-gold text-black text-xs font-mono font-bold tracking-wider hover:bg-gold-light transition-all duration-300"
-          >
-            {translate("Filter by Brand", currentLang).toUpperCase()}
-          </button>
-        </div>
+          </span>
+          <span className="shrink-0 rounded-lg bg-gold px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-black font-mono">
+            {translate("ALL", currentLang)}
+          </span>
+        </button>
 
         {/* Catalog Container Layout: Sidebar + Grid */}
         <div className="lg:grid lg:grid-cols-[280px_1fr] gap-10 items-start max-w-7xl mx-auto">
@@ -440,78 +470,115 @@ export default function SignatureCollection({
           </aside>
 
           {/* Mobile Sidebar Overlay Drawer */}
-          {mobileFiltersOpen && (
-            <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm lg:hidden">
-              <div className="w-[300px] h-full bg-[#0d0d0f] border-l border-white/10 p-6 overflow-y-auto space-y-6 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
-                    <span className="text-sm font-mono text-white uppercase tracking-wider">{translate("Filter by Brand", currentLang)}</span>
-                    <button onClick={() => setMobileFiltersOpen(false)} className="text-gray-400 hover:text-white">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  {renderFiltersContent()}
+          {mobileFiltersOpen && createPortal(
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={translate("Filter by Brand", currentLang)}
+              className={`fixed inset-0 flex bg-black/85 backdrop-blur-sm lg:hidden ${
+                isRtl ? 'justify-start' : 'justify-end'
+              }`}
+              style={{ zIndex: 9999 }}
+              onClick={() => setMobileFiltersOpen(false)}
+            >
+              <div
+                dir={isRtl ? 'rtl' : 'ltr'}
+                className={`flex h-[100dvh] w-full max-w-[420px] flex-col overflow-hidden bg-[#0d0d0f] shadow-2xl ${
+                  isRtl ? 'border-r' : 'border-l'
+                } border-white/10`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#0d0d0f]/95 px-5 py-4 backdrop-blur-xl">
+                  <span className="flex items-center gap-2 text-sm font-mono text-white uppercase tracking-wider">
+                    <SlidersHorizontal className="h-4 w-4 text-gold" />
+                    {translate("Filter by Brand", currentLang)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setMobileFiltersOpen(false)}
+                    aria-label="Close filters"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-gray-400 transition hover:border-gold/40 hover:text-white"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setMobileFiltersOpen(false)}
-                  className="w-full py-3 bg-gold text-black text-xs font-mono font-bold rounded-lg tracking-widest mt-8"
-                >
-                  {translate("VIEW SPECS", currentLang).toUpperCase()}
-                </button>
+
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6">
+                  <div className="mx-auto w-full max-w-md">
+                    {renderFiltersContent()}
+                  </div>
+                </div>
+
+                <div className="shrink-0 border-t border-white/10 bg-[#0d0d0f]/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
+                  <button
+                    type="button"
+                    onClick={() => setMobileFiltersOpen(false)}
+                    className="w-full rounded-xl bg-gold py-3.5 text-xs font-bold uppercase tracking-widest text-black font-mono transition hover:bg-gold-light"
+                  >
+                    {translate("View all watches", currentLang)}
+                  </button>
+                </div>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
 
           {/* Watch Cards Grid Container */}
           <div className="flex-1 space-y-8">
             {watches.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-                {watches.map((watch) => (
-                  <Link
-                    key={watch.id}
-                    to={`/product/${watch.id}`}
-                    className="collection-card group cursor-pointer watch-card block"
-                  >
-                    <div className="relative bg-[#0d0d0f]/60 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden transition-all duration-500 hover:border-gold/30 shadow-2xl flex flex-col justify-between h-full">
-                      
-                      {/* Watch Image Aspect Box */}
-                      <div className="aspect-square overflow-hidden bg-[#0d0d0f] relative flex items-center justify-center p-6 xl:p-10">
-                        <img
-                          src={watch.image}
-                          alt={watch.name}
-                          loading="lazy"
-                          className="max-h-[95%] max-w-[95%] object-contain transition-transform duration-700 group-hover:scale-105 select-none"
-                        />
-                        
-                        <span className="absolute top-4 left-4 bg-black/85 backdrop-blur-md border border-gold/30 text-gold font-body text-[9px] font-bold tracking-[0.1em] px-2.5 py-1 rounded-full uppercase shadow-md font-mono">
-                          {translate(getAudienceLabel(watch) === 'Womens' ? 'WOMENS' : 'MENS', currentLang)}
-                        </span>
+                {watches.map((watch) => {
+                  const isAr = currentLang === 'ar';
+                  const displayName = isAr && watch.nameAr ? watch.nameAr : watch.name;
+                  const displayBrand = isAr && watch.brandAr ? watch.brandAr : watch.brand;
+                  const displayModel = isAr && watch.modelAr ? watch.modelAr : (watch.model || watch.name.replace(new RegExp(watch.brand, 'i'), '').trim() || 'Master Copy');
 
-                        <span className="absolute top-4 right-4 bg-black/70 backdrop-blur-md border border-white/10 text-white/70 font-body text-[8px] font-bold tracking-[0.1em] px-2.5 py-1 rounded-full uppercase shadow-md font-mono">
-                          {watch.brand}
-                        </span>
+                  return (
+                    <Link
+                      key={watch.id}
+                      to={`/product/${watch.id}`}
+                      className="collection-card group cursor-pointer watch-card block"
+                    >
+                      <div className="relative bg-[#0d0d0f]/60 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden transition-all duration-500 hover:border-gold/30 shadow-2xl flex flex-col justify-between h-full">
 
-                        {/* Stock indicator badge */}
-                        <span className="absolute bottom-4 right-4 text-[8px] font-mono tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase">
-                          {translate("IN STOCK", currentLang)}
-                        </span>
-                      </div>
-                      
-                      {/* Info Section */}
-                      <div className="p-6 flex flex-col justify-between flex-grow">
-                        <div>
-                          <p className="font-body text-[9px] tracking-[0.2em] text-gold mb-1.5 uppercase font-semibold font-mono">
-                            {translate("SIGNATURE TIMEPIECE", currentLang)}
-                          </p>
-                          <h3 className="font-body text-base font-light tracking-wide text-white group-hover:text-gold transition-colors duration-300 line-clamp-2">
-                            {watch.name}
-                          </h3>
-                          {/* Visible Model name tag */}
-                          <span className="inline-block mt-2 px-2 py-0.5 text-[8px] font-mono text-white/50 border border-white/10 rounded uppercase">
-                            {watch.model || watch.name.replace(new RegExp(watch.brand, 'i'), '').trim() || 'Master Copy'}
+                        {/* Watch Image Aspect Box */}
+                        <div className="aspect-square overflow-hidden bg-[#0d0d0f] relative flex items-center justify-center p-6 xl:p-10">
+                          <WatchImage
+                            src={watch.image}
+                            alt={displayName}
+                            loading="lazy"
+                            className="max-h-[95%] max-w-[95%] object-contain transition-transform duration-700 group-hover:scale-105 select-none"
+                          />
+
+                          <span className="absolute top-4 left-4 bg-black/85 backdrop-blur-md border border-gold/30 text-gold font-body text-[9px] font-bold tracking-[0.1em] px-2.5 py-1 rounded-full uppercase shadow-md font-mono">
+                            {translate(getAudienceLabel(watch) === 'Womens' ? 'WOMENS' : 'MENS', currentLang)}
+                          </span>
+
+                          <span className="absolute top-4 right-4 bg-black/70 backdrop-blur-md border border-white/10 text-white/70 font-body text-[8px] font-bold tracking-[0.1em] px-2.5 py-1 rounded-full uppercase shadow-md font-mono">
+                            {displayBrand}
+                          </span>
+
+                          {/* Stock indicator badge */}
+                          <span className="absolute bottom-4 right-4 text-[8px] font-mono tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase">
+                            {translate("IN STOCK", currentLang)}
                           </span>
                         </div>
-                        
+
+                        {/* Info Section */}
+                        <div className="p-6 flex flex-col justify-between flex-grow">
+                          <div>
+                            <p className="font-body text-[9px] tracking-[0.2em] text-gold mb-1.5 uppercase font-semibold font-mono">
+                              {translate("SIGNATURE TIMEPIECE", currentLang)}
+                            </p>
+                            <h3 className="font-body text-base font-light tracking-wide text-white group-hover:text-gold transition-colors duration-300 line-clamp-2">
+                              {displayName}
+                            </h3>
+                            {/* Visible Model name tag */}
+                            <span className="inline-block mt-2 px-2 py-0.5 text-[8px] font-mono text-white/50 border border-white/10 rounded uppercase">
+                              {displayModel}
+                            </span>
+                          </div>
+
                         <div className="mt-6 pt-4 border-t border-white/5">
                           <p className={`font-body text-[9px] tracking-wider text-silver/40 uppercase font-mono ${isRtl ? 'text-right' : 'text-left'}`}>
                             {translate("Exclusive Price", currentLang)}
@@ -534,10 +601,10 @@ export default function SignatureCollection({
                           </span>
                         </div>
                       </div>
-
-                    </div>
-                  </Link>
-                ))}
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             ) : (
               !loading && (

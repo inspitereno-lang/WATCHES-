@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router'
-import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { WatchImage } from '../components/WatchImage'
+import { translate } from '../utils/translate'
 
 interface NewArrivalItem {
   id: number
@@ -8,6 +10,8 @@ interface NewArrivalItem {
   type: string
   image: string
   label: string
+  priceUSD?: string
+  priceAED?: string
 }
 
 interface CraftsmanshipImageItem {
@@ -25,55 +29,55 @@ interface NewArrivalsProps {
 
 const defaultArrivals: NewArrivalItem[] = [
   {
-    id: 138,
-    name: 'Daytona Pikachu 126518LN Gold',
+    id: 123,
+    name: 'Rolex Cosmograph Daytona 40mm – PANDA',
     type: '1:1 Swiss Master Copy Edition',
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F02%2FIMG_0913-300x300.webp',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372639/t24_watches_clean/vmdeatpytq76vufbbmhh.png',
     label: 'BEST SELLER',
   },
   {
     id: 119,
-    name: 'Patek Philippe Celestial Blue',
+    name: 'Richard Mille RM 055 Bubba Watson Asia Carbon NTPT',
     type: '1:1 Swiss Master Copy Edition',
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3594-300x300.webp',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372624/t24_watches_clean/ffoturqlsqn7c3aiwgif.png',
     label: 'NEW ARRIVAL',
   },
   {
-    id: 543,
-    name: 'Audemars Piguet Royal Oak 41 MM',
+    id: 114,
+    name: 'Rolex Datejust 126281RBR Two-Tone Oyster Grey Dial 36mm 2023',
     type: '1:1 Master Copy Edition',
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fdubaiwatchstores.com%2Fwp-content%2Fuploads%2F2018%2F10%2F1-19.jpg',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372603/t24_watches_clean/jctyki5eoi9smo4s67ri.png',
     label: 'EXQUISITE',
   },
   {
-    id: 537,
-    name: 'Richard Mille RM11-03 Rose Gold',
+    id: 103,
+    name: 'Richard Mille RM 67-01 Rose Gold Skeleton Dial Extra Flat',
     type: '1:1 Flyback Chrono Master Copy',
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fdubaiwatchstores.com%2Fwp-content%2Fuploads%2F2018%2F11%2FIMG_0179-copy.jpg',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372551/t24_watches_clean/ze5js60llxs3rgiukog3.png',
     label: 'CRAFTSMANSHIP',
   },
 ]
 
 const defaultCraftsmanship: CraftsmanshipImageItem[] = [
   { 
-    id: 125, 
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F03%2FIMG_2868-300x300.webp', 
-    alt: 'Richard Mille Mother Of Pearl Rose Gold' 
+    id: 138, 
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372700/t24_watches_clean/fnrdjyeusvk64pfj2doh.png', 
+    alt: 'Audemars Piguet Royal Oak Double Balance Wheel Skeleton' 
   },
   { 
-    id: 156, 
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2025%2F11%2FIMG_4627-300x300.webp', 
-    alt: 'Audemars Piguet Frosted Double Balance Wheel' 
+    id: 102, 
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372545/t24_watches_clean/h8fxgwcqbbzof42ixa6y.png', 
+    alt: 'Richard Mille RM 67-02 Mutaz Essa Barshim Qatar' 
   },
   { 
-    id: 541, 
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fdubaiwatchstores.com%2Fwp-content%2Fuploads%2F2018%2F10%2F1-21.jpg', 
-    alt: 'Audemars Piguet Royal Oak 33 MM' 
+    id: 119, 
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372624/t24_watches_clean/ffoturqlsqn7c3aiwgif.png', 
+    alt: 'Richard Mille RM 055 Bubba Watson' 
   },
   { 
-    id: 540, 
-    image: 'https://images.weserv.nl/?url=https%3A%2F%2Fdubaiwatchstores.com%2Fwp-content%2Fuploads%2F2018%2F10%2F1-22.jpg', 
-    alt: 'Audemars Piguet Royal Oak Diamond White' 
+    id: 114, 
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372603/t24_watches_clean/jctyki5eoi9smo4s67ri.png', 
+    alt: 'Rolex Datejust 126281RBR Two-Tone' 
   },
 ]
 
@@ -83,14 +87,13 @@ export default function NewArrivals({
   newArrivals: apiNewArrivals = [],
   craftsmanshipImages: apiCraftsmanship = [],
 }: NewArrivalsProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [visibleSlides, setVisibleSlides] = useState(3)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [isHovered, setIsHovered] = useState(false)
-  const trackRef = useRef<HTMLDivElement>(null)
+  const currentLang = localStorage.getItem('t24_lang') || 'ar'
 
-  // Merge API and fallbacks so there are always 8 items (4 arrivals, 4 craftsmanship)
-  const mergedArrivals = [...apiNewArrivals, ...defaultArrivals.filter(d => !apiNewArrivals.some(a => a.id === d.id))].slice(0, 4)
-  const mergedCraftsmanship = [...apiCraftsmanship, ...defaultCraftsmanship.filter(d => !apiCraftsmanship.some(c => c.id === d.id))].slice(0, 4)
+  // Merge API and fallbacks so there are always up to 24 items (12 arrivals, 12 craftsmanship)
+  const mergedArrivals = [...apiNewArrivals, ...defaultArrivals.filter(d => !apiNewArrivals.some(a => a.id === d.id))].slice(0, 12)
+  const mergedCraftsmanship = [...apiCraftsmanship, ...defaultCraftsmanship.filter(d => !apiCraftsmanship.some(c => c.id === d.id))].slice(0, 12)
 
   // Construct standard items list for carousel slider
   const slides = [
@@ -98,56 +101,69 @@ export default function NewArrivals({
       id: item.id,
       brand: item.label || 'Rolex',
       reference: item.name,
-      price: item.name.includes('Pikachu') ? '$1,250' : item.name.includes('Patek') ? '$1,850' : item.name.includes('Mille') ? '$2,450' : '$1,450',
+      priceUSD: item.priceUSD || (item.name.includes('Pikachu') ? '$1,250' : item.name.includes('Patek') ? '$1,850' : item.name.includes('Mille') ? '$2,450' : '$1,450'),
+      priceAED: item.priceAED || (item.name.includes('Pikachu') ? 'AED 4,590' : item.name.includes('Patek') ? 'AED 6,795' : item.name.includes('Mille') ? 'AED 8,995' : 'AED 5,325'),
       image: item.image,
     })),
     ...mergedCraftsmanship.map(item => ({
       id: item.id,
       brand: item.alt ? (item.alt.includes('Mille') ? 'Richard Mille' : item.alt.includes('Audemars') ? 'Audemars Piguet' : 'Rolex') : 'Rolex',
       reference: item.alt || 'Luxury Watch',
-      price: item.alt && item.alt.includes('Mille') ? '$2,450' : '$1,650',
+      priceUSD: item.alt && item.alt.includes('Mille') ? '$2,450' : '$1,650',
+      priceAED: item.alt && item.alt.includes('Mille') ? 'AED 8,995' : 'AED 6,060',
       image: item.image,
     }))
   ]
 
-  // Update visible slides count dynamically
+  // Double slides list for a seamless linear marquee flow
+  const marqueeSlides = [...slides, ...slides]
+
+  // Continuous linear scrolling logic (pause on hover)
   useEffect(() => {
-    const updateVisible = () => {
-      if (window.innerWidth < 640) {
-        setVisibleSlides(1)
-      } else if (window.innerWidth < 1024) {
-        setVisibleSlides(2)
-      } else {
-        setVisibleSlides(3)
+    const container = containerRef.current
+    if (!container) return
+
+    let animationId: number
+    const speed = 0.8 // pixels per frame
+
+    const updateScroll = () => {
+      if (!isHovered) {
+        container.scrollLeft += speed
+        
+        const halfWidth = container.scrollWidth / 2
+        if (container.scrollLeft >= halfWidth) {
+          container.scrollLeft = container.scrollLeft - halfWidth
+        }
       }
+      animationId = requestAnimationFrame(updateScroll)
     }
-    updateVisible()
-    window.addEventListener('resize', updateVisible)
-    return () => window.removeEventListener('resize', updateVisible)
-  }, [])
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => {
-      const maxIndex = slides.length - visibleSlides
-      return prev < maxIndex ? prev + 1 : 0
-    })
+    animationId = requestAnimationFrame(updateScroll)
+    return () => cancelAnimationFrame(animationId)
+  }, [isHovered])
+
+  const scrollNext = () => {
+    const container = containerRef.current
+    if (!container) return
+    setIsHovered(true)
+    container.scrollBy({ left: 300, behavior: 'smooth' })
+    setTimeout(() => {
+      setIsHovered(false)
+    }, 800)
   }
 
-  const prevSlide = () => {
-    setCurrentIndex((prev) => {
-      const maxIndex = slides.length - visibleSlides
-      return prev > 0 ? prev - 1 : maxIndex
-    })
+  const scrollPrev = () => {
+    const container = containerRef.current
+    if (!container) return
+    setIsHovered(true)
+    if (container.scrollLeft <= 5) {
+      container.scrollLeft = container.scrollWidth / 2
+    }
+    container.scrollBy({ left: -300, behavior: 'smooth' })
+    setTimeout(() => {
+      setIsHovered(false)
+    }, 800)
   }
-
-  // Autoplay functionality (moves side-to-side automatically, pauses on hover)
-  useEffect(() => {
-    if (isHovered) return
-    const timer = setInterval(() => {
-      nextSlide()
-    }, 3000)
-    return () => clearInterval(timer)
-  }, [isHovered, visibleSlides, slides.length])
 
   return (
     <section className="bg-black py-20 lg:py-28 px-6 lg:px-16 w-full text-white relative overflow-hidden">
@@ -163,78 +179,74 @@ export default function NewArrivals({
           <div className="absolute inset-0 z-0">
             <img 
               src="https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&q=80&w=600" 
-              alt="Premium Collection Spotlight" 
+              alt="Luxury watch movement"
               className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-1000"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent z-10" />
           </div>
 
-          {/* Gold ambient overlay */}
-          <div className="absolute inset-0 bg-[#e8c264]/[0.02] blur-2xl pointer-events-none" />
-
-          {/* Top text block */}
-          <div className="relative z-10">
-            <span className="text-[10px] tracking-[0.3em] text-[#e8c264] uppercase font-bold block mb-3">
-              LUXURY & PREMIUM BRANDS
+          <div className="relative z-20 space-y-4">
+            <span className="font-mono text-[9px] tracking-[0.35em] text-[#e8c264] bg-[#e8c264]/10 border border-[#e8c264]/20 px-2.5 py-1 rounded-full uppercase">
+              Spotlight
             </span>
-            <h2 className="font-display text-2xl sm:text-3xl lg:text-[20px] xl:text-[26px] 2xl:text-[32px] text-white font-light leading-tight uppercase tracking-tight">
-              {newArrivalsTitle} <br />
-              & <span className="font-bold text-[#e8c264] whitespace-nowrap">{craftsmanshipTitle}</span>
-            </h2>
+            <h3 className="font-display text-2xl xl:text-3xl font-light tracking-tight text-white leading-tight mt-2">
+              {newArrivalsTitle}
+              <br />
+              <span className="text-[#e8c264] font-bold font-display">& {craftsmanshipTitle}</span>
+            </h3>
           </div>
 
-          {/* Bottom text/location block */}
-          <div className="relative z-10 pt-16">
-            <div className="flex items-center gap-2 text-xs font-mono text-[#e8c264]/80">
-              <MapPin className="w-4 h-4 text-[#e8c264]" />
-              <span className="tracking-wider uppercase">Experience Excellence</span>
-            </div>
-            <p className="text-[11px] text-silver/60 mt-1 font-body">Master copy timepieces</p>
+          <div className="relative z-20 pt-8 border-t border-white/5 mt-auto">
+            <p className="font-body text-xs text-silver tracking-widest leading-relaxed">
+              Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.
+            </p>
           </div>
         </div>
 
-        {/* Right Product Carousel Slider */}
-        <div 
-          className="lg:col-span-9 flex flex-col justify-center relative"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+        {/* Right Slider Section */}
+        <div className="lg:col-span-9 flex flex-col justify-center relative">
           
-          {/* Navigation Arrows */}
-          <div className="absolute -top-14 right-4 flex gap-3 z-20 lg:static lg:-top-0 lg:right-0">
-            <button 
-              onClick={prevSlide}
-              className="lg:absolute lg:-left-6 lg:top-1/2 lg:-translate-y-1/2 w-11 h-11 rounded-full border border-white/10 bg-black/80 hover:bg-[#e8c264] hover:text-black hover:border-[#e8c264] flex items-center justify-center transition-all duration-300 z-30 group shadow-md"
-              aria-label="Previous Products"
-            >
-              <ChevronLeft className="w-5 h-5 text-white group-hover:text-black" />
-            </button>
+          {/* Navigation Controls Row */}
+          <div className="flex items-center justify-between mb-6 z-20 px-1">
+            <div className="flex items-center gap-3">
+              <span className="h-[1px] w-8 bg-[#e8c264]" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#e8c264]">
+                {translate("Hover to focus / click arrows to slide", currentLang)}
+              </p>
+            </div>
             
-            <button 
-              onClick={nextSlide}
-              className="lg:absolute lg:-right-6 lg:top-1/2 lg:-translate-y-1/2 w-11 h-11 rounded-full border border-white/10 bg-black/80 hover:bg-[#e8c264] hover:text-black hover:border-[#e8c264] flex items-center justify-center transition-all duration-300 z-30 group shadow-md"
-              aria-label="Next Products"
-            >
-              <ChevronRight className="w-5 h-5 text-white group-hover:text-black" />
-            </button>
+            {/* Arrows */}
+            <div className="flex gap-2" dir="ltr">
+              <button 
+                onClick={scrollPrev}
+                className="w-10 h-10 rounded-full border border-white/10 bg-black/80 hover:bg-[#e8c264] hover:text-black hover:border-[#e8c264] flex items-center justify-center transition-all duration-300 z-10 group"
+                aria-label="Previous Products"
+              >
+                <ChevronLeft className="w-5 h-5 text-white group-hover:text-black" />
+              </button>
+              <button 
+                onClick={scrollNext}
+                className="w-10 h-10 rounded-full border border-[#e8c264]/10 bg-black/80 hover:bg-[#e8c264] hover:text-black hover:border-[#e8c264] flex items-center justify-center transition-all duration-300 z-10 group"
+                aria-label="Next Products"
+              >
+                <ChevronRight className="w-5 h-5 text-white group-hover:text-black" />
+              </button>
+            </div>
           </div>
 
           {/* Carousel Viewport Container */}
           <div className="w-full overflow-hidden px-1 py-4">
             <div 
-              ref={trackRef}
-              className="flex flex-row flex-nowrap gap-5 transition-transform duration-500 ease-out"
-              style={{
-                transform: `translate3d(-${currentIndex * (100 / visibleSlides)}%, 0, 0)`,
-              }}
+              ref={containerRef}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className="flex flex-row flex-nowrap gap-5 overflow-x-auto scrollbar-none"
             >
-              {slides.map((item, idx) => (
+              {marqueeSlides.map((item, idx) => (
                 <div 
                   key={idx}
-                  className="shrink-0 rounded-2xl bg-[#0d0d0f] border border-white/5 backdrop-blur-md p-6 flex flex-col justify-between group hover:border-[#e8c264]/20 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
-                  style={{
-                    width: `calc(${100 / visibleSlides}% - ${(visibleSlides - 1) * 20 / visibleSlides}px)`
-                  }}
+                  className="shrink-0 w-[280px] rounded-2xl bg-[#0d0d0f] border border-white/5 backdrop-blur-md p-6 flex flex-col justify-between group hover:border-[#e8c264]/20 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
                 >
                   {/* Link wrapper around entire card */}
                   <Link to={`/product/${item.id}`} className="flex flex-col h-full justify-between">
@@ -242,10 +254,10 @@ export default function NewArrivals({
                     {/* Watch Image */}
                     <div className="relative w-full aspect-[4/5] bg-[#0a0a0c] rounded-xl flex items-center justify-center p-4 mb-5 overflow-hidden">
                       <div className="absolute w-[180px] h-[180px] rounded-full bg-[#e8c264]/[0.015] blur-xl pointer-events-none group-hover:bg-[#e8c264]/[0.03] transition-colors duration-500" />
-                      <img 
-                        src={item.image} 
-                        alt={item.reference} 
-                        className="max-h-[190px] object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-700" 
+                      <WatchImage
+                        src={item.image}
+                        alt={item.reference}
+                        className="max-h-[190px] object-contain group-hover:scale-105 transition-transform duration-700"
                         loading="lazy"
                       />
                     </div>
@@ -258,8 +270,9 @@ export default function NewArrivals({
                       <h3 className="font-display text-sm text-white font-medium tracking-wide uppercase line-clamp-1 group-hover:text-[#e8c264] transition-colors duration-300">
                         {item.reference}
                       </h3>
-                      <div className="mt-3 text-xs font-mono text-silver/80 tracking-wider">
-                        {item.price}
+                      <div className="mt-3 text-xs font-mono text-silver/80 tracking-wider flex items-center justify-center gap-1.5" dir="ltr">
+                        <span className="text-[#e8c264] font-bold">{item.priceAED}</span>
+                        <span className="text-white/40 text-[10px] font-normal">({item.priceUSD})</span>
                       </div>
                     </div>
                   </Link>

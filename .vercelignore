@@ -1,0 +1,12 @@
+# Exclude server and scraper directories from Vercel frontend deployments
+server/
+scrape.mjs
+scraped_products.json
+cloudinary_mappings.json
+removebg_gallery_progress.json
+removebg_progress.json
+fresh_import.mjs
+docs/
+scripts/
+*.pdf
+scratch/

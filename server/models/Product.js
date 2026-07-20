@@ -71,6 +71,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    thumbnail: {
+      type: String,
+      default: '',
+    },
+    images: {
+      type: [String],
+      default: [],
+    },
     movement: {
       type: String,
       required: true,
@@ -105,6 +113,25 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: true,
     },
+    isVisible: {
+      type: Boolean,
+      required: true,
+      default: true,
+      index: true,
+    },
+    // Arabic Translations
+    nameAr: { type: String, default: '' },
+    brandAr: { type: String, default: '' },
+    modelAr: { type: String, default: '' },
+    materialAr: { type: String, default: '' },
+    movementAr: { type: String, default: '' },
+    casingAr: { type: String, default: '' },
+    bezelAr: { type: String, default: '' },
+    glassAr: { type: String, default: '' },
+    waterResistanceAr: { type: String, default: '' },
+    descriptionAr: { type: String, default: '' },
+    featuresAr: { type: [String], default: [] },
+    warrantyAr: { type: String, default: '' },
   },
   {
     timestamps: true,

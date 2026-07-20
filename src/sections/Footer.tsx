@@ -43,7 +43,7 @@ export default function Footer({
 }: FooterProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const linksList = footerLinks && footerLinks.length > 0 ? footerLinks : defaultFooterLinks
-  const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const currentLang = localStorage.getItem('t24_lang') || 'ar'
 
   const [selectedRep, setSelectedRep] = useState<SalesRep | null>(null)
 

@@ -55,16 +55,17 @@ export default function Hero({
   const markerRef = useRef<HTMLDivElement>(null)
 
   const [currentSlide, setCurrentSlide] = useState(0)
-  const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const currentLang = localStorage.getItem('t24_lang') || 'ar'
   const isRtl = currentLang === 'ar'
 
   const slideshowImages = Array.from(
     new Set(
       [
-        heroWatchImageUrl,
-        '/watch-diver-green.jpg',
-        '/watch-steel-blue.jpg',
-        '/watch-dress-rose.jpg'
+        '/hero-brands/richard-mille-rm11.png',
+        '/hero-brands/patek-philippe-nautilus.png',
+        '/hero-brands/audemars-piguet-royal-oak.png',
+        '/hero-brands/rolex-daytona.png',
+        '/hero-brands/cartier-santos.png'
       ].filter(
         (src) =>
           src &&
@@ -141,17 +142,19 @@ export default function Hero({
         .to(cta, { opacity: 1, y: 0, duration: 0.5 }, '-=0.2')
         .to([stats, marker], { opacity: 1, y: 0, duration: 0.55, stagger: 0.08 }, '-=0.25')
 
-      gsap.to(watchPanel, {
-        yPercent: 7,
-        xPercent: isRtl ? 2 : -2,
-        rotate: isRtl ? 0.7 : -0.7,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
+      gsap.matchMedia().add('(min-width: 1024px)', () => {
+        gsap.to(watchPanel, {
+          yPercent: 6,
+          xPercent: isRtl ? 8 : -8,
+          rotate: isRtl ? 0.45 : -0.45,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+        })
       })
 
       gsap.to(glow, {
@@ -176,6 +179,10 @@ export default function Hero({
   }, [isRtl])
 
   const titleLines = (heroData.title || 'SWISS | PRECISION').split(' | ')
+  const collectionTarget =
+    !heroData.ctaTarget || heroData.ctaTarget === '#store'
+      ? '/collections'
+      : heroData.ctaTarget
   const displayStats = heroData.stats?.length ? heroData.stats : [
     { value: 'FREE', label: 'Same-day delivery' },
     { value: '2 YR', label: 'Service warranty' },
@@ -193,12 +200,16 @@ export default function Hero({
       />
       <div
         ref={glowRef}
-        className={`absolute top-[-10rem] -z-20 hidden h-[45rem] w-[45rem] rounded-full bg-[conic-gradient(from_120deg,rgba(217,165,32,0),rgba(217,165,32,0.32),rgba(232,194,100,0.22),rgba(235,203,122,0.42),rgba(217,165,32,0))] blur-3xl sm:block ${isRtl ? 'left-[-16rem]' : 'right-[-16rem]'}`}
+        className={`absolute top-[-10rem] -z-20 hidden h-[45rem] w-[45rem] rounded-full bg-[conic-gradient(from_120deg,rgba(217,165,32,0),rgba(217,165,32,0.32),rgba(232,194,100,0.22),rgba(235,203,122,0.42),rgba(217,165,32,0))] blur-3xl ${isRtl ? 'left-[-16rem]' : 'right-[-16rem]'}`}
       />
 
       <div
         ref={watchPanelRef}
-        className={`absolute bottom-0 top-20 -z-20 w-[156vw] sm:w-[88vw] lg:w-[66vw] overflow-hidden sm:top-14 ${isRtl ? 'left-[-42vw] sm:left-[-16vw] lg:left-[-8vw]' : 'right-[-42vw] sm:right-[-16vw] lg:right-[-8vw]'}`}
+        className={`absolute bottom-0 top-20 -z-20 w-[138vw] overflow-hidden sm:top-14 sm:w-[105vw] lg:top-20 lg:w-[60vw] ${
+          isRtl
+            ? 'left-[-48vw] sm:left-[-12vw] lg:left-[-4vw]'
+            : 'left-[-19vw] sm:left-auto sm:right-[-12vw] lg:right-0'
+        }`}
       >
         {slideshowImages.map((src, idx) => (
           <img
@@ -209,27 +220,43 @@ export default function Hero({
             loading={idx === 0 ? 'eager' : 'lazy'}
             fetchPriority={idx === 0 ? 'high' : 'low'}
             decoding="async"
-            className={`absolute inset-0 h-full w-full object-cover object-[64%_48%] transition-all duration-[1500ms] ease-in-out will-change-transform sm:object-[58%_50%] ${
-              idx === currentSlide 
-                ? 'opacity-100 scale-[1.04] brightness-[1.68] contrast-[1.18] saturate-[1.75] sm:scale-[1.03] sm:brightness-[1.32] sm:contrast-[1.12] sm:saturate-[1.34]' 
+            className={`absolute inset-0 h-full w-full object-contain transition-all duration-[1500ms] ease-in-out will-change-transform ${
+              isRtl
+                ? 'object-center sm:object-left'
+                : 'object-center sm:object-right'
+            } ${
+              idx === currentSlide
+                ? 'opacity-100 scale-[1.04] brightness-[1.32] contrast-[1.05] saturate-[1.16] sm:scale-[1.02] sm:brightness-[1.42] lg:scale-100 lg:brightness-[1.58] lg:contrast-[1.03] lg:saturate-[1.18]'
                 : 'opacity-0 scale-[1.00] brightness-[1.0] contrast-[1.0] saturate-[1.0]'
             }`}
           />
         ))}
-        <div className={`absolute inset-0 bg-[linear-gradient(${isRtl ? '270deg' : '90deg'},rgba(5,4,3,0.78)_0%,rgba(5,4,3,0.42)_20%,rgba(5,4,3,0.02)_50%,rgba(5,4,3,0.12)_78%,rgba(5,4,3,0.44)_100%)] sm:bg-[linear-gradient(${isRtl ? '270deg' : '90deg'},#050403_0%,rgba(5,4,3,0.72)_14%,rgba(5,4,3,0.10)_42%,rgba(5,4,3,0.04)_70%,rgba(5,4,3,0.56)_100%)]`} />
-        <div className="absolute inset-0 hidden bg-[radial-gradient(circle_at_58%_42%,rgba(235,203,122,0.24),transparent_32%),radial-gradient(circle_at_72%_50%,rgba(232,194,100,0.18),transparent_24%)] mix-blend-screen sm:block sm:bg-[radial-gradient(circle_at_54%_42%,rgba(235,203,122,0.10),transparent_30%),radial-gradient(circle_at_72%_48%,rgba(232,194,100,0.10),transparent_24%)]" />
-        <div className={`absolute inset-y-0 w-[38%] ${isRtl ? 'right-0 bg-gradient-to-l' : 'left-0 bg-gradient-to-r'} from-[#050403] via-[#050403]/48 to-transparent sm:w-1/2 sm:via-[#050403]/72`} />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050403]/10 via-transparent to-[#050403]/55" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(235,203,122,0.14),transparent_34%)] mix-blend-screen" />
+        <div className={`absolute inset-y-0 w-[58%] ${isRtl ? 'right-0 bg-gradient-to-l' : 'left-0 bg-gradient-to-r'} from-[#050403]/95 via-[#050403]/55 to-transparent sm:w-1/2 lg:w-[42%]`} />
       </div>
 
-      <div className="absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,rgba(5,4,3,0.96)_0%,rgba(5,4,3,0.82)_28%,rgba(5,4,3,0.18)_58%,rgba(5,4,3,0.06)_100%),linear-gradient(180deg,rgba(5,4,3,0.18)_0%,rgba(5,4,3,0.06)_45%,#050403_100%)] sm:block" />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(5,4,3,0.04)_0%,rgba(5,4,3,0.30)_46%,rgba(5,4,3,0.88)_100%),linear-gradient(90deg,rgba(5,4,3,0.74),rgba(5,4,3,0.10))] sm:hidden" />
+      <div
+        className={`absolute inset-0 -z-10 hidden sm:block ${
+          isRtl
+            ? 'bg-[linear-gradient(270deg,rgba(5,4,3,0.96)_0%,rgba(5,4,3,0.82)_28%,rgba(5,4,3,0.18)_58%,rgba(5,4,3,0.06)_100%),linear-gradient(180deg,rgba(5,4,3,0.18)_0%,rgba(5,4,3,0.06)_45%,#050403_100%)]'
+            : 'bg-[linear-gradient(90deg,rgba(5,4,3,0.96)_0%,rgba(5,4,3,0.82)_28%,rgba(5,4,3,0.18)_58%,rgba(5,4,3,0.06)_100%),linear-gradient(180deg,rgba(5,4,3,0.18)_0%,rgba(5,4,3,0.06)_45%,#050403_100%)]'
+        }`}
+      />
+      <div
+        className={`absolute inset-0 -z-10 sm:hidden ${
+          isRtl
+            ? 'bg-[linear-gradient(180deg,rgba(5,4,3,0.04)_0%,rgba(5,4,3,0.30)_46%,rgba(5,4,3,0.88)_100%),linear-gradient(270deg,rgba(5,4,3,0.74),rgba(5,4,3,0.10))]'
+            : 'bg-[linear-gradient(180deg,rgba(5,4,3,0.04)_0%,rgba(5,4,3,0.30)_46%,rgba(5,4,3,0.88)_100%),linear-gradient(90deg,rgba(5,4,3,0.74),rgba(5,4,3,0.10))]'
+        }`}
+      />
       <div className="absolute inset-x-0 bottom-0 -z-10 h-44 bg-gradient-to-t from-[#050403] to-transparent" />
       <div className={`absolute top-0 h-full w-px bg-gradient-to-b from-transparent via-[#e8c264]/50 to-transparent ${isRtl ? 'right-0 sm:right-8 lg:right-12' : 'left-0 sm:left-8 lg:left-12'}`} />
       <div className={`absolute top-28 hidden h-40 w-40 rounded-full border border-[#ebcb7a]/20 lg:block ${isRtl ? 'left-10' : 'right-10'}`} />
       <div className={`absolute top-40 hidden h-24 w-24 rounded-full border border-[#e8c264]/20 lg:block ${isRtl ? 'left-20' : 'right-20'}`} />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-7 sm:px-10 sm:py-8 lg:px-14">
-        <div className="max-w-[42rem]">
+        <div className="w-full max-w-[42rem]">
           <p
             ref={eyebrowRef}
             className="mb-5 inline-flex items-center gap-3 border border-[#e8c264]/25 bg-[#120b04]/35 px-4 py-2 font-body text-[10px] font-medium uppercase tracking-[0.42em] text-[#ebcb7a] shadow-[0_0_35px_rgba(217,165,32,0.14)] backdrop-blur-md sm:mb-6 sm:tracking-[0.46em] sm:text-xs"
@@ -259,7 +286,7 @@ export default function Hero({
 
           <p
             ref={subheadRef}
-            className="mt-1 max-w-xl font-body text-[10px] font-medium uppercase tracking-[0.28em] text-[#e8c264] drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:mt-2 sm:text-xs sm:tracking-[0.32em]"
+            className="mt-1 max-w-xl font-body text-[10px] font-medium uppercase tracking-[0.12em] text-[#e8c264] drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:mt-2 sm:text-xs sm:tracking-[0.32em]"
           >
             {heroData.subtitleDesc}
           </p>
@@ -274,21 +301,21 @@ export default function Hero({
           <div className="mt-6 flex flex-col gap-5 sm:mt-7 sm:flex-row sm:items-center">
             <a
               ref={ctaRef}
-              href={heroData.ctaTarget}
+              href={collectionTarget}
               className="relative z-20 group inline-flex w-fit items-center gap-4 rounded-full border border-[#ebcb7a]/70 bg-gradient-to-r from-[#d9a520] via-[#e8c264] to-[#ebcb7a] px-7 py-4 font-body text-xs font-bold uppercase tracking-[0.24em] text-[#090604] shadow-[0_18px_70px_rgba(217,165,32,0.36),0_0_42px_rgba(232,194,100,0.22)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_24px_90px_rgba(217,165,32,0.48),0_0_58px_rgba(235,203,122,0.28)]"
             >
               <span>{heroData.ctaLabel}</span>
-              <ArrowRight size={17} className="transition duration-300 group-hover:translate-x-1" />
+              <ArrowRight size={17} className={`transition duration-300 ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
             </a>
           </div>
 
           <div
             ref={statsRef}
-            className="mt-7 grid max-w-2xl grid-cols-3 gap-2 border-y border-[#ebcb7a]/20 bg-black/10 py-4 font-body text-[10px] uppercase tracking-[0.14em] text-white/75 backdrop-blur-[2px] sm:mt-8 sm:gap-3 sm:text-xs sm:tracking-[0.22em]"
+            className="mt-7 grid max-w-2xl grid-cols-3 gap-2 border-y border-[#ebcb7a]/20 bg-black/10 py-4 text-center font-body text-[9px] uppercase tracking-normal text-white/75 backdrop-blur-[2px] sm:mt-8 sm:gap-3 sm:text-xs sm:tracking-[0.22em]"
           >
             {displayStats.slice(0, 3).map((stat) => (
               <div key={`${stat.value}-${stat.label}`}>
-                <span className="block text-xl font-black tracking-[-0.04em] text-[#ebcb7a]">
+                <span className="mb-1 block text-lg font-black tracking-[-0.04em] text-[#ebcb7a] sm:text-xl">
                   {translate(stat.value, currentLang)}
                 </span>
                 {translate(stat.label, currentLang)}
@@ -311,4 +338,3 @@ export default function Hero({
     </section>
   )
 }
-

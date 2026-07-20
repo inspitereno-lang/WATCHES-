@@ -17,7 +17,7 @@ export default function Nocturne({
   nocturneHeading2 = 'MILLE',
   nocturneCopy = 'Discover the finest Richard Mille replica watches Dubai collection. From the ultra-thin RM 67-01 replica in Dubai and RM 67-02 replica in Dubai to complex skeleton dials, each Richard Mille super clone in Dubai is crafted with carbon casings and exact details, making them the ultimate Richard Mille replica watches in Dubai.',
   nocturneBuildSpec = 'RICHARD MILLE SUPER CLONE IN DUBAI',
-  nocturneImage = 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3434-300x300.webp',
+  nocturneImage = 'https://dubaiwatchstores.com/wp-content/uploads/2026/05/richard-mille-extra-flat-mutaz-barshim-qatar-white-carbon-quartz-tpt-pink-rm-67-02-2-removebg-preview.webp',
 }: NocturneProps) {
   const sectionRef = useRef<HTMLElement>(null)
 

@@ -124,8 +124,20 @@ function formatProduct(p, sourceSite) {
     image = p.thumbnail;
   }
   
-  if (image && !image.includes('weserv.nl')) {
+  let thumbnail = '';
+  if (p.images && p.images.length > 0 && p.images[0].thumbnail) {
+    thumbnail = p.images[0].thumbnail;
+  } else if (p.thumbnail) {
+    thumbnail = p.thumbnail;
+  } else {
+    thumbnail = image;
+  }
+  
+  if (image && !image.includes('weserv.nl') && !image.includes('dubaiwatchstores.com')) {
     image = `https://images.weserv.nl/?url=${encodeURIComponent(image)}`;
+  }
+  if (thumbnail && !thumbnail.includes('weserv.nl') && !thumbnail.includes('dubaiwatchstores.com')) {
+    thumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(thumbnail)}`;
   }
   
   // Factory classification
@@ -148,6 +160,21 @@ function formatProduct(p, sourceSite) {
     .replace(/\s+/g, ' ')
     .trim() || `Superb execution of the iconic ${name}. Engineered down to the exact millimeter matching weight, sweep frequency, and bezel dimensions seamlessly.`;
 
+  // Extract multiple images
+  let images = [];
+  if (p.images && p.images.length > 0) {
+    images = p.images.map(img => {
+      let src = img.src;
+      if (src && !src.includes('weserv.nl') && !src.includes('dubaiwatchstores.com')) {
+        src = `https://images.weserv.nl/?url=${encodeURIComponent(src)}`;
+      }
+      return src;
+    }).filter(Boolean);
+  }
+  if (images.length === 0 && image) {
+    images = [image];
+  }
+
   return {
     name,
     brand,
@@ -155,6 +182,8 @@ function formatProduct(p, sourceSite) {
     priceAED,
     url: p.permalink || sourceSite,
     image,
+    thumbnail,
+    images,
     factory,
     audience,
     movement,
@@ -170,23 +199,13 @@ function formatProduct(p, sourceSite) {
 async function scrapeAll() {
   console.log('Initiating product crawler for WooCommerce REST APIs...');
   
-  // 1. Fetch raw products from both sites
-  const tickerProductsRaw = await fetchAllProducts('https://ticker24watches.com/wp-json/wc/store/v1/products');
+  // 1. Fetch raw products from DubaiWatchStores only
   const dubaiProductsRaw = await fetchAllProducts('https://dubaiwatchstores.com/wp-json/wc/store/v1/products');
   
-  console.log(`Fetched raw product counts: Ticker24 (${tickerProductsRaw.length}), DubaiWatchStores (${dubaiProductsRaw.length})`);
+  console.log(`Fetched raw product counts: DubaiWatchStores (${dubaiProductsRaw.length})`);
   
   const mergedList = [];
   const seenNames = new Set();
-  
-  // Process Ticker24 products
-  for (const raw of tickerProductsRaw) {
-    const formatted = formatProduct(raw, 'https://ticker24watches.com/');
-    if (formatted && !seenNames.has(formatted.name.toLowerCase())) {
-      seenNames.add(formatted.name.toLowerCase());
-      mergedList.push(formatted);
-    }
-  }
   
   // Process DubaiWatchStores products
   for (const raw of dubaiProductsRaw) {

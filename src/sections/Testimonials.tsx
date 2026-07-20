@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Star, Quote, UserCheck } from 'lucide-react'
+import { Star, Quote } from 'lucide-react'
 import { translate } from '../utils/translate'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -20,7 +20,7 @@ interface Testimonial {
 const defaultTestimonials: Testimonial[] = [
   {
     id: 1,
-    name: 'Faisal Al-Mansoori',
+    name: 'Fahad Al-Mansoori',
     location: 'Dubai Marina, UAE',
     role: 'Watch Collector',
     watchBought: 'Rolex Daytona Panda',
@@ -30,7 +30,7 @@ const defaultTestimonials: Testimonial[] = [
   },
   {
     id: 2,
-    name: 'Marcus Sterling',
+    name: 'Lucas Sterling',
     location: 'London, UK',
     role: 'Finance Director',
     watchBought: 'Patek Philippe Nautilus 5711',
@@ -53,17 +53,37 @@ const defaultTestimonials: Testimonial[] = [
     name: 'Khalid Bin-Fahd',
     location: 'Riyadh, Saudi Arabia',
     role: 'Business Owner',
-    watchBought: 'Audemars Piguet Royal Oak 15500 (ZF)',
+    watchBought: 'Audemars Piguet Royal Oak 15500',
     rating: 5,
     quote: 'Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%!',
+    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face'
+  },
+  {
+    id: 5,
+    name: 'Jean-Pierre Moreau',
+    location: 'Geneva, Switzerland',
+    role: 'Horological Enthusiast',
+    watchBought: 'Vacheron Constantin Overseas',
+    rating: 5,
+    quote: 'Living in Geneva, I appreciate quality watchmaking. The Maltese Cross bezel finish and the quick-release steel strap mechanism work exactly like the original. Truly exceptional copy quality.',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+  },
+  {
+    id: 6,
+    name: 'Amara Okafor',
+    location: 'Lagos, Nigeria',
+    role: 'Art Director',
+    watchBought: 'AP Royal Oak Double Balance Wheel',
+    rating: 5,
+    quote: 'The skeleton dial is breathtaking. You can see the double balance wheels beating in perfect synchronization. The gold plating color is exceptionally rich and heavy. Exceeded all expectations!',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face'
   }
 ]
 
 export default function Testimonials({ items }: { items?: Testimonial[] }) {
   const sectionRef = useRef<HTMLElement>(null)
   const testimonialsList = items && items.length > 0 ? items : defaultTestimonials
-  const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const currentLang = localStorage.getItem('t24_lang') || 'ar'
 
   useEffect(() => {
     const section = sectionRef.current
@@ -138,7 +158,7 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
         {/* Header */}
         <div className="mb-16 lg:mb-20">
           <p className="test-label font-body text-xs tracking-[0.3em] text-gold mb-4 uppercase">
-            {translate('CONCIERGE REVIEWS', currentLang)}
+            {translate('CUSTOMER REVIEWS', currentLang)}
           </p>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <h2 className="test-heading font-display text-4xl sm:text-5xl lg:text-6xl text-white leading-[0.95] font-light">
@@ -153,7 +173,7 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {testimonialsList.map((test, idx) => (
             <div
               key={idx}
@@ -180,27 +200,13 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
 
               {/* User Bio */}
               <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
-                <div className="flex items-center gap-3">
-                  {test.avatar ? (
-                    <img
-                      src={test.avatar}
-                      alt={test.name}
-                      className="w-10 h-10 rounded-full object-cover border border-gold/20 group-hover:border-gold/50 transition-colors"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gold">
-                      <UserCheck size={18} />
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="font-body text-sm font-semibold text-white tracking-wide">
-                      {test.name}
-                    </h4>
-                    <p className="font-body text-[10px] text-silver/60 tracking-wider">
-                      {test.location} &bull; {test.role}
-                    </p>
-                  </div>
+                <div>
+                  <h4 className="font-body text-sm font-semibold text-white tracking-wide">
+                    {test.name}
+                  </h4>
+                  <p className="font-body text-[10px] text-silver/60 tracking-wider">
+                    {test.location} &bull; {test.role}
+                  </p>
                 </div>
                 
                 {/* Watch detail badge */}

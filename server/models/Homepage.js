@@ -61,8 +61,8 @@ const homepageSchema = new mongoose.Schema(
     salesReps: {
       type: [salesRepSchema],
       default: [
-        { name: 'Faisal (Senior Concierge)', number: '971501234567', isActive: true, isFeatured: true },
-        { name: 'Marcus (Support Desk)', number: '971507654321', isActive: true, isFeatured: false }
+        { name: 'WhatsApp', number: '971501234567', isActive: true, isFeatured: true },
+        { name: 'WhatsApp', number: '971507654321', isActive: true, isFeatured: false }
       ]
     },
     // HERO SECTION
@@ -140,17 +140,17 @@ const homepageSchema = new mongoose.Schema(
       type: [newArrivalSchema],
       default: [
         {
-          id: 138,
-          name: 'Daytona Pikachu 126518LN Gold',
+          id: 105,
+          name: 'Rolex Daytona Cosmograph M126505-0001 Oyster – 40mm',
           type: '1:1 Swiss Master Copy Edition',
-          image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F02%2FIMG_0913-300x300.webp',
+          image: 'https://dubaiwatchstores.com/wp-content/uploads/2025/04/m126505-0001.jpg',
           label: 'BEST SELLER',
         },
         {
-          id: 119,
-          name: 'Patek Philippe Celestial Blue',
+          id: 106,
+          name: 'Patek Philippe Celestial 5102PR Blue',
           type: '1:1 Swiss Master Copy Edition',
-          image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3594-300x300.webp',
+          image: 'https://dubaiwatchstores.com/wp-content/uploads/2025/04/6102P_001_1@2x-e1743605689581.jpg',
           label: 'NEW ARRIVAL',
         }
       ]
@@ -159,14 +159,14 @@ const homepageSchema = new mongoose.Schema(
       type: [craftImageSchema],
       default: [
         { 
-          id: 125, 
-          image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F03%2FIMG_2868-300x300.webp', 
-          alt: 'Richard Mille Mother Of Pearl Rose Gold' 
+          id: 103, 
+          image: 'https://dubaiwatchstores.com/wp-content/uploads/2026/05/67-01-rose-removebg-preview.webp', 
+          alt: 'Richard Mille RM 67-01 Rose Gold Skeleton Dial Extra Flat' 
         },
         { 
-          id: 156, 
-          image: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2025%2F11%2FIMG_4627-300x300.webp', 
-          alt: 'Audemars Piguet Frosted Double Balance Wheel' 
+          id: 138, 
+          image: 'https://dubaiwatchstores.com/wp-content/uploads/2023/01/AP_skeleton-removebg-preview-1.png', 
+          alt: 'Audemars Piguet Royal Oak Double Balance Wheel Skeleton' 
         }
       ]
     },
@@ -174,7 +174,7 @@ const homepageSchema = new mongoose.Schema(
     // CLONE WATCHES DETAIL SECTION (Patek Celestial specs)
     detailBrand: { type: String, default: 'PATEK PHILIPPE' },
     detailModel: { type: String, default: 'CELESTIAL' },
-    detailImage: { type: String, default: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3594-300x300.webp' },
+    detailImage: { type: String, default: 'https://dubaiwatchstores.com/wp-content/uploads/2025/04/6102P_001_1@2x-e1743605689581.jpg' },
     detailDesc1: { type: String, default: 'The Patek Philippe Celestial represents the absolute zenith of grand complication horology. Its deep-sky chart dial captures the mesmerizing, slow progression of the stars and the moon in the Northern Hemisphere, bringing cosmic mechanics to your wrist.' },
     detailDesc2: { type: String, default: 'This premium Swiss master copy execution features a multi-layered dial disk, sapphire dial apertures, and the micro-rotor Calibre 240 LU CL C movement. Fine-tuned and pressure tested by our workshop for seamless mechanical sweeps and identical weight parameters.' },
     detailSpecs: {
@@ -215,7 +215,7 @@ const homepageSchema = new mongoose.Schema(
     lumeHeading2: { type: String, default: 'NAUTILUS' },
     lumeSubhead: { type: String, default: 'DIW ALL CARBON BLACK ORANGE' },
     lumeBody: { type: String, default: 'A customized, ultra-modern carbon-forged masterpiece by DIW. Extremely light, durable, featuring dynamic orange luminous hour markers and indicators that absorb UV light during the day to emit a soft, enduring glow in total darkness.' },
-    lumeImage: { type: String, default: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2024%2F10%2FIMG_0394-300x300.webp' },
+    lumeImage: { type: String, default: 'https://dubaiwatchstores.com/wp-content/uploads/2025/12/IMG_1196.webp' },
 
     // HERITAGE SECTION (Maison Atelier)
     heritageHeading1: { type: String, default: 'T24' },
@@ -247,7 +247,7 @@ const homepageSchema = new mongoose.Schema(
       default: [
         {
           id: 1,
-          name: 'Faisal Al-Mansoori',
+          name: 'Fahad Al-Mansoori',
           location: 'Dubai Marina, UAE',
           role: 'Watch Collector',
           watchBought: 'Rolex Daytona Panda (Premium Edition)',
@@ -257,7 +257,7 @@ const homepageSchema = new mongoose.Schema(
         },
         {
           id: 2,
-          name: 'Marcus Sterling',
+          name: 'Lucas Sterling',
           location: 'London, UK',
           role: 'Finance Director',
           watchBought: 'Patek Philippe Nautilus 5711 (Premium Edition)',
@@ -293,7 +293,7 @@ const homepageSchema = new mongoose.Schema(
     nocturneHeading2: { type: String, default: 'MILLE' },
     nocturneCopy: { type: String, default: 'Discover the finest Richard Mille replica watches Dubai collection. From the ultra-thin RM 67-01 replica in Dubai and RM 67-02 replica in Dubai to complex skeleton dials, each Richard Mille super clone in Dubai is crafted with carbon casings and exact details, making them the ultimate Richard Mille replica watches in Dubai.' },
     nocturneBuildSpec: { type: String, default: 'RICHARD MILLE SUPER CLONE IN DUBAI' },
-    nocturneImage: { type: String, default: 'https://images.weserv.nl/?url=https%3A%2F%2Fticker24watches.com%2Fwp-content%2Fuploads%2F2026%2F04%2FIMG_3434-300x300.webp' },
+    nocturneImage: { type: String, default: 'https://dubaiwatchstores.com/wp-content/uploads/2026/05/richard-mille-extra-flat-mutaz-barshim-qatar-white-carbon-quartz-tpt-pink-rm-67-02-2-removebg-preview.webp' },
 
     // FOOTER SECTION
     footerHeading: { type: String, default: 'CONTACT US' },
