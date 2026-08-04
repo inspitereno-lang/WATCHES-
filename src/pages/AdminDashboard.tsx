@@ -2370,6 +2370,17 @@ export default function AdminDashboard() {
                   />
                 </div>
 
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Source Link / URL</label>
+                  <input
+                    type="text"
+                    value={productForm.url || ''}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, url: e.target.value }))}
+                    placeholder="e.g. https://dubaiwatchstores.com/product/..."
+                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
+                  />
+                </div>
+
                 <div className="space-y-1 flex flex-col justify-end">
                   <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Availability status</label>
                   <label className="flex items-center gap-3.5 px-3 py-2 bg-white/[0.02] border border-white/5 rounded-lg cursor-pointer select-none hover:border-gold/20">
