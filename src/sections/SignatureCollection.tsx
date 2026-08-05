@@ -97,6 +97,30 @@ export default function SignatureCollection({
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
+  // Dynamic categories
+  const [brands, setBrands] = useState<string[]>(['ALL BRANDS', ...PRIMARY_BRANDS, ...OTHER_BRANDS])
+  const [brandModels, setBrandModels] = useState<Record<string, string[]>>(BRAND_MODELS)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.brands) setBrands(data.brands)
+          if (data.brandModels) setBrandModels(data.brandModels)
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err)
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  const cleanBrands = brands.filter(b => b !== 'ALL BRANDS')
+  const primaryBrandsList = cleanBrands.slice(0, 6)
+  const otherBrandsList = cleanBrands.slice(6)
+
   const selectedAudience = activeAudienceFilter !== undefined ? activeAudienceFilter : selectedAudienceState
   const setSelectedAudience = (aud: AudienceFilter) => {
     if (onAudienceFilterChange) {
@@ -308,7 +332,7 @@ export default function SignatureCollection({
           </button>
 
           {/* Primary Brands */}
-          {PRIMARY_BRANDS.map((brand) => {
+          {primaryBrandsList.map((brand) => {
             const isSelected = selectedBrand === brand;
             return (
               <button
@@ -338,7 +362,7 @@ export default function SignatureCollection({
 
             {showMoreBrands && (
               <div className="pl-3 pr-1 mt-2 space-y-1.5 border-l border-white/5 max-h-[180px] overflow-y-auto custom-scrollbar">
-                {OTHER_BRANDS.map((brand) => {
+                {otherBrandsList.map((brand) => {
                   const isSelected = selectedBrand === brand;
                   return (
                     <button
@@ -366,9 +390,9 @@ export default function SignatureCollection({
         <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e8c264] mb-3">
           {translate("Filter by Model", currentLang)}
         </h4>
-        {selectedBrand !== 'ALL BRANDS' && BRAND_MODELS[selectedBrand] ? (
+        {selectedBrand !== 'ALL BRANDS' && brandModels[selectedBrand] ? (
           <div className="flex flex-wrap gap-1.5 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
-            {BRAND_MODELS[selectedBrand].map((model) => {
+            {brandModels[selectedBrand].map((model) => {
               const isSelected = selectedModel === model;
               return (
                 <button

@@ -30,6 +30,21 @@
     scroll-behavior: auto;
   }
 
+  html.language-booting #root {
+    opacity: 0;
+  }
+
+  html.language-leaving #root {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  #root {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
   body {
     @apply bg-black text-white antialiased;
     font-family: 'Inter', sans-serif;
@@ -51,6 +66,12 @@
 
   .font-body {
     font-family: 'Inter', sans-serif;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root {
+    transition: none;
   }
 }
 

@@ -578,6 +578,89 @@ app.post('/api/translate/batch', async (req, res) => {
   }
 });
 
+// 1.8 Fetch Category Filters List (Brands, Audiences, and Brand-to-Model mappings)
+app.get('/api/categories', async (req, res) => {
+  try {
+    const defaultBrands = [
+      'Richard Mille',
+      'Audemars Piguet',
+      'Patek Philippe',
+      'Rolex',
+      'Hublot',
+      'Cartier',
+      'Vacheron Constantin',
+      'Omega',
+      'IWC',
+      'Breitling',
+      'Chopard',
+      'TAG Heuer'
+    ];
+
+    const defaultBrandModels = {
+      'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
+      'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
+      'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications'],
+      'Richard Mille': ['RM 11-03', 'RM 35-02', 'RM 67-02', 'RM 21-02', 'RM 55'],
+      'Hublot': ['Big Bang', 'Classic Fusion', 'Spirit of Big Bang'],
+      'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère'],
+      'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques']
+    };
+
+    // Query database for all products
+    const includeHidden = req.query.includeHidden === 'true';
+    const filter = includeHidden ? {} : { isVisible: true };
+    const products = await Product.find(filter, 'brand model');
+
+    // Build sets for merging
+    const brandsSet = new Set(defaultBrands);
+    const brandModels = {};
+
+    // Initialize brandModels with defaultBrandModels
+    for (const brand in defaultBrandModels) {
+      brandModels[brand] = new Set(defaultBrandModels[brand]);
+    }
+
+    // Merge database items
+    products.forEach(p => {
+      if (p.brand) {
+        const brandTrimmed = p.brand.trim();
+        if (brandTrimmed) {
+          brandsSet.add(brandTrimmed);
+          
+          if (!brandModels[brandTrimmed]) {
+            brandModels[brandTrimmed] = new Set();
+          }
+          if (p.model) {
+            const modelTrimmed = p.model.trim();
+            if (modelTrimmed) {
+              brandModels[brandTrimmed].add(modelTrimmed);
+            }
+          }
+        }
+      }
+    });
+
+    // Convert to sorted lists
+    const brandsList = Array.from(brandsSet).sort((a, b) => a.localeCompare(b));
+    const formattedBrandModels = {};
+    for (const brand in brandModels) {
+      formattedBrandModels[brand] = Array.from(brandModels[brand]).sort((a, b) => a.localeCompare(b));
+    }
+
+    const brands = ['ALL BRANDS', ...brandsList];
+    const audiences = ['ALL', 'Womens', 'Mens'];
+
+    return res.status(200).json({
+      brands,
+      audiences,
+      brandModels: formattedBrandModels
+    });
+  } catch (err) {
+    console.error('Failed to fetch categories:', err);
+    return res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
 // 2. Fetch Catalogue (supports brand/category pills filter, query search, pagination)
 app.get('/api/products', async (req, res) => {
   try {

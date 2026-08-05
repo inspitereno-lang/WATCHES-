@@ -29,6 +29,22 @@ describe('T24 Watches CMS API Endpoints', () => {
     await mongoose.connection.close();
   });
 
+  // 0.8 GET /api/categories (Public)
+  describe('GET /api/categories', () => {
+    it('should fetch the hardcoded list of brands, audiences, and models', async () => {
+      const res = await request(app)
+        .get('/api/categories')
+        .expect(200);
+
+      expect(res.body).toHaveProperty('brands');
+      expect(res.body).toHaveProperty('audiences');
+      expect(res.body).toHaveProperty('brandModels');
+      expect(Array.isArray(res.body.brands)).toBe(true);
+      expect(res.body.brands).toContain('Rolex');
+      expect(res.body.brandModels).toHaveProperty('Rolex');
+    });
+  });
+
   // 1. GET /api/homepage (Public)
   describe('GET /api/homepage', () => {
     it('should fetch the dynamic homepage configuration and sections content', async () => {

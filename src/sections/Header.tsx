@@ -41,9 +41,8 @@ export default function Header({
   const toggleLanguage = () => {
     const nextLang = currentLang === 'en' ? 'ar' : 'en'
     localStorage.setItem('t24_lang', nextLang)
-    document.documentElement.dir = nextLang === 'ar' ? 'rtl' : 'ltr'
-    setCurrentLang(nextLang)
-    window.location.reload()
+    document.documentElement.classList.add('language-leaving')
+    window.setTimeout(() => window.location.reload(), 160)
   }
 
   useEffect(() => {

@@ -1,8 +1,25 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr" class="language-booting">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        try {
+          const isAdmin = window.location.pathname.startsWith('/admin')
+          const language = isAdmin ? 'en' : (localStorage.getItem('t24_lang') || 'en')
+          document.documentElement.lang = language
+          document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
+        } catch {
+          document.documentElement.lang = 'en'
+          document.documentElement.dir = 'ltr'
+        }
+
+        window.setTimeout(() => {
+          document.documentElement.classList.remove('language-booting')
+        }, 1200)
+      })()
+    </script>
     <title>تي 24 للساعات | ساعات فاخرة وماستر كوبي في دبي</title>
     
     <!-- SEO Meta Tags -->

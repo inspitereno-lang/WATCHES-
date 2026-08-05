@@ -85,6 +85,9 @@ export default function ArabicLocalizer() {
       document.documentElement.lang = 'en'
       document.documentElement.dir = 'ltr'
       document.body.classList.remove('is-arabic')
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('language-booting')
+      })
       return
     }
 
@@ -93,8 +96,12 @@ export default function ArabicLocalizer() {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
     document.body.classList.toggle('is-arabic', language === 'ar')
 
+    if (language === 'ar') localizeElement(document.body, language)
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('language-booting')
+    })
+
     if (language !== 'ar') return
-    localizeElement(document.body, language)
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {

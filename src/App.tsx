@@ -63,6 +63,15 @@ export default function App() {
   }, [pathname])
 
   useEffect(() => {
+    const isAdminRoute = pathname.startsWith('/admin')
+    if (isAdminRoute) {
+      if (lenisRef.current) {
+        lenisRef.current.destroy()
+        lenisRef.current = null
+      }
+      return
+    }
+
     // Initialize Lenis smooth scroll
     const lenis = new Lenis({
       lerp: 0.15,
@@ -73,9 +82,10 @@ export default function App() {
     // Connect Lenis to ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update)
 
-    gsap.ticker.add((time) => {
+    const rafCallback = (time: number) => {
       lenis.raf(time * 1000)
-    })
+    }
+    gsap.ticker.add(rafCallback)
 
     gsap.ticker.lagSmoothing(0)
 
@@ -87,9 +97,10 @@ export default function App() {
     return () => {
       clearTimeout(timeout)
       lenis.destroy()
-      gsap.ticker.remove(lenis.raf)
+      gsap.ticker.remove(rafCallback)
+      lenisRef.current = null
     }
-  }, [])
+  }, [pathname])
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">

@@ -66,6 +66,26 @@ const BRAND_MODELS: Record<string, string[]> = {
 export default function WatchesPage() {
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   
+  // Dynamic categories
+  const [brands, setBrands] = useState<string[]>(PRIMARY_BRANDS)
+  const [brandModels, setBrandModels] = useState<Record<string, string[]>>(BRAND_MODELS)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.brands) setBrands(data.brands)
+          if (data.brandModels) setBrandModels(data.brandModels)
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err)
+      }
+    }
+    fetchCategories()
+  }, [])
+
   // Catalog state
   const [watches, setWatches] = useState<Watch[]>([])
   const [loading, setLoading] = useState(true)
@@ -198,7 +218,7 @@ export default function WatchesPage() {
 
         {/* Brand visual pills row */}
         <div className="flex flex-wrap justify-center gap-2 pt-6 max-w-4xl mx-auto">
-          {PRIMARY_BRANDS.slice(0, 7).map((brand) => {
+          {brands.slice(0, 7).map((brand) => {
             const isSelected = selectedBrand === brand;
             return (
               <button
@@ -314,7 +334,7 @@ export default function WatchesPage() {
                     }}
                     className="w-full rounded-xl border border-white/10 bg-[#151518] px-4 py-3 text-sm text-white outline-none focus:border-gold font-mono"
                   >
-                    {PRIMARY_BRANDS.map((brand) => (
+                    {brands.map((brand) => (
                       <option key={brand} value={brand}>
                         {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : brand}
                       </option>
@@ -329,7 +349,7 @@ export default function WatchesPage() {
                   <select
                     aria-label={translate("Model", currentLang)}
                     value={selectedModel}
-                    disabled={selectedBrand === 'ALL BRANDS' || !BRAND_MODELS[selectedBrand]}
+                    disabled={selectedBrand === 'ALL BRANDS' || !brandModels[selectedBrand]}
                     onChange={(event) => {
                       setSelectedModel(event.target.value)
                       setPage(1)
@@ -337,7 +357,7 @@ export default function WatchesPage() {
                     className="w-full rounded-xl border border-white/10 bg-[#151518] px-4 py-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-40 focus:border-gold font-mono"
                   >
                     <option value="">{translate('ALL', currentLang)}</option>
-                    {(BRAND_MODELS[selectedBrand] || []).map((model) => (
+                    {(brandModels[selectedBrand] || []).map((model) => (
                       <option key={model} value={model}>{model}</option>
                     ))}
                   </select>
@@ -441,7 +461,7 @@ export default function WatchesPage() {
 
               {brandDropdownOpen && (
                 <div className="absolute left-0 mt-2 w-52 rounded-xl border border-white/10 bg-[#0d0d0f] shadow-2xl p-2 z-40 max-h-60 overflow-y-auto custom-scrollbar">
-                  {PRIMARY_BRANDS.map((brand) => (
+                  {brands.map((brand) => (
                     <button
                       key={brand}
                       onClick={() => {
@@ -463,7 +483,7 @@ export default function WatchesPage() {
             {/* Model Dropdown (Contextual) */}
             <div className="relative">
               <button 
-                disabled={selectedBrand === 'ALL BRANDS' || !BRAND_MODELS[selectedBrand]}
+                disabled={selectedBrand === 'ALL BRANDS' || !brandModels[selectedBrand]}
                 onClick={() => {
                   setModelDropdownOpen(!modelDropdownOpen)
                   setBrandDropdownOpen(false)
@@ -476,7 +496,7 @@ export default function WatchesPage() {
                 <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
               </button>
 
-              {modelDropdownOpen && selectedBrand !== 'ALL BRANDS' && BRAND_MODELS[selectedBrand] && (
+              {modelDropdownOpen && selectedBrand !== 'ALL BRANDS' && brandModels[selectedBrand] && (
                 <div className="absolute left-0 mt-2 w-52 rounded-xl border border-white/10 bg-[#0d0d0f] shadow-2xl p-2 z-40 max-h-60 overflow-y-auto custom-scrollbar">
                   <button
                     onClick={() => {
@@ -489,7 +509,7 @@ export default function WatchesPage() {
                     <span>{translate('ALL', currentLang)}</span>
                     {!selectedModel && <Check className="w-3.5 h-3.5 text-gold" />}
                   </button>
-                  {BRAND_MODELS[selectedBrand].map((model) => (
+                  {brandModels[selectedBrand].map((model) => (
                     <button
                       key={model}
                       onClick={() => {

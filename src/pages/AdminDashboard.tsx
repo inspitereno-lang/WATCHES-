@@ -174,6 +174,8 @@ export default function AdminDashboard() {
   
   const [newFeature, setNewFeature] = useState('')
   const [productLoading, setProductLoading] = useState(false)
+  const [availableBrands, setAvailableBrands] = useState<string[]>([])
+  const [availableBrandModels, setAvailableBrandModels] = useState<Record<string, string[]>>({})
   const [galleryUploadLoading, setGalleryUploadLoading] = useState(false)
 
   // Auth Guard check & force LTR for dashboard layout
@@ -206,6 +208,7 @@ export default function AdminDashboard() {
     if (!token) return
     fetchHomepageData()
     fetchProducts()
+    fetchCategories()
   }, [token, page, searchTerm])
 
   const fetchHomepageData = async () => {
@@ -255,6 +258,23 @@ export default function AdminDashboard() {
       console.error('Error fetching products:', err)
     } finally {
       setProductsLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories?includeHidden=true')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.brands) {
+          setAvailableBrands(data.brands.filter((b: string) => b !== 'ALL BRANDS'))
+        }
+        if (data.brandModels) {
+          setAvailableBrandModels(data.brandModels)
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err)
     }
   }
 
@@ -484,6 +504,7 @@ export default function AdminDashboard() {
       showToast('success', editingProduct ? 'Product details updated successfully.' : 'New watch listing added successfully.')
       setIsModalOpen(false)
       fetchProducts()
+      fetchCategories()
     } catch (err: any) {
       showToast('error', err.message || 'Product save failed.')
     } finally {
@@ -507,6 +528,7 @@ export default function AdminDashboard() {
       showToast('success', 'Watch deleted successfully from database catalog.')
       setDeleteConfirmId(null)
       fetchProducts()
+      fetchCategories()
     } catch (err: any) {
       showToast('error', err.message || 'Failed to delete watch.')
     }
@@ -537,6 +559,7 @@ export default function AdminDashboard() {
           ? 'Watch is now visible on the storefront.'
           : 'Watch has been hidden from the storefront.'
       )
+      fetchCategories()
     } catch (err: any) {
       showToast('error', err.message || 'Failed to update storefront visibility.')
     }
@@ -1971,11 +1994,17 @@ export default function AdminDashboard() {
                     <input
                       type="text"
                       required
+                      list="admin-brands-list"
                       placeholder="e.g. Rolex / Patek Philippe"
                       value={productForm.brand}
                       onChange={(e) => setProductForm(prev => ({ ...prev, brand: e.target.value }))}
                       className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
                     />
+                    <datalist id="admin-brands-list">
+                      {availableBrands.map((b) => (
+                        <option key={b} value={b} />
+                      ))}
+                    </datalist>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Category</label>
@@ -2308,11 +2337,17 @@ export default function AdminDashboard() {
                   <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Model / Series</label>
                   <input
                     type="text"
+                    list="admin-models-list"
                     value={productForm.model || ''}
                     onChange={(e) => setProductForm(prev => ({ ...prev, model: e.target.value }))}
                     placeholder="e.g. Daytona 116500LN"
                     className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
                   />
+                  <datalist id="admin-models-list">
+                    {(availableBrandModels[productForm.brand.trim()] || []).map((m) => (
+                      <option key={m} value={m} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="space-y-1">
