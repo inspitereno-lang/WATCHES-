@@ -1946,18 +1946,19 @@ export default function AdminDashboard() {
       </main>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 md:p-12 overflow-y-auto flex items-start justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-3xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl mx-auto my-8">
+        <div key={editingProduct ? `edit-${editingProduct.id}` : 'new-product'} className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 sm:p-6 md:p-10 flex items-start justify-center overflow-y-auto" data-lenis-prevent>
+          <div className="relative w-full max-w-3xl max-h-none sm:max-h-[calc(100vh-5rem)] bg-[#0e0e11] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-xs font-mono text-white my-4 sm:my-8">
             
             {/* Corner styling borders */}
-            <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/30 rounded-tl-2xl pointer-events-none" />
-            <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-gold/30 rounded-tr-2xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-gold/30 rounded-bl-2xl pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-gold/30 rounded-br-2xl pointer-events-none" />
+            <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/30 rounded-tl-2xl pointer-events-none z-10" />
+            <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-gold/30 rounded-tr-2xl pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-gold/30 rounded-bl-2xl pointer-events-none z-10" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-gold/30 rounded-br-2xl pointer-events-none z-10" />
 
-            <div className="mb-6 flex justify-between items-start">
+            {/* Header */}
+            <div className="p-5 md:p-7 flex justify-between items-start border-b border-white/10 bg-[#121216] shrink-0">
               <div>
-                <h3 className="text-lg font-light text-white">
+                <h3 className="text-base md:text-lg font-light text-white">
                   {editingProduct ? 'Edit Watch Specifications' : 'Register New Watch Listing'}
                 </h3>
                 <p className="text-[10px] text-gray-500 font-mono mt-0.5 uppercase">
@@ -1967,13 +1968,15 @@ export default function AdminDashboard() {
               <button 
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-500 hover:text-white font-mono text-xs cursor-pointer border border-white/5 hover:border-white/20 px-2 py-1 rounded"
+                className="text-gray-500 hover:text-white font-mono text-xs cursor-pointer border border-white/10 hover:border-white/30 px-2.5 py-1 rounded-lg transition-all"
               >
                 CLOSE [ESC]
               </button>
             </div>
 
-            <form onSubmit={handleProductSubmit} className="space-y-5 text-xs font-mono">
+            {/* Scrollable Container */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 md:p-8 custom-scrollbar">
+              <form onSubmit={handleProductSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 <div className="space-y-1">
@@ -2507,30 +2510,32 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl text-xs font-mono text-white transition-all duration-300 cursor-pointer"
-                >
-                  CANCEL
-                </button>
-                <button
-                  type="submit"
-                  disabled={productLoading}
-                  className="px-6 py-2.5 bg-gold hover:bg-gold-light text-black text-xs font-mono font-bold tracking-widest rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg"
-                >
-                  {productLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-black" />
-                      SAVING DETAILS...
-                    </>
-                  ) : (
-                    'SAVE WATCH SPECIFICATIONS'
-                  )}
-                </button>
-              </div>
-            </form>
+                {/* Action Buttons inside scroll area */}
+                <div className="pt-6 border-t border-white/10 flex items-center justify-end gap-3 pb-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-5 py-2.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl text-xs font-mono text-white transition-all duration-300 cursor-pointer"
+                  >
+                    CANCEL
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={productLoading}
+                    className="px-6 py-2.5 bg-gold hover:bg-gold-light text-black text-xs font-mono font-bold tracking-widest rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-gold/10"
+                  >
+                    {productLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-black" />
+                        SAVING DETAILS...
+                      </>
+                    ) : (
+                      'SAVE WATCH SPECIFICATIONS'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
