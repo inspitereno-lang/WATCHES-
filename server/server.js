@@ -402,6 +402,30 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['CATALOGUE', 'الكتالوج'],
   ['CURATED WATCH DIRECTORY', 'دليل الساعات المختار'],
   ['Refined timepieces selected for balanced weight, smooth movement, and daily-wear precision.', 'ساعات راقية مختارة بوزن متوازن وحركة انسيابية ودقة للاستخدام اليومي.'],
+  ['In Stock', 'متوفر'],
+  ['IN STOCK', 'متوفر'],
+  ['In stock', 'متوفر'],
+  ['Sold Out', 'نفد المخزون'],
+  ['SOLD OUT', 'نفد المخزون'],
+  ['All', 'الكل'],
+  ['ALL', 'الكل'],
+  ['Featured', 'مميز'],
+  ['min read', 'دقائق للقراءة'],
+  ['Read article', 'اقرأ المقال'],
+  ['Read Article', 'اقرأ المقال'],
+  ['READ ARTICLE', 'اقرأ المقال'],
+  ['Read more →', 'اقرأ المزيد ←'],
+  ['No journal articles are available.', 'لا توجد مقالات متاحة حاليًا.'],
+  ['Article not found', 'المقال غير موجود'],
+  ['Return to the journal', 'العودة إلى المجلة'],
+  ['Back to journal', 'العودة إلى المجلة'],
+  ['In this guide', 'في هذا الدليل'],
+  ['Continue shopping', 'تابع التسوق'],
+  ['Compare the references in our catalogue.', 'قارن بين الموديلات في كتالوجنا.'],
+  ['Explore collections →', 'استكشف المجموعات ←'],
+  ['WHITE GLOVE DELIVERY', 'توصيل فاخر وفوري'],
+  ['SAME-DAY FREE DELIVERY IN DUBAI & UAE', 'توصيل مجاني بنفس اليوم في دبي والإمارات'],
+  ['Direct hand-delivery across Dubai, Abu Dhabi, Sharjah, and all Emirates with zero advance payment.', 'توصيل يدوي مباشر في دبي وأبوظبي والشارقة وجميع الإمارات دون أي دفع مسبق.'],
 ]);
 
 async function translateText(text, to = 'ar') {
@@ -629,9 +653,7 @@ app.get('/api/translate', async (req, res) => {
     if (!text) {
       return res.status(400).json({ error: 'Text query parameter is required.' });
     }
-    const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${to}&dt=t&q=${encodeURIComponent(text)}`);
-    const data = await response.json();
-    const translatedText = data[0].map(item => item[0]).join('');
+    const translatedText = await translateText(text, to);
     return res.status(200).json({ original: text, translated: translatedText });
   } catch (err) {
     console.error('Translation error:', err);
