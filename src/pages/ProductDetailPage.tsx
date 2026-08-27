@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate, Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -73,6 +74,35 @@ export default function ProductDetailPage({
   const [loading, setLoading] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const currentLang = localStorage.getItem('t24_lang') || 'en'
+
+  // Lock body scroll when lightbox is open
+  useEffect(() => {
+    if (lightboxOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [lightboxOpen])
+
+  // Keyboard navigation for lightbox (Escape to close, arrows to cycle)
+  useEffect(() => {
+    if (!lightboxOpen || !watch) return
+    const imgs = watch.images && watch.images.length > 0 ? watch.images : [watch.image]
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setLightboxOpen(false)
+      } else if (e.key === 'ArrowLeft') {
+        setLightboxIndex((prev) => (prev - 1 + imgs.length) % imgs.length)
+      } else if (e.key === 'ArrowRight') {
+        setLightboxIndex((prev) => (prev + 1) % imgs.length)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lightboxOpen, watch])
 
   // Refresh ScrollTrigger when content finishes loading to ensure footer and other elements animate correctly
   useEffect(() => {
@@ -351,12 +381,12 @@ export default function ProductDetailPage({
             {/* ── Main Image with Hover Magnifier ── */}
             <div
               ref={imageContainerRef}
-              className="relative rounded-2xl border border-white/5 bg-[#0d0d0f] flex items-center justify-center aspect-square overflow-hidden shadow-2xl cursor-zoom-in select-none"
+              className="relative rounded-2xl border border-white/5 bg-[#0d0d0f] flex items-center justify-center aspect-square overflow-hidden shadow-2xl cursor-zoom-in select-none group"
               onMouseMove={(e) => {
                 const rect = imageContainerRef.current?.getBoundingClientRect()
                 if (!rect) return
-                const x = ((e.clientX - rect.left) / rect.width) * 100
-                const y = ((e.clientY - rect.top) / rect.height) * 100
+                const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+                const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100))
                 setMousePos({ x, y })
               }}
               onMouseEnter={() => setIsHoveringImage(true)}
@@ -378,24 +408,24 @@ export default function ProductDetailPage({
               <WatchImage
                 src={activeImage || watch.image}
                 alt={watch.name}
-                className="max-h-[88%] max-w-[88%] object-contain transition-transform duration-500 ease-out"
-                style={{ transform: isHoveringImage ? 'scale(1.06)' : 'scale(1)' }}
+                className="max-h-[88%] max-w-[88%] object-contain transition-transform duration-500 ease-out pointer-events-none"
+                style={{ transform: isHoveringImage ? 'scale(1.04)' : 'scale(1)' }}
               />
 
               {/* Magnifier lens — follows cursor */}
               {isHoveringImage && (
                 <div
-                  className="pointer-events-none absolute z-20 rounded-full border-2 border-gold/60 shadow-[0_0_0_1px_rgba(212,175,55,0.2),0_8px_32px_rgba(0,0,0,0.8)] overflow-hidden"
+                  className="pointer-events-none absolute z-20 rounded-full border-2 border-gold/70 shadow-[0_0_0_2px_rgba(212,175,55,0.25),0_12px_36px_rgba(0,0,0,0.9)] overflow-hidden"
                   style={{
-                    width: 140,
-                    height: 140,
-                    left: `calc(${mousePos.x}% - 70px)`,
-                    top: `calc(${mousePos.y}% - 70px)`,
+                    width: 150,
+                    height: 150,
+                    left: `calc(${mousePos.x}% - 75px)`,
+                    top: `calc(${mousePos.y}% - 75px)`,
                     backgroundImage: `url(${activeImage || watch.image})`,
-                    backgroundSize: '400%',
+                    backgroundSize: '350%',
                     backgroundPosition: `${mousePos.x}% ${mousePos.y}%`,
                     backgroundRepeat: 'no-repeat',
-                    backdropFilter: 'brightness(1.15)',
+                    backgroundColor: '#0d0d0f',
                   }}
                 />
               )}
@@ -409,7 +439,7 @@ export default function ProductDetailPage({
 
               {/* Hint label */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 pointer-events-none">
-                <span className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest bg-black/80 border border-gold/40 text-gold px-3 py-1.5 rounded-full shadow-[0_0_12px_rgba(212,175,55,0.15)]">
+                <span className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest bg-black/85 border border-gold/40 text-gold px-3.5 py-1.5 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.2)]">
                   {isHoveringImage ? (
                     <><span>🔍</span> {translate("Click to expand", currentLang)}</>
                   ) : (
@@ -425,8 +455,12 @@ export default function ProductDetailPage({
                 {watch.images.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setActiveImage(img)}
-                    className={`w-20 h-20 rounded-xl border p-2 bg-[#0d0d0f] flex items-center justify-center transition-all duration-300 shrink-0 hover:scale-105 ${
+                    type="button"
+                    onClick={() => {
+                      setActiveImage(img)
+                      setLightboxIndex(idx)
+                    }}
+                    className={`w-20 h-20 rounded-xl border p-2 bg-[#0d0d0f] flex items-center justify-center transition-all duration-300 shrink-0 hover:scale-105 cursor-pointer ${
                       (activeImage || watch.image) === img
                         ? 'border-gold shadow-md shadow-gold/25'
                         : 'border-white/5 hover:border-gold/30'
@@ -435,7 +469,7 @@ export default function ProductDetailPage({
                     <WatchImage
                       src={img}
                       alt={`${watch.name} view ${idx + 1}`}
-                      className="max-h-full max-w-full object-contain rounded-lg"
+                      className="max-h-full max-w-full object-contain rounded-lg pointer-events-none"
                     />
                   </button>
                 ))}
@@ -443,81 +477,6 @@ export default function ProductDetailPage({
             )}
 
           </div>
-
-          {/* ── FULLSCREEN LIGHTBOX ── */}
-          {lightboxOpen && (() => {
-            const imgs = watch.images && watch.images.length > 0 ? watch.images : [watch.image]
-            const current = imgs[lightboxIndex] || watch.image
-            return (
-              <div
-                role="dialog"
-                aria-modal="true"
-                className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-                onClick={() => setLightboxOpen(false)}
-              >
-                {/* Close button */}
-                <button
-                  aria-label="Close"
-                  className="absolute top-6 right-6 w-11 h-11 rounded-full border border-white/20 bg-white/5 hover:bg-gold hover:text-black flex items-center justify-center text-white text-xl transition-all duration-200 z-20"
-                  onClick={() => setLightboxOpen(false)}
-                >✕</button>
-
-                {/* Prev arrow */}
-                {imgs.length > 1 && (
-                  <button
-                    aria-label="Previous"
-                    className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-20"
-                    onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + imgs.length) % imgs.length) }}
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
-                )}
-
-                {/* Main lightbox image */}
-                <div
-                  className="max-w-[85vw] max-h-[85vh] flex items-center justify-center relative z-10"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <WatchImage
-                    src={current}
-                    alt={watch.name}
-                    className="max-w-full max-h-[85vh] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)] rounded-xl"
-                  />
-                </div>
-
-                {/* Next arrow */}
-                {imgs.length > 1 && (
-                  <button
-                    aria-label="Next"
-                    className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-20"
-                    onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % imgs.length) }}
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
-                )}
-
-                {/* Dot indicators */}
-                {imgs.length > 1 && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                    {imgs.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={(e) => { e.stopPropagation(); setLightboxIndex(i) }}
-                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                          i === lightboxIndex ? 'bg-gold w-5' : 'bg-white/30 hover:bg-white/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Image counter */}
-                <div className="absolute bottom-6 right-6 text-xs font-mono text-gray-400 z-20">
-                  {lightboxIndex + 1} / {imgs.length}
-                </div>
-              </div>
-            )
-          })()}
 
           {/* RIGHT COLUMN: Luxury Dossier Sheets */}
           <div className="lg:col-span-6 xl:col-span-7 space-y-8">
@@ -865,6 +824,101 @@ export default function ProductDetailPage({
         )}
 
       </div>
+
+      {/* ── FULLSCREEN LIGHTBOX (Rendered in Portal to prevent CSS transform trap) ── */}
+      {lightboxOpen && createPortal(
+        (() => {
+          const imgs = watch.images && watch.images.length > 0 ? watch.images : [watch.image]
+          const current = imgs[lightboxIndex] || watch.image
+          return (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={watch.name}
+              className="fixed inset-0 z-[999999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 select-none w-screen h-screen"
+              onClick={() => setLightboxOpen(false)}
+            >
+              {/* Close button */}
+              <button
+                type="button"
+                aria-label="Close"
+                className="absolute top-6 right-6 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:text-black flex items-center justify-center text-white text-2xl transition-all duration-200 z-50 cursor-pointer shadow-xl hover:scale-105"
+                onClick={() => setLightboxOpen(false)}
+              >
+                ✕
+              </button>
+
+              {/* Prev arrow */}
+              {imgs.length > 1 && (
+                <button
+                  type="button"
+                  aria-label="Previous image"
+                  className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-50 cursor-pointer shadow-xl hover:scale-110"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxIndex((lightboxIndex - 1 + imgs.length) % imgs.length)
+                  }}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+              )}
+
+              {/* Main lightbox image container */}
+              <div
+                className="w-full h-full max-w-5xl max-h-[85vh] flex items-center justify-center relative z-20 pointer-events-none"
+              >
+                <WatchImage
+                  src={current}
+                  alt={watch.name}
+                  className="max-w-full max-h-[80vh] w-auto h-auto object-contain drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] pointer-events-auto rounded-xl animate-[fadeInScale_0.2s_ease-out]"
+                />
+              </div>
+
+              {/* Next arrow */}
+              {imgs.length > 1 && (
+                <button
+                  type="button"
+                  aria-label="Next image"
+                  className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-50 cursor-pointer shadow-xl hover:scale-110"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxIndex((lightboxIndex + 1) % imgs.length)
+                  }}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
+
+              {/* Dot indicators & Counter */}
+              {imgs.length > 1 && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-50 bg-black/80 px-4 py-2 rounded-full border border-white/10 backdrop-blur-sm shadow-xl">
+                  {imgs.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`View image ${i + 1}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLightboxIndex(i)
+                      }}
+                      className={`transition-all duration-200 rounded-full cursor-pointer ${
+                        i === lightboxIndex
+                          ? 'bg-gold w-6 h-2.5 shadow-[0_0_8px_rgba(212,175,55,0.6)]'
+                          : 'bg-white/40 hover:bg-white/80 w-2.5 h-2.5'
+                      }`}
+                    />
+                  ))}
+                  <span className="text-xs font-mono text-gray-300 ml-2 border-l border-white/20 pl-3">
+                    {lightboxIndex + 1} / {imgs.length}
+                  </span>
+                </div>
+              )}
+            </div>
+          )
+        })(),
+        document.body
+      )}
+
     </div>
   )
 }

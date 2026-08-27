@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router'
 import { 
   Crown, 
@@ -288,12 +289,12 @@ export default function WatchesPage() {
           </div>
         </div>
 
-        {mobileFiltersOpen && (
+        {mobileFiltersOpen && createPortal(
           <div
             role="dialog"
             aria-modal="true"
             aria-label={translate("Filter by Brand", currentLang)}
-            className={`fixed inset-0 z-50 flex bg-black/80 backdrop-blur-sm md:hidden ${
+            className={`fixed inset-0 z-[999999] flex bg-black/80 backdrop-blur-sm md:hidden ${
               currentLang === 'ar' ? 'justify-start' : 'justify-end'
             }`}
             onClick={() => setMobileFiltersOpen(false)}
@@ -342,41 +343,44 @@ export default function WatchesPage() {
                   </select>
                 </label>
 
-                <label className="block space-y-2">
-                  <span className="block text-[10px] uppercase tracking-[0.18em] text-gold font-mono">
-                    {translate("Model", currentLang)}
-                  </span>
-                  <select
-                    aria-label={translate("Model", currentLang)}
-                    value={selectedModel}
-                    disabled={selectedBrand === 'ALL BRANDS' || !brandModels[selectedBrand]}
-                    onChange={(event) => {
-                      setSelectedModel(event.target.value)
-                      setPage(1)
-                    }}
-                    className="w-full rounded-xl border border-white/10 bg-[#151518] px-4 py-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-40 focus:border-gold font-mono"
-                  >
-                    <option value="">{translate('ALL', currentLang)}</option>
-                    {(brandModels[selectedBrand] || []).map((model) => (
-                      <option key={model} value={model}>{model}</option>
-                    ))}
-                  </select>
-                </label>
+                {selectedBrand && selectedBrand !== 'ALL BRANDS' && brandModels[selectedBrand] && brandModels[selectedBrand].length > 0 && (
+                  <label className="block space-y-2">
+                    <span className="block text-[10px] uppercase tracking-[0.18em] text-gold font-mono">
+                      {translate("Model / Series", currentLang)}
+                    </span>
+                    <select
+                      aria-label={translate("Model / Series", currentLang)}
+                      value={selectedModel}
+                      onChange={(event) => {
+                        setSelectedModel(event.target.value)
+                        setPage(1)
+                      }}
+                      className="w-full rounded-xl border border-white/10 bg-[#151518] px-4 py-3 text-sm text-white outline-none focus:border-gold font-mono"
+                    >
+                      <option value="">{translate('All Models', currentLang)}</option>
+                      {brandModels[selectedBrand].map((model) => (
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
 
                 <div className="space-y-2">
                   <span className="block text-[10px] uppercase tracking-[0.18em] text-gold font-mono">
-                    {translate("Collection", currentLang)}
+                    {translate("Audience", currentLang)}
                   </span>
-                  <div className="grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-1">
+                  <div className="grid grid-cols-3 gap-2">
                     {(['ALL', 'Mens', 'Womens'] as const).map((audience) => (
                       <button
-                        type="button"
                         key={audience}
+                        type="button"
                         onClick={() => {
                           setSelectedAudience(audience)
                           setPage(1)
                         }}
-                        className={`min-w-0 rounded-lg px-2 py-2.5 text-[10px] uppercase transition font-mono ${
+                        className={`rounded-xl border border-white/10 px-3 py-2.5 text-center text-xs font-mono transition-all duration-200 ${
                           selectedAudience === audience
                             ? 'bg-gold text-black font-bold'
                             : 'text-gray-400 hover:text-white'
@@ -415,7 +419,8 @@ export default function WatchesPage() {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* Sticky Filters Panel */}
