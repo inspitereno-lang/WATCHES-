@@ -188,18 +188,18 @@ export default function NewArrivals({
 
           <div className="relative z-20 space-y-4">
             <span className="font-mono text-[9px] tracking-[0.35em] text-[#e8c264] bg-[#e8c264]/10 border border-[#e8c264]/20 px-2.5 py-1 rounded-full uppercase">
-              Spotlight
+              {translate('Spotlight', currentLang)}
             </span>
             <h3 className="font-display text-2xl xl:text-3xl font-light tracking-tight text-white leading-tight mt-2">
-              {newArrivalsTitle}
+              {translate(newArrivalsTitle, currentLang)}
               <br />
-              <span className="text-[#e8c264] font-bold font-display">& {craftsmanshipTitle}</span>
+              <span className="text-[#e8c264] font-bold font-display">{currentLang === 'ar' ? 'و ' : '& '}{translate(craftsmanshipTitle, currentLang)}</span>
             </h3>
           </div>
 
           <div className="relative z-20 pt-8 border-t border-white/5 mt-auto">
             <p className="font-body text-xs text-silver tracking-widest leading-relaxed">
-              Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.
+              {translate("Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.", currentLang)}
             </p>
           </div>
         </div>

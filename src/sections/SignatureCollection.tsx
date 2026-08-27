@@ -94,12 +94,18 @@ export default function SignatureCollection({
   const [selectedModel, setSelectedModel] = useState('')
   const [showMoreBrands, setShowMoreBrands] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [brandModels, setBrandModels] = useState<Record<string, string[]>>(BRAND_MODELS)
+
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
+  const eyebrow = translate(catalogueEyebrow, currentLang)
+  const heading1 = translate(catalogueHeading1, currentLang)
+  const heading2 = translate(catalogueHeading2, currentLang)
+  const description = translate(catalogueDescription, currentLang)
+
   // Dynamic categories
   const [brands, setBrands] = useState<string[]>(['ALL BRANDS', ...PRIMARY_BRANDS, ...OTHER_BRANDS])
-  const [brandModels, setBrandModels] = useState<Record<string, string[]>>(BRAND_MODELS)
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -454,15 +460,15 @@ export default function SignatureCollection({
         {/* Section Header */}
         <div className="text-center mb-12 lg:mb-20">
           <p className="sig-label font-body text-xs tracking-[0.3em] text-gold mb-4 uppercase">
-            {catalogueEyebrow}
+            {eyebrow}
           </p>
           <h2 className="sig-heading font-display text-4xl sm:text-5xl lg:text-6xl text-white leading-[0.95] font-light">
-            {catalogueHeading1}
+            {heading1}
             <br />
-            <span className="text-gold font-bold">{catalogueHeading2}</span>
+            <span className="text-gold font-bold">{heading2}</span>
           </h2>
           <p className="sig-sub font-body text-xs text-silver mt-6 tracking-widest max-w-lg mx-auto leading-relaxed">
-            {catalogueDescription}
+            {description}
           </p>
         </div>
 

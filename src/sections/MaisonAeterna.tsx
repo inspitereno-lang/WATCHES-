@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { translate } from '../utils/translate'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -26,6 +27,15 @@ export default function MaisonAeterna({
   heritageCaptionText = 'Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision',
 }: MaisonAeternaProps) {
   const sectionRef = useRef<HTMLElement>(null)
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
+
+  const heading1 = translate(heritageHeading1, currentLang)
+  const heading2 = translate(heritageHeading2, currentLang)
+  const desc1 = translate(heritageDesc1, currentLang)
+  const desc2 = translate(heritageDesc2, currentLang)
+  const desc3 = translate(heritageDesc3, currentLang)
+  const captionLabel = translate(heritageCaptionLabel, currentLang)
+  const captionText = translate(heritageCaptionText, currentLang)
 
   useEffect(() => {
     const section = sectionRef.current
@@ -106,20 +116,20 @@ export default function MaisonAeterna({
         <div className="relative flex flex-col items-center gap-10 lg:flex-row lg:gap-14">
           <div className="lg:w-[50%]">
             <h2 className="maison-heading font-display text-[clamp(3.5rem,5.5vw,5.75rem)] uppercase leading-[0.86] text-white">
-              {heritageHeading1}
+              {heading1}
               <br />
-              <span className="font-bold text-gold">{heritageHeading2}</span>
+              <span className="font-bold text-gold">{heading2}</span>
             </h2>
 
             <div className="mt-8 max-w-2xl space-y-5">
               <p className="maison-text font-body text-sm leading-7 text-white/55 sm:text-[15px]">
-                {heritageDesc1}
+                {desc1}
               </p>
               <p className="maison-text font-body text-sm leading-7 text-white/55 sm:text-[15px]">
-                {heritageDesc2}
+                {desc2}
               </p>
               <p className="maison-text font-body text-sm leading-7 text-white/55 sm:text-[15px]">
-                {heritageDesc3}
+                {desc3}
               </p>
             </div>
           </div>
@@ -128,16 +138,16 @@ export default function MaisonAeterna({
             <div className="maison-image relative overflow-hidden rounded-[1.25rem] border border-gold/15 bg-black">
               <img
                 src={heritageImage}
-                alt={heritageCaptionText}
+                alt={captionText}
                 className="h-auto max-h-[430px] w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6">
                 <p className="font-body text-xs font-bold uppercase tracking-[0.34em] text-gold">
-                  {heritageCaptionLabel}
+                  {captionLabel}
                 </p>
                 <p className="mt-2 font-body text-sm leading-relaxed text-white/75">
-                  {heritageCaptionText}
+                  {captionText}
                 </p>
               </div>
             </div>

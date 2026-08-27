@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, BookOpen, CalendarDays, Clock, Loader2 } from 'lucide-react'
 import { Link } from 'react-router'
 import Seo from '../components/Seo'
+import { translate } from '../utils/translate'
 import type { BlogPost } from '../types/blog'
 
 export default function BlogPage() {
-  const isArabic = (localStorage.getItem('t24_lang') || 'en') === 'ar'
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const isArabic = currentLang === 'ar'
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('All')
@@ -59,7 +61,7 @@ export default function BlogPage() {
         <div className="relative mx-auto max-w-7xl px-6 py-20 text-center lg:px-12 lg:py-28">
           <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-[#e8c264]/25 bg-[#e8c264]/5 px-4 py-2 font-body text-[9px] uppercase tracking-[0.24em] text-[#e8c264]">
             <BookOpen size={14} />
-            T24 Editorial
+            {translate('T24 Editorial', currentLang)}
           </div>
           <h1 className="font-display text-4xl font-light sm:text-6xl lg:text-7xl">
             {isArabic ? (
@@ -74,9 +76,9 @@ export default function BlogPage() {
               : 'In-depth reference guides, movement explainers, style advice, and practical watch-care knowledge for collectors in Dubai.'}
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-x-8 gap-y-3 font-body text-[9px] uppercase tracking-[0.18em] text-white/40">
-            <span>{posts.length || 6} detailed guides</span>
-            <span>Independent education</span>
-            <span>Updated weekly</span>
+            <span>{posts.length || 6} {translate('detailed guides', currentLang)}</span>
+            <span>{translate('Independent education', currentLang)}</span>
+            <span>{translate('Updated weekly', currentLang)}</span>
           </div>
         </div>
       </section>
@@ -93,7 +95,7 @@ export default function BlogPage() {
                   : 'border-white/10 bg-white/[0.02] text-white/50 hover:border-[#e8c264]/40 hover:text-white'
               }`}
             >
-              {category}
+              {translate(category, currentLang)}
             </button>
           ))}
         </div>
@@ -111,35 +113,37 @@ export default function BlogPage() {
               <div className="relative aspect-[16/10] overflow-hidden bg-[#111] lg:aspect-auto lg:min-h-[24rem]">
                 <img
                   src={featured.heroImage}
-                  alt={featured.title}
+                  alt={translate(featured.title, currentLang)}
                   className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent lg:bg-gradient-to-r" />
               </div>
-                <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-12">
+              <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-12">
                 <p className="font-body text-[9px] font-semibold uppercase tracking-[0.22em] text-[#e8c264]">
-                  Featured · {featured.category}
+                  {isArabic ? 'مميز · ' : 'Featured · '}{translate(featured.category, currentLang)}
                 </p>
                 <h2 className="mt-5 font-display text-3xl leading-tight text-white sm:text-4xl">
-                  {featured.title}
+                  {translate(featured.title, currentLang)}
                 </h2>
-                <p className="mt-5 font-body text-sm leading-7 text-white/55">{featured.excerpt}</p>
+                <p className="mt-5 font-body text-sm leading-7 text-white/55">
+                  {translate(featured.excerpt, currentLang)}
+                </p>
                 <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-4 font-body text-[9px] uppercase tracking-[0.14em] text-white/40">
                     <span className="inline-flex items-center gap-2">
                       <Clock size={13} />
-                      {featured.readingMinutes} min read
+                      {featured.readingMinutes} {translate('min read', currentLang)}
                     </span>
                     <span className="inline-flex items-center gap-2">
                       <CalendarDays size={13} />
-                      {new Date(featured.publishedAt).toLocaleDateString('ar-AE', {
+                      {new Date(featured.publishedAt).toLocaleDateString(isArabic ? 'ar-AE' : 'en-US', {
                         day: 'numeric',
                         month: 'short',
                       })}
                     </span>
                   </div>
                   <span className="inline-flex items-center gap-2 font-body text-[9px] font-semibold uppercase tracking-[0.16em] text-[#e8c264]">
-                    Read article
+                    {translate('Read article', currentLang)}
                     <ArrowRight size={14} className={isArabic ? 'rotate-180' : ''} />
                   </span>
                 </div>
@@ -156,19 +160,23 @@ export default function BlogPage() {
                   <div className="relative aspect-[4/3] overflow-hidden bg-[#111]">
                     <img
                       src={post.heroImage}
-                      alt={post.title}
+                      alt={translate(post.title, currentLang)}
                       className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
                   </div>
                   <div className="p-6">
                     <p className="font-body text-[9px] uppercase tracking-[0.18em] text-[#e8c264]">
-                      {post.category}
+                      {translate(post.category, currentLang)}
                     </p>
-                    <h2 className="mt-3 font-display text-2xl leading-tight text-white">{post.title}</h2>
-                    <p className="mt-4 line-clamp-3 font-body text-xs leading-6 text-white/50">{post.excerpt}</p>
+                    <h2 className="mt-3 font-display text-2xl leading-tight text-white">
+                      {translate(post.title, currentLang)}
+                    </h2>
+                    <p className="mt-4 line-clamp-3 font-body text-xs leading-6 text-white/50">
+                      {translate(post.excerpt, currentLang)}
+                    </p>
                     <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 font-body text-[9px] uppercase tracking-[0.14em] text-white/40">
-                      <span>{post.readingMinutes} min · {post.author}</span>
+                      <span>{post.readingMinutes} {translate('min', currentLang)} · {translate(post.author, currentLang)}</span>
                       <span className="text-[#e8c264]">{isArabic ? 'اقرأ المزيد ←' : 'Read more →'}</span>
                     </div>
                   </div>
@@ -178,10 +186,11 @@ export default function BlogPage() {
           </>
         ) : (
           <div className="rounded-2xl border border-white/10 py-20 text-center font-body text-sm text-white/45">
-            No journal articles are available.
+            {translate('No journal articles are available.', currentLang)}
           </div>
         )}
       </main>
     </div>
   )
 }
+

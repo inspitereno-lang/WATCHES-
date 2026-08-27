@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { translateUiText } from '../utils/translate'
 
-const TRANSLATABLE_ATTRIBUTES = ['placeholder', 'title', 'aria-label'] as const
+const TRANSLATABLE_ATTRIBUTES = ['placeholder', 'title', 'aria-label', 'alt'] as const
 const runtimeTranslations = new Map<string, string>()
 const pendingRuntimeText = new Set<string>()
 let runtimeTimer: number | undefined
@@ -10,7 +10,6 @@ let runtimeTimer: number | undefined
 function shouldTranslateAtRuntime(value: string) {
   const text = value.trim()
   return (
-    window.location.pathname.startsWith('/admin') &&
     /[A-Za-z]{2}/.test(text) &&
     !/^https?:\/\//i.test(text) &&
     !/^[A-Z0-9._/+:-]{1,12}$/.test(text)
@@ -30,12 +29,14 @@ function queueRuntimeTranslation(value: string) {
       const response = await fetch('/api/translate/batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texts, to: 'ar' }),
+        body: JSON.stringify({ texts, to: 'ar', targetLang: 'ar' }),
       })
       if (!response.ok) return
       const data = await response.json() as { translations?: Record<string, string> }
       Object.entries(data.translations || {}).forEach(([source, translated]) => {
-        runtimeTranslations.set(source, translated)
+        if (translated && translated !== source) {
+          runtimeTranslations.set(source, translated)
+        }
       })
       localizeElement(document.body, 'ar')
     } catch {
@@ -55,12 +56,18 @@ function localizeElement(root: ParentNode, language: string) {
     if (node.parentElement?.closest('script, style, code, pre, [data-no-translate]')) return
     const original = node.nodeValue || ''
     const trimmed = original.trim()
+    if (!trimmed) return
+
     const runtime = runtimeTranslations.get(trimmed)
     const localized = runtime
       ? original.replace(trimmed, runtime)
       : translateUiText(original, language)
-    if (localized !== node.nodeValue) node.nodeValue = localized
-    else queueRuntimeTranslation(original)
+
+    if (localized !== node.nodeValue) {
+      node.nodeValue = localized
+    } else {
+      queueRuntimeTranslation(original)
+    }
   })
 
   const elements =
@@ -70,9 +77,13 @@ function localizeElement(root: ParentNode, language: string) {
     TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
       const value = element.getAttribute(attribute)
       if (!value) return
-      const localized = runtimeTranslations.get(value.trim()) || translateUiText(value, language)
-      if (localized !== value) element.setAttribute(attribute, localized)
-      else queueRuntimeTranslation(value)
+      const trimmed = value.trim()
+      const localized = runtimeTranslations.get(trimmed) || translateUiText(value, language)
+      if (localized !== value) {
+        element.setAttribute(attribute, localized)
+      } else {
+        queueRuntimeTranslation(value)
+      }
     })
   })
 }
@@ -96,7 +107,10 @@ export default function ArabicLocalizer() {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
     document.body.classList.toggle('is-arabic', language === 'ar')
 
-    if (language === 'ar') localizeElement(document.body, language)
+    if (language === 'ar') {
+      localizeElement(document.body, language)
+    }
+
     requestAnimationFrame(() => {
       document.documentElement.classList.remove('language-booting')
     })
@@ -114,6 +128,7 @@ export default function ArabicLocalizer() {
         })
       })
     })
+
     observer.observe(document.body, { childList: true, subtree: true, characterData: true })
     return () => {
       observer.disconnect()

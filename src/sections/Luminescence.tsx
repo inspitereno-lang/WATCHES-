@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { translate } from '../utils/translate'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -20,6 +21,12 @@ export default function Luminescence({
   lumeImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp',
 }: LuminescenceProps) {
   const sectionRef = useRef<HTMLElement>(null)
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
+
+  const heading1 = translate(lumeHeading1, currentLang)
+  const heading2 = translate(lumeHeading2, currentLang)
+  const subhead = translate(lumeSubhead, currentLang)
+  const body = translate(lumeBody, currentLang)
 
   useEffect(() => {
     const section = sectionRef.current
@@ -113,17 +120,17 @@ export default function Luminescence({
         <div className="relative z-10 flex flex-col items-center gap-12 lg:flex-row lg:gap-20">
           <div className="lg:w-1/2">
             <h2 className="lume-heading font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl text-white leading-[0.95] mb-8 uppercase font-light">
-              {lumeHeading1}
+              {heading1}
               <br />
-              <span className="font-bold text-[#e8c264]">{lumeHeading2}</span>
+              <span className="font-bold text-[#e8c264]">{heading2}</span>
             </h2>
 
             <h3 className="lume-subhead font-body text-xl lg:text-2xl tracking-[0.1em] text-gold mb-6 uppercase">
-              {lumeSubhead}
+              {subhead}
             </h3>
 
             <p className="lume-body font-body text-sm text-silver leading-relaxed max-w-md font-light">
-              {lumeBody}
+              {body}
             </p>
           </div>
 

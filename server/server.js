@@ -270,6 +270,50 @@ const withAudience = (product) => {
 
 const translationCache = new Map();
 const STATIC_AR_TRANSLATIONS = new Map([
+  // Hero translations
+  ['SWISS | PRECISION', 'الدقة | السويسرية'],
+  ['SWISS PRECISION', 'الدقة السويسرية'],
+  ['SWISS', 'سويسري'],
+  ['PRECISION', 'الدقة'],
+  ['SUPER CLONE WATCHES DUBAI', 'ساعات سوبر كلون دبي'],
+  ['SUPER CLONE WATCHES IN DUBAI', 'ساعات سوبر كلون في دبي'],
+  ['Best replica watches in Dubai. Master copy watches & clone watches.', 'أفضل الساعات الماستر كوبي في دبي. ساعات طبق الأصل وساعات كلون.'],
+  ['BEST REPLICA WATCHES IN DUBAI. MASTER COPY WATCHES & CLONE WATCHES.', 'أفضل الساعات الماستر كوبي في دبي. ساعات طبق الأصل وساعات كلون.'],
+  ["Dubai's ultimate boutique for 1:1 super clone watches. Hand-calibrated with flawless sweep movements, premium Oystersteel, and sapphire crystals. Cash on delivery available.", "بوتيك دبي الرائد لساعات السوبر كلون ١:١. معايرة يدوياً بحركات انسيابية متقنة، وفولاذ أويسترستيل الفاخر، وزجاج السافير. الدفع عند الاستلام متوفر."],
+  ['VIEW COLLECTION', 'عرض المجموعة'],
+  ['SWISS 1:1 BUILD', 'صناعة سويسرية ١:١'],
+  ['DUBAI EDITION', 'إصدار دبي'],
+  ['PREMIUM OYSTERSTEEL', 'فولاذ أويسترستيل فاخر'],
+  ['1:1 BUILD', 'صناعة ١:١'],
+  ['FREE', 'مجانًا'],
+  ['Same-day delivery', 'توصيل في نفس اليوم'],
+  ['2 YR', 'سنتين'],
+  ['Service warranty', 'ضمان الخدمة'],
+  ['COD', 'الدفع عند الاستلام'],
+  ['Multiple payments', 'طرق دفع متعددة'],
+
+  // Architecture of Time
+  ['ARCHITECTURE', 'هندسة'],
+  ['OF TIME', 'الوقت'],
+  ['ARCHITECTURE OF TIME', 'هندسة الوقت'],
+  ['CASE, DIAL, MOVEMENT', 'العلبة، الميناء، الحركة'],
+  ['CASE', 'العلبة'],
+  ['DIAL', 'الميناء'],
+  ['MOVEMENT', 'الحركة'],
+  ['Discover the best copy watches and super clone watches in Dubai, crafted with replica-watch detailing, refined case architecture, exposed movement depth, and polished gold finishing for collectors seeking premium replica watches in Dubai.', 'اكتشف أفضل الساعات الماستر كوبي وساعات السوبر كلون في دبي، المصنوعة بتفاصيل دقيقة، وهيكل علبة راقٍ، وعمق حركة مكشوف، وتشطيبات ذهبية مصقولة لهواة الساعات الفاخرة في دبي.'],
+  ['Discover the ultimate collection of superclone watches and superclone watches in Dubai. At T24, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.', 'اكتشف المجموعة النهائية من ساعات السوبر كلون وساعات السوبر كلون في دبي. في تي ٢٤، نقدم أفضل ساعات السوبر كلون التي شهدتها دبي على الإطلاق، والمصممة بتفاصيل ساعات تقليدية ١:١، وهيكل علبة راقٍ، وعمق حركة ميكانيكي مكشوف، وتشطيب ذهبي مصقول. نحن المصدر الرائد لهواة جمع الساعات الباحثين عن ساعات تقليدية ممتاز في دبي وساعات دبي التقليدية ذات الوزن الأصلي والمعايرة بالكامل لدقة الارتداء اليومي.'],
+  ['At T24 Watches, the engineering of our master copy timepieces represents the ultimate synthesis of form and function. Discover the finest selection of superclone watches and premium superclone watches in Dubai, meticulously crafted to replicate original luxury standards. As the premier destination for superclone watches Dubai collectors trust, each watch features a 1:1 case architecture, scratch-resistant sapphire glass, and a fully calibrated clone movement. For those seeking the highest quality replica watches in Dubai, our collection delivers identical luxury weights and detailed hand-finishing, making us the benchmark for Dubai replica watches and premium copy watches.', 'في تي 24 للساعات، تمثل هندسة ساعاتنا الماستر كوبي التكامل الأمثل بين الشكل والأداء. اكتشف أرقى تشكيلة من ساعات السوبر كلون وساعات السوبر كلون في دبي، المصممة بدقة لتحاكي المعايير الفاخرة الأصلية. بصفتنا الوجهة الأولى لساعات السوبر كلون التي يثق بها هواة الجمع في دبي، تتميز كل ساعة بهيكل علبة ١:١، وزجاج سافير مقاوم للخدش، وحركة كلون معايرة بالكامل لدقة الاستخدام اليومي.'],
+
+  // Atelier (Maison Aeterna)
+  ['T24', 'تي 24'],
+  ['ATELIER', 'المشغل'],
+  ['At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.', 'في تي ٢٤ للساعات، نقدم أفضل الساعات التقليدية في دبي. يتخصص مشغل الساعات المخصص لدينا في اختيار ومعايرة وضبط ساعات السوبر كلون ١:١ التي يفضلها جامعو الساعات في دبي. كل ساعة سوبر كلون في دبي نقوم بتسليمها يدويًا مصممة باستخدام توزيع وزن متطابق وحركات مسح سويسرية خالية من العيوب.'],
+  ['As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.', 'بصفتنا مصدرًا رئيسيًا لساعات الكوبي في دبي، يتخصص صانعو الساعات لدينا في ضبط وإعادة معايرة حركات الفيرست كوبي. من التفكيك إلى التشحيم، يتم تحسين كل ساعة لتكرار عمليات المسح الانسيابية ومعدلات التكتكة ومتانة الماركات الفاخرة الأصلية.'],
+  ['From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.', 'من تكوينات دايتونا إلى إصدارات ألياف الكربون NTPT المعقدة، نحن نمثل قمة ساعات الماستر كوبي التي تقدمها دبي. نحن نستخدم فولاذ 904L الراقي المقاوم للتآكل، وزجاج السافير، والأساور الثقيلة لضمان تميز مجموعة الساعات الكلون في دبي.'],
+  ['FROM THE EYES OF THE ARTISAN', 'من منظور الحرفي'],
+  ['Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision', 'تخضع كل ساعة مخصصة من تي ٢٤ للمعايرة واختبار الضغط لضمان الدقة اليومية الموثوقة'],
+
+  // Blog Posts
   ['Buying Guides', 'أدلة الشراء'],
   ['Reference Guides', 'أدلة المراجع'],
   ['Watch Care', 'العناية بالساعات'],
@@ -277,6 +321,20 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['Style Guides', 'أدلة الأناقة'],
   ['Collector Guides', 'أدلة هواة الجمع'],
   ['T24 Editorial', 'تحرير تي 24'],
+  ['How to Choose a Premium Replica Watch in Dubai', 'كيف تختار ساعة ماستر كوبي فاخرة في دبي'],
+  ['A complete quality-control guide covering the reference, movement, dial, crystal, case finishing, bracelet feel, fit, delivery, and after-sales support.', 'دليل شامل لمراقبة الجودة يغطي الرقم المرجعي، الحركة، الميناء، الزجاج، تشطيب العلبة، ملمس السوار، المقاس، التوصيل، وخدمة ما بعد البيع.'],
+  ['The Architecture of a 1:1 Clone Movement', 'هندسة حركة الساعات الكلون ١:١'],
+  ['An engineering explainer detailing how modern clone calibers reproduce the balance assembly, bridge architecture, rotor winding, and beat rate of Swiss movements.', 'شرح هندسي يوضح كيف تحاكي عيارات الكلون الحديثة مجمع التوازن، وهيكل الجسور، وتعبئة الدوار، ومعدل النبض للحركات السويسرية.'],
+  ['Rolex Daytona Reference Guide: Selecting the Right Dial and Caliber', 'دليل مرجع رولكس دايتونا: اختيار الميناء والعيار المناسبين'],
+  ['Explore the differences between steel, ceramic, Oysterflex, and precious-metal Daytona references with buying advice for collectors in Dubai.', 'استكشف الفروق بين إصدارات دايتونا المصنوعة من الفولاذ، السيراميك، أويسترفليكس، والمعادن الثمينة مع نصائح شراء لهواة الجمع في دبي.'],
+  ['Caring for High-End Replica Watches in Dubai’s Climate', 'العناية بالساعات الماستر كوبي الفاخرة في مناخ دبي'],
+  ["Caring for High-End Replica Watches in Dubai's Climate", 'العناية بالساعات الماستر كوبي الفاخرة في مناخ دبي'],
+  ['Practical ownership rules covering heat, humidity, dust exposure, magnetic fields, bracelet cleaning, and scheduled service intervals.', 'قواعد عملية للملكية تغطي الحرارة، الرطوبة، التعرض للغبار، المجالات المغناطيسية، تنظيف السوار، وجداول الصيانة الدورية.'],
+  ['Mechanical vs. Automatic vs. Quartz: A Practical Collector’s Guide', 'الميكانيكية مقابل الأوتوماتيكية مقابل الكوارتز: دليل عملي لهواة الجمع'],
+  ["Mechanical vs. Automatic vs. Quartz: A Practical Collector's Guide", 'الميكانيكية مقابل الأوتوماتيكية مقابل الكوارتز: دليل عملي لهواة الجمع'],
+  ['Understand the mechanical heart of luxury timepieces, how automatic rotors function, and why sweep movements remain the collector standard.', 'افهم القلب الميكانيكي للساعات الفاخرة، وكيف تعمل الدوارات الأوتوماتيكية، ولماذا تظل حركات المسح الانسيابية معيار هواة الجمع.'],
+  ['The Essential 3-Watch Replica Collection for Every Occasion', 'المجموعة الأساسية المكونة من 3 ساعات ماستر كوبي لكل مناسبة'],
+  ['How to build a complete watch wardrobe with one daily sports piece, one formal dress reference, and one expressive weekend chronograph.', 'كيفية بناء خزانة ساعات متكاملة بساعة رياضية يومية، وساعة رسمية للمناسبات، وكرونوغراف مميز لعطلة نهاية الأسبوع.'],
   ['Begin with the exact reference', 'ابدأ بالرقم المرجعي الدقيق'],
   ['Inspect the dial and crystal', 'افحص الميناء والزجاج'],
   ['Test the movement and controls', 'اختبر الحركة وعناصر التحكم'],
@@ -314,15 +372,18 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['1:1 Flyback Chrono Master Copy', 'كرونوغراف فلايباك ماستر كوبي ١:١'],
   ['Automatic Swiss Clone', 'ساعة كلون سويسرية أوتوماتيكية'],
   ['Swiss QC Standards Guaranteed', 'معايير الجودة السويسرية مضمونة'],
-  ['Same-day delivery', 'توصيل في نفس اليوم'],
-  ['Service warranty', 'ضمان الخدمة'],
-  ['Multiple payments', 'دفعات متعددة'],
-  ['At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.', 'في تي ٢٤ للساعات، نقدم أفضل الساعات التقليدية في دبي. يتخصص مشغل الساعات المخصص لدينا في اختيار ومعايرة وضبط ساعات السوبر كلون ١:١ التي يفضلها جامعو الساعات في دبي. كل ساعة سوبر كلون في دبي نقوم بتسليمها يدويًا مصممة باستخدام توزيع وزن متطابق وحركات مسح سويسرية خالية من العيوب.'],
-  ['As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.', 'بصفتنا مصدرًا رئيسيًا لساعات الكوبي في دبي، يتخصص صانعو الساعات لدينا في ضبط وإعادة معايرة حركات الفيرست كوبي. من التفكيك إلى التشحيم، يتم تحسين كل ساعة لتكرار عمليات المسح الانسيابية ومعدلات التكتكة ومتانة الماركات الفاخرة الأصلية.'],
-  ['From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.', 'من تكوينات دايتونا إلى إصدارات ألياف الكربون NTPT المعقدة، نحن نمثل قمة ساعات الماستر كوبي التي تقدمها دبي. نحن نستخدم فولاذ 904L الراقي المقاوم للتآكل، وزجاج السافير، والأساور الثقيلة لضمان تميز مجموعة الساعات الكلون في دبي.'],
-  ['FROM THE EYES OF THE ARTISAN', 'من منظور الحرفي'],
-  ['Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision', 'تخضع كل ساعة مخصصة من تي ٢٤ للمعايرة واختبار الضغط لضمان الدقة اليومية الموثوقة'],
-  ['Discover the ultimate collection of superclone watches and superclone watches in Dubai. At T24, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.', 'اكتشف المجموعة النهائية من ساعات السوبر كلون وساعات السوبر كلون في دبي. في تي ٢٤، نقدم أفضل ساعات السوبر كلون التي شهدتها دبي على الإطلاق، والمصممة بتفاصيل ساعات تقليدية ١:١، وهيكل علبة راقٍ، وعمق حركة ميكانيكي مكشوف، وتشطيب ذهبي مصقول. نحن المصدر الرائد لهواة جمع الساعات الباحثين عن ساعات تقليدية ممتاز في دبي وساعات دبي التقليدية ذات الوزن الأصلي والمعايرة بالكامل لدقة الارتداء اليومي.'],
+  ['SWISS QC STANDARDS GUARANTEED', 'معايير الجودة السويسرية مضمونة'],
+  ['NEW ARRIVALS', 'وصل حديثاً'],
+  ['EXQUISITE CRAFTSMANSHIP', 'حرفية استثنائية'],
+  ['BEST SELLER', 'الأكثر مبيعًا'],
+  ['NEW ARRIVAL', 'وصل حديثًا'],
+  ['EXQUISITE', 'استثنائي'],
+  ['CRAFTSMANSHIP', 'الحرفية'],
+  ['Spotlight', 'تحت الضوء'],
+  ['THE SIGNATURE', 'التشكيلة المميزة'],
+  ['CATALOGUE', 'الكتالوج'],
+  ['CURATED WATCH DIRECTORY', 'دليل الساعات المختار'],
+  ['Refined timepieces selected for balanced weight, smooth movement, and daily-wear precision.', 'ساعات راقية مختارة بوزن متوازن وحركة انسيابية ودقة للاستخدام اليومي.'],
 ]);
 
 async function translateText(text, to = 'ar') {
@@ -330,8 +391,10 @@ async function translateText(text, to = 'ar') {
   if (text.startsWith('http://') || text.startsWith('https://') || text.startsWith('/') || text.includes('/upload/')) {
     return text;
   }
-  if (to === 'ar' && STATIC_AR_TRANSLATIONS.has(text)) {
-    return STATIC_AR_TRANSLATIONS.get(text);
+  const trimmed = text.trim();
+  if (to === 'ar') {
+    if (STATIC_AR_TRANSLATIONS.has(text)) return STATIC_AR_TRANSLATIONS.get(text);
+    if (STATIC_AR_TRANSLATIONS.has(trimmed)) return STATIC_AR_TRANSLATIONS.get(trimmed);
   }
   const cacheKey = `${to}:${text}`;
   if (translationCache.has(cacheKey)) {

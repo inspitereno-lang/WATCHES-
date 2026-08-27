@@ -83,18 +83,21 @@ export default function Hero({
   }, [slideshowImages.length])
 
   const heroData = {
-    title: heroTitle,
-    subtitleLabel: heroSubtitleLabel,
-    subtitleDesc: heroSubtitleDesc,
-    bodyDescription: heroBodyDescription,
-    ctaLabel: heroCtaLabel,
+    title: translate(heroTitle, currentLang),
+    subtitleLabel: translate(heroSubtitleLabel, currentLang),
+    subtitleDesc: translate(heroSubtitleDesc, currentLang),
+    bodyDescription: translate(heroBodyDescription, currentLang),
+    ctaLabel: translate(heroCtaLabel, currentLang),
     ctaTarget: heroCtaTarget,
     watchImageUrl: heroWatchImageUrl,
-    watchLabelLine1: heroWatchLabelLine1,
-    watchLabelLine2: heroWatchLabelLine2,
-    watchLabelLine3: heroWatchLabelLine3,
-    watchLabelLine4: heroWatchLabelLine4,
-    stats: heroStats,
+    watchLabelLine1: translate(heroWatchLabelLine1, currentLang),
+    watchLabelLine2: translate(heroWatchLabelLine2, currentLang),
+    watchLabelLine3: translate(heroWatchLabelLine3, currentLang),
+    watchLabelLine4: translate(heroWatchLabelLine4, currentLang),
+    stats: (heroStats || []).map((s) => ({
+      value: translate(s.value, currentLang),
+      label: translate(s.label, currentLang),
+    })),
   }
 
   useLayoutEffect(() => {
