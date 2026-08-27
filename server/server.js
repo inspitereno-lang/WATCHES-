@@ -426,6 +426,63 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['WHITE GLOVE DELIVERY', 'توصيل فاخر وفوري'],
   ['SAME-DAY FREE DELIVERY IN DUBAI & UAE', 'توصيل مجاني بنفس اليوم في دبي والإمارات'],
   ['Direct hand-delivery across Dubai, Abu Dhabi, Sharjah, and all Emirates with zero advance payment.', 'توصيل يدوي مباشر في دبي وأبوظبي والشارقة وجميع الإمارات دون أي دفع مسبق.'],
+
+  // Testimonials
+  ['Fahad Al-Mansoori', 'فهد المنصوري'],
+  ['Dubai Marina, UAE', 'دبي مارينا، الإمارات'],
+  ['Watch Collector', 'هاوي جمع الساعات'],
+  ['Rolex Daytona Panda', 'رولكس دايتونا باندا'],
+  ['ROLEX DAYTONA PANDA', 'رولكس دايتونا باندا'],
+  ['Absolutely mind-blowing. I own a genuine Datejust, but I wanted a Daytona for daily wear without the risk. The weight, bezel luster, and mechanical chronograph sweep are identical. Hand-delivered in Dubai within 4 hours!', 'أمر مذهل للغاية. أمتلك ساعة ديت جست أصلية، لكنني أردت دايتونا للاستخدام اليومي دون قلق. الوزن، ولمعان الإطار، وحركة الكرونوغراف الميكانيكية متطابقة تماماً. تم التوصيل اليدوي في دبي خلال 4 ساعات!'],
+  ['Absolutely mind-blowing. I own a genuine Datejust, but I wanted a Daytona for daily wear without the risk. The weight, bezel luster, and mechanical chronograph sweep are identical. Hand-delivered in Dubai within 4 hours', 'أمر مذهل للغاية. أمتلك ساعة ديت جست أصلية، لكنني أردت دايتونا للاستخدام اليومي دون قلق. الوزن، ولمعان الإطار، وحركة الكرونوغراف الميكانيكية متطابقة تماماً. تم التوصيل اليدوي في دبي خلال 4 ساعات!'],
+
+  ['Lucas Sterling', 'لوكاس ستيرلينغ'],
+  ['London, UK', 'لندن، المملكة المتحدة'],
+  ['Finance Director', 'مدير مالي'],
+  ['Patek Philippe Nautilus 5711', 'باتيك فيليب نوتيلوس 5711'],
+  ['PATEK PHILIPPE NAUTILUS 5711', 'باتيك فيليب نوتيلوس 5711'],
+  ['I was skeptical about the 8.3mm thickness, but the proportions are excellent. It fits beautifully on wrist. The blue-grey gradient dial shifts beautifully in direct light. Direct WhatsApp ordering was fast and smooth.', 'كنت متشككًا بشأن سُمك 8.3 مم، لكن الأبعاد ممتازة وتستقر على المعصم بانسيابية. الميناء المتدرج باللون الأزرق والرمادي يتغير بروعة تحت الضوء المباشر. الطلب عبر واتساب كان سريعاً وسلساً.'],
+
+  ['Sarah Jenkins', 'سارة جنكينز'],
+  ['Los Angeles, USA', 'لوس أنجلوس، الولايات المتحدة'],
+  ['Creative Director', 'مديرة إبداعية'],
+  ['Rolex Datejust 41 Wimbledon', 'رولكس ديت جست 41 ويمبلدون'],
+  ['ROLEX DATEJUST 41 WIMBLEDON', 'رولكس ديت جست 41 ويمبلدون'],
+  ['The Wimbledon slate Roman dial is a masterpiece of precision. The fluted bezel catches light beautifully. Incredible premium customer service from their Dubai desk!', 'ميناء ويمبلدون الروماني باللون الرمادي تحفة فنية من الدقة. الإطار المخدد يعكس الضوء بشكل رائع. خدمة عملاء ممتازة واستثنائية من مكتبهم في دبي!'],
+  ['The Wimbledon slate Roman dial is a masterpiece of precision. The fluted bezel catches light beautifully. Incredible premium customer service from their Dubai desk', 'ميناء ويمبلدون الروماني باللون الرمادي تحفة فنية من الدقة. الإطار المخدد يعكس الضوء بشكل رائع. خدمة عملاء ممتازة واستثنائية من مكتبهم في دبي!'],
+
+  ['Khalid Bin-Fahd', 'خالد بن فهد'],
+  ['Riyadh, Saudi Arabia', 'الرياض، المملكة العربية السعودية'],
+  ['Business Owner', 'رائد أعمال'],
+  ['Audemars Piguet Royal Oak 15500', 'أوديمار بيجيه رويال أوك 15500'],
+  ['AUDEMARS PIGUET ROYAL OAK 15500', 'أوديمار بيجيه رويال أوك 15500'],
+  ['Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%!', 'حرفية لا تُصدق في سوار الفولاذ المقاوم للصدأ المصقول. الوصلات تنزلق بسلاسة دون أي احتكاك وتعكس الضوء بجمال. توصيل سريع إلى الرياض. أنصح بها 100%!'],
+  ['Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%', 'حرفية لا تُصدق في سوار الفولاذ المقاوم للصدأ المصقول. الوصلات تنزلق بسلاسة دون أي احتكاك وتعكس الضوء بجمال. توصيل سريع إلى الرياض. أنصح بها 100%!'],
+
+  ['Jean-Pierre Moreau', 'جان بيير مورو'],
+  ['Geneva, Switzerland', 'جنيف، سويسرا'],
+  ['Horological Enthusiast', 'خبير ساعات'],
+  ['Vacheron Constantin Overseas', 'فاشيرون كونستانتين أوفرسيز'],
+  ['VACHERON CONSTANTIN OVERSEAS', 'فاشيرون كونستانتين أوفرسيز'],
+  ['Living in Geneva, I appreciate quality watchmaking. The Maltese Cross bezel finish and the quick-release steel strap mechanism work exactly like the original. Truly exceptional copy quality.', 'بإقامتي في جنيف، أقدر صناعة الساعات الراقية. تشطيب إطار صليب مالطا وآلية السوار الفولاذي سريعة الفك تعمل تماماً مثل الأصل. جودة ماستر كوبي استثنائية حقاً.'],
+
+  ['Amara Okafor', 'أمارا أوكافور'],
+  ['Lagos, Nigeria', 'لاغوس، نيجيريا'],
+  ['Art Director', 'مدير فني'],
+  ['AP Royal Oak Double Balance Wheel', 'أوديمار بيجيه رويال أوك دبل بالانس ويل'],
+  ['AP ROYAL OAK DOUBLE BALANCE WHEEL', 'أوديمار بيجيه رويال أوك دبل بالانس ويل'],
+  ['The skeleton dial is breathtaking. You can see the double balance wheels beating in perfect synchronization. The gold plating color is exceptionally rich and heavy. Exceeded all expectations!', 'الميناء المفرغ (سكلتون) يسحر الأنفاس. يمكنك رؤية عجلات التوازن المزدوجة تنبض بتزامن تام. لون الطلاء الذهبي ثري وثقيل للغاية. فاقت كل التوقعات!'],
+  ['The skeleton dial is breathtaking. You can see the double balance wheels beating in perfect synchronization. The gold plating color is exceptionally rich and heavy. Exceeded all expectations', 'الميناء المفرغ (سكلتون) يسحر الأنفاس. يمكنك رؤية عجلات التوازن المزدوجة تنبض بتزامن تام. لون الطلاء الذهبي ثري وثقيل للغاية. فاقت كل التوقعات!'],
+
+  // Specs Bar Translations
+  ['SWISS MOVEMENT 1:1', 'حركة سويسرية ١:١'],
+  ['Automatic Sweep Movement', 'حركة مسح أوتوماتيكية'],
+  ['VS3235 & Caliber 4130 Clones', 'كاليبر VS3235 و4130 كلون'],
+  ['Flawless Sweep & Chronograph', 'مسح انسيابي وكرونوغراف متقن'],
+  ['Highly Corrosion Resistant', 'مقاوم للتآكل بدرجة عالية'],
+  ['Genuine Luxury Weight', 'وزن فاخر ومطابق للأصل'],
+  ['Anti-Reflective Coating', 'طبقة مانعة للانعكاس'],
+  ['Scratch-Proof Durability', 'متانة مقاومة للخدش'],
 ]);
 
 async function translateText(text, to = 'ar') {

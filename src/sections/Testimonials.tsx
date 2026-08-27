@@ -162,9 +162,8 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
           </p>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <h2 className="test-heading font-display text-4xl sm:text-5xl lg:text-6xl text-white leading-[0.95] font-light">
-              {translate('REPUTATION IS', currentLang)}
-              <br />
-              <span className="text-gold font-bold">{translate('EVERYTHING', currentLang)}</span>
+              <span className="block">{translate('REPUTATION IS', currentLang)}</span>
+              <span className="block text-gold font-bold">{translate('EVERYTHING', currentLang)}</span>
             </h2>
             <p className="font-body text-xs text-silver tracking-widest max-w-sm lg:mb-2 leading-relaxed">
               {translate('Read verified testimonials from real watch collectors and enthusiasts who trusted our custom watch configurations.', currentLang)}
@@ -194,7 +193,7 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
 
                 {/* Quote Text */}
                 <p className="font-body text-sm text-silver leading-relaxed font-light mb-6 italic">
-                  &ldquo;{test.quote}&rdquo;
+                  &ldquo;{translate(test.quote, currentLang)}&rdquo;
                 </p>
               </div>
 
@@ -202,16 +201,16 @@ export default function Testimonials({ items }: { items?: Testimonial[] }) {
               <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
                 <div>
                   <h4 className="font-body text-sm font-semibold text-white tracking-wide">
-                    {test.name}
+                    {translate(test.name, currentLang)}
                   </h4>
                   <p className="font-body text-[10px] text-silver/60 tracking-wider">
-                    {test.location} &bull; {test.role}
+                    {translate(test.location, currentLang)} &bull; {translate(test.role, currentLang)}
                   </p>
                 </div>
                 
                 {/* Watch detail badge */}
                 <span className="bg-gold/10 text-gold font-body text-[8px] font-bold tracking-[0.1em] px-2.5 py-1 rounded uppercase">
-                  {test.watchBought}
+                  {translate(test.watchBought, currentLang)}
                 </span>
               </div>
             </div>

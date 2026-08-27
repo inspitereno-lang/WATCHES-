@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { translate } from '../utils/translate'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -11,8 +12,8 @@ interface Spec {
 
 const defaultSpecs: Spec[] = [
   {
-    title: 'SWISS MOVEMENT',
-    details: ['Automatic Sweep Movement', 'Flawless Sweep & Chronograph'],
+    title: 'SWISS MOVEMENT 1:1',
+    details: ['VS3235 & Caliber 4130 Clones', 'Flawless Sweep & Chronograph'],
   },
   {
     title: '904L OYSTERSTEEL',
@@ -26,6 +27,8 @@ const defaultSpecs: Spec[] = [
 
 export default function SpecsBar({ items }: { items?: Spec[] }) {
   const sectionRef = useRef<HTMLElement>(null)
+  const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const isRtl = currentLang === 'ar'
   const specsList = items && items.length > 0 ? items : defaultSpecs
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function SpecsBar({ items }: { items?: Spec[] }) {
             <div key={spec.title} className="flex items-center gap-8 lg:gap-0">
               <div className="spec-item text-center lg:px-12 xl:px-16">
                 <h3 className="font-body text-sm lg:text-base tracking-[0.15em] text-white mb-2">
-                  {spec.title}
+                  {translate(spec.title, currentLang)}
                 </h3>
                 <div className="space-y-0.5">
                   {spec.details && spec.details.map((detail) => (
@@ -73,7 +76,7 @@ export default function SpecsBar({ items }: { items?: Spec[] }) {
                       key={detail}
                       className="font-body text-xs text-silver"
                     >
-                      {detail}
+                      {translate(detail, currentLang)}
                     </p>
                   ))}
                 </div>
@@ -81,7 +84,7 @@ export default function SpecsBar({ items }: { items?: Spec[] }) {
 
               {index < specsList.length - 1 && (
                 <div className="hidden lg:block text-gold/50 font-body text-xl px-4 select-none">
-                  →
+                  {isRtl ? '←' : '→'}
                 </div>
               )}
 
