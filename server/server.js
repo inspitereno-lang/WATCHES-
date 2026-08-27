@@ -114,7 +114,7 @@ app.get('/api/hero', async (req, res) => {
     if (!settings) {
       settings = await Homepage.create({});
     }
-    return res.status(200).json({
+    let heroPayload = {
       title: settings.heroTitle,
       subtitleLabel: settings.heroSubtitleLabel,
       subtitleDesc: settings.heroSubtitleDesc,
@@ -127,7 +127,25 @@ app.get('/api/hero', async (req, res) => {
       watchLabelLine3: settings.heroWatchLabelLine3,
       watchLabelLine4: settings.heroWatchLabelLine4,
       stats: settings.heroStats
-    });
+    };
+    if (req.query.lang === 'ar') {
+      heroPayload.title = await translateText(heroPayload.title, 'ar');
+      heroPayload.subtitleLabel = await translateText(heroPayload.subtitleLabel, 'ar');
+      heroPayload.subtitleDesc = await translateText(heroPayload.subtitleDesc, 'ar');
+      heroPayload.bodyDescription = await translateText(heroPayload.bodyDescription, 'ar');
+      heroPayload.ctaLabel = await translateText(heroPayload.ctaLabel, 'ar');
+      heroPayload.watchLabelLine1 = await translateText(heroPayload.watchLabelLine1, 'ar');
+      heroPayload.watchLabelLine2 = await translateText(heroPayload.watchLabelLine2, 'ar');
+      heroPayload.watchLabelLine3 = await translateText(heroPayload.watchLabelLine3, 'ar');
+      heroPayload.watchLabelLine4 = await translateText(heroPayload.watchLabelLine4, 'ar');
+      if (Array.isArray(heroPayload.stats)) {
+        heroPayload.stats = await Promise.all(heroPayload.stats.map(async s => ({
+          value: await translateText(s.value, 'ar'),
+          label: await translateText(s.label, 'ar')
+        })));
+      }
+    }
+    return res.status(200).json(heroPayload);
   } catch (err) {
     console.error('GET /api/hero error:', err);
     return res.status(500).json({ error: 'Server error fetching homepage hero copy.' });
