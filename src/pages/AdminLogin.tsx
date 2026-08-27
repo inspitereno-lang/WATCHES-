@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { ShieldAlert, KeyRound, User, Loader2 } from 'lucide-react'
+import { toast } from '../components/ui/sonner'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ export default function AdminLogin() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    const toastId = toast.loading('Authorizing administrator access...')
 
     try {
       const res = await fetch('/api/admin/login', {
@@ -48,13 +50,23 @@ export default function AdminLogin() {
 
       localStorage.setItem('adminToken', data.token)
       localStorage.setItem('adminUser', JSON.stringify(data.user))
+      toast.success('Access Authorized', {
+        id: toastId,
+        description: 'Welcome back to T24 Watches Dubai CMS panel.'
+      })
       navigate('/admin')
     } catch (err: any) {
-      setError(err.message || 'Server error during login.')
+      const errorMsg = err.message || 'Server error during login.'
+      setError(errorMsg)
+      toast.error('Authentication Failed', {
+        id: toastId,
+        description: errorMsg
+      })
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div

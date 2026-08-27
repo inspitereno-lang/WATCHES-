@@ -22,6 +22,7 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import ScrollToTop from './components/ScrollToTop'
 import ArabicLocalizer from './components/ArabicLocalizer'
+import { Toaster } from './components/ui/sonner'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -104,6 +105,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      <Toaster />
       <ArabicLocalizer />
       <ScrollToTop />
       <Routes>

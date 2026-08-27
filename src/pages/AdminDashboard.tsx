@@ -9,14 +9,17 @@ import {
   Image as ImageIcon, 
   Loader2, 
   Check, 
-  AlertCircle,
   Eye,
   EyeOff,
   Sliders,
   Database,
   PlusCircle,
-  X
+  X,
+  Copy,
+  Sparkles,
+  Upload
 } from 'lucide-react'
+import { toast } from '../components/ui/sonner'
 
 // Define static lists
 
@@ -57,10 +60,6 @@ export default function AdminDashboard() {
   // Tab states
   const [activeTab, setActiveTab] = useState<'products' | 'homepage'>('products')
   const [activeSubTab, setActiveSubTab] = useState<'hero' | 'arrivals' | 'heritage' | 'atelier' | 'catalogue' | 'testimonials' | 'footer'>('hero')
-
-  // Notification states
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
 
   // Homepage Settings form state
   const [homepageForm, setHomepageForm] = useState<any>({
@@ -282,22 +281,17 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('adminToken')
     localStorage.removeItem('adminUser')
+    toast.info('Logged Out', {
+      description: 'Administrative session ended successfully.'
+    })
     navigate('/admin/login')
   }
 
-  const showToast = (type: 'success' | 'error', text: string) => {
-    if (type === 'success') {
-      setSuccessMsg(text)
-      setTimeout(() => setSuccessMsg(''), 4000)
-    } else {
-      setErrorMsg(text)
-      setTimeout(() => setErrorMsg(''), 4000)
-    }
-  }
-
   // Generic Image Upload Handler
-  const handleFieldImageUpload = async (file: File, fieldKey: string) => {
+  const handleFieldImageUpload = async (file: File, fieldKey: string, fieldLabel?: string) => {
     setUploadLoadingField(fieldKey)
+    const displayName = fieldLabel || fieldKey
+    const toastId = toast.loading(`Uploading ${displayName} to Cloudinary...`)
 
     const formData = new FormData()
     formData.append('image', file)
@@ -315,19 +309,24 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(data.error || 'Failed to upload image')
 
       setHomepageForm((prev: any) => ({ ...prev, [fieldKey]: data.url }))
-      showToast('success', 'Image uploaded successfully to Cloudinary.')
+      toast.success('Image Uploaded', {
+        id: toastId,
+        description: `${displayName} image uploaded successfully to Cloudinary.`
+      })
     } catch (err: any) {
-      showToast('error', err.message || 'Image upload failed.')
+      toast.error('Upload Failed', {
+        id: toastId,
+        description: err.message || 'Image upload failed.'
+      })
     } finally {
       setUploadLoadingField(null)
     }
   }
 
-
-
   // Product secondary gallery photo upload
   const handleGalleryPhotoUpload = async (file: File) => {
     setGalleryUploadLoading(true)
+    const toastId = toast.loading(`Uploading photo to Cloudinary...`)
     const formData = new FormData()
     formData.append('image', file)
 
@@ -345,14 +344,22 @@ export default function AdminDashboard() {
 
       setProductForm(prev => {
         const currentImages = prev.images || []
+        const nextMain = prev.image || data.url
         return {
           ...prev,
-          images: [...currentImages, data.url]
+          images: [...currentImages, data.url],
+          image: nextMain
         }
       })
-      showToast('success', 'Gallery image uploaded successfully to Cloudinary.')
+      toast.success('Gallery Photo Uploaded', {
+        id: toastId,
+        description: 'New watch photo added to gallery successfully.'
+      })
     } catch (err: any) {
-      showToast('error', err.message || 'Image upload failed.')
+      toast.error('Upload Failed', {
+        id: toastId,
+        description: err.message || 'Image upload failed.'
+      })
     } finally {
       setGalleryUploadLoading(false)
     }
@@ -362,6 +369,7 @@ export default function AdminDashboard() {
   const handleHomepageSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setHomepageLoading(true)
+    const toastId = toast.loading('Saving homepage settings...')
     try {
       const res = await fetch('/api/admin/homepage', {
         method: 'PUT',
@@ -375,9 +383,15 @@ export default function AdminDashboard() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to save copy')
 
-      showToast('success', 'Homepage content parameters updated successfully.')
+      toast.success('Homepage Updated', {
+        id: toastId,
+        description: 'All copy, hero banners, and section settings saved live.'
+      })
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to update homepage settings.')
+      toast.error('Save Failed', {
+        id: toastId,
+        description: err.message || 'Failed to update homepage settings.'
+      })
     } finally {
       setHomepageLoading(false)
     }
@@ -458,31 +472,50 @@ export default function AdminDashboard() {
 
   // Add feature tag
   const addFeature = () => {
-    if (!newFeature.trim()) return
+    const val = newFeature.trim()
+    if (!val) return
+    if (productForm.features.includes(val)) {
+      toast.warning('Tag Already Exists', {
+        description: `"${val}" is already added to specifications.`
+      })
+      return
+    }
     setProductForm(prev => ({
       ...prev,
-      features: [...prev.features, newFeature.trim()]
+      features: [...prev.features, val]
     }))
+    toast.success('Feature Added', {
+      description: `Tag "${val}" added to specifications.`
+    })
     setNewFeature('')
   }
 
   // Remove feature tag
   const removeFeature = (idx: number) => {
+    const tagName = productForm.features[idx]
     setProductForm(prev => ({
       ...prev,
       features: prev.features.filter((_, i) => i !== idx)
     }))
+    toast.info('Feature Removed', {
+      description: tagName ? `Removed "${tagName}" tag.` : 'Feature tag removed.'
+    })
   }
 
   // Save product (Create or Edit)
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!productForm.image) {
-      showToast('error', 'Please upload a product watch photo.')
+    if (!productForm.image && (!productForm.images || productForm.images.length === 0)) {
+      toast.error('Photo Required', {
+        description: 'Please upload or provide at least one watch photo before saving.'
+      })
       return
     }
 
     setProductLoading(true)
+    const toastId = toast.loading(
+      editingProduct ? 'Updating watch listing...' : 'Adding new watch listing...'
+    )
     try {
       const url = editingProduct 
         ? `/api/products/${editingProduct.id}` 
@@ -501,12 +534,23 @@ export default function AdminDashboard() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to save product')
 
-      showToast('success', editingProduct ? 'Product details updated successfully.' : 'New watch listing added successfully.')
+      toast.success(
+        editingProduct ? 'Watch Updated' : 'Watch Published',
+        {
+          id: toastId,
+          description: editingProduct 
+            ? `Specifications for ${productForm.name || 'watch'} updated successfully.` 
+            : `New listing "${productForm.name || 'watch'}" added to catalogue.`
+        }
+      )
       setIsModalOpen(false)
       fetchProducts()
       fetchCategories()
     } catch (err: any) {
-      showToast('error', err.message || 'Product save failed.')
+      toast.error('Save Failed', {
+        id: toastId,
+        description: err.message || 'Product save failed.'
+      })
     } finally {
       setProductLoading(false)
     }
@@ -514,6 +558,7 @@ export default function AdminDashboard() {
 
   // Delete product
   const handleDeleteProduct = async (id: number) => {
+    const toastId = toast.loading('Deleting watch from database catalog...')
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
@@ -525,17 +570,26 @@ export default function AdminDashboard() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Delete operation failed')
 
-      showToast('success', 'Watch deleted successfully from database catalog.')
+      toast.success('Watch Deleted', {
+        id: toastId,
+        description: 'Watch deleted successfully from database catalog.'
+      })
       setDeleteConfirmId(null)
       fetchProducts()
       fetchCategories()
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to delete watch.')
+      toast.error('Delete Failed', {
+        id: toastId,
+        description: err.message || 'Failed to delete watch.'
+      })
     }
   }
 
   const handleToggleVisibility = async (product: Watch) => {
     const nextVisibility = product.isVisible === false
+    const toastId = toast.loading(
+      nextVisibility ? 'Publishing watch to storefront...' : 'Hiding watch from storefront...'
+    )
     try {
       const res = await fetch(`/api/admin/products/${product.id}/visibility`, {
         method: 'PATCH',
@@ -553,17 +607,24 @@ export default function AdminDashboard() {
           item.id === product.id ? { ...item, isVisible: nextVisibility } : item
         )
       )
-      showToast(
-        'success',
-        nextVisibility
-          ? 'Watch is now visible on the storefront.'
-          : 'Watch has been hidden from the storefront.'
+      toast.success(
+        nextVisibility ? 'Watch Visible' : 'Watch Hidden',
+        {
+          id: toastId,
+          description: nextVisibility
+            ? `"${product.name}" is now live and visible on the storefront.`
+            : `"${product.name}" is hidden from the storefront.`
+        }
       )
       fetchCategories()
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to update storefront visibility.')
+      toast.error('Visibility Update Failed', {
+        id: toastId,
+        description: err.message || 'Failed to update storefront visibility.'
+      })
     }
   }
+
 
   if (!token) {
     return (
@@ -583,20 +644,6 @@ export default function AdminDashboard() {
       className="min-h-screen bg-[#070708] text-white flex flex-col font-sans"
     >
       
-      {/* Toast notifications */}
-      {successMsg && (
-        <div className="fixed top-6 right-6 z-50 p-4 rounded-xl bg-emerald-950/85 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-3 shadow-2xl backdrop-blur-md font-mono uppercase">
-          <Check className="w-5 h-5 shrink-0" />
-          <span>{successMsg}</span>
-        </div>
-      )}
-      {errorMsg && (
-        <div className="fixed top-6 right-6 z-50 p-4 rounded-xl bg-red-950/85 border border-red-500/30 text-red-400 text-xs flex items-center gap-3 shadow-2xl backdrop-blur-md font-mono uppercase">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
       {/* Admin header */}
       <header className="border-b border-white/5 bg-[#0e0e11] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -940,6 +987,47 @@ export default function AdminDashboard() {
                       />
                     </div>
 
+                    {/* Hero Main Banner Watch Image */}
+                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
+                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">
+                        Hero Main Banner Watch Image
+                      </h4>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div className="flex-1 w-full flex gap-2">
+                          <input
+                            type="text"
+                            value={homepageForm.heroWatchImageUrl || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, heroWatchImageUrl: e.target.value }))}
+                            placeholder="Hero banner watch image URL (Cloudinary or /watch-diver-green.jpg)..."
+                            className="flex-1 px-4 py-3 text-xs rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all font-mono text-white"
+                          />
+                          <label className="px-4 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shrink-0 select-none">
+                            {uploadLoadingField === 'heroWatchImageUrl' ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-gold" />
+                            ) : (
+                              <Upload className="w-4 h-4" />
+                            )}
+                            <span>UPLOAD BANNER</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  handleFieldImageUpload(e.target.files[0], 'heroWatchImageUrl', 'Hero Main Banner')
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {homepageForm.heroWatchImageUrl && (
+                          <div className="w-16 h-16 bg-black border border-white/10 rounded-lg p-1 flex items-center justify-center shrink-0 overflow-hidden relative">
+                            <img src={homepageForm.heroWatchImageUrl} alt="Hero Banner Preview" className="max-h-full max-w-full object-contain" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Floating labels list */}
                     <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
                       <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Hero Showcase Floating Labels</h4>
@@ -1152,36 +1240,54 @@ export default function AdminDashboard() {
                                   }}
                                   className="flex-1 px-3 py-1 text-xs rounded bg-white/[0.02] border border-white/5"
                                 />
-                                <label className="px-3 py-1.5 bg-white/5 border border-white/10 text-white text-[10px] rounded cursor-pointer select-none">
-                                  {uploadLoadingField === `newArrivals_${idx}` ? '...' : 'UPLOAD'}
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={async (e) => {
-                                      if (e.target.files && e.target.files[0]) {
-                                        setUploadLoadingField(`newArrivals_${idx}`)
-                                        const file = e.target.files[0]
-                                        const formData = new FormData()
-                                        formData.append('image', file)
-                                        try {
-                                          const res = await fetch('/api/admin/upload', {
-                                            method: 'POST',
-                                            headers: { 'Authorization': `Bearer ${token}` },
-                                            body: formData
-                                          })
-                                          const upRes = await res.json()
-                                          if (res.ok) {
-                                            const list = [...homepageForm.newArrivals]
-                                            list[idx].image = upRes.url
-                                            setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                            showToast('success', 'Arrival watch image uploaded successfully.')
+                                  <label className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] rounded cursor-pointer select-none transition-all flex items-center gap-1">
+                                    {uploadLoadingField === `newArrivals_${idx}` ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
+                                    ) : (
+                                      <Upload className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>{uploadLoadingField === `newArrivals_${idx}` ? '...' : 'UPLOAD'}</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={async (e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                          setUploadLoadingField(`newArrivals_${idx}`)
+                                          const toastId = toast.loading(`Uploading Arrival Card ${idx + 1} image...`)
+                                          const file = e.target.files[0]
+                                          const formData = new FormData()
+                                          formData.append('image', file)
+                                          try {
+                                            const res = await fetch('/api/admin/upload', {
+                                              method: 'POST',
+                                              headers: { 'Authorization': `Bearer ${token}` },
+                                              body: formData
+                                            })
+                                            const upRes = await res.json()
+                                            if (res.ok) {
+                                              const list = [...homepageForm.newArrivals]
+                                              list[idx].image = upRes.url
+                                              setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
+                                              toast.success('Arrival Photo Uploaded', {
+                                                id: toastId,
+                                                description: `Arrival Card ${idx + 1} photo updated.`
+                                              })
+                                            } else {
+                                              throw new Error(upRes.error || 'Upload failed')
+                                            }
+                                          } catch (err: any) {
+                                            toast.error('Upload Failed', {
+                                              id: toastId,
+                                              description: err.message || 'Image upload failed.'
+                                            })
+                                          } finally {
+                                            setUploadLoadingField(null)
                                           }
-                                        } catch (err) { console.error(err) } finally { setUploadLoadingField(null) }
-                                      }
-                                    }}
-                                  />
-                                </label>
+                                        }
+                                      }}
+                                    />
+                                  </label>
                               </div>
                             </div>
                           </div>
@@ -1234,8 +1340,13 @@ export default function AdminDashboard() {
                                   }}
                                   className="flex-1 px-3 py-1 text-xs rounded bg-white/[0.02] border border-white/5"
                                 />
-                                <label className="px-3 py-1.5 bg-white/5 border border-white/10 text-white text-[10px] rounded cursor-pointer select-none">
-                                  {uploadLoadingField === `craftsmanship_${idx}` ? '...' : 'UPLOAD'}
+                                <label className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] rounded cursor-pointer select-none transition-all flex items-center gap-1">
+                                  {uploadLoadingField === `craftsmanship_${idx}` ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
+                                  ) : (
+                                    <Upload className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>{uploadLoadingField === `craftsmanship_${idx}` ? '...' : 'UPLOAD'}</span>
                                   <input
                                     type="file"
                                     accept="image/*"
@@ -1243,6 +1354,7 @@ export default function AdminDashboard() {
                                     onChange={async (e) => {
                                       if (e.target.files && e.target.files[0]) {
                                         setUploadLoadingField(`craftsmanship_${idx}`)
+                                        const toastId = toast.loading(`Uploading Craftsmanship Card ${idx + 1} image...`)
                                         const file = e.target.files[0]
                                         const formData = new FormData()
                                         formData.append('image', file)
@@ -1257,13 +1369,26 @@ export default function AdminDashboard() {
                                             const list = [...homepageForm.craftsmanshipImages]
                                             list[idx].image = upRes.url
                                             setHomepageForm((prev: any) => ({ ...prev, craftsmanshipImages: list }))
-                                            showToast('success', 'Craftsmanship image uploaded successfully.')
+                                            toast.success('Craftsmanship Photo Uploaded', {
+                                              id: toastId,
+                                              description: `Craftsmanship Card ${idx + 1} photo updated.`
+                                            })
+                                          } else {
+                                            throw new Error(upRes.error || 'Upload failed')
                                           }
-                                        } catch (err) { console.error(err) } finally { setUploadLoadingField(null) }
+                                        } catch (err: any) {
+                                          toast.error('Upload Failed', {
+                                            id: toastId,
+                                            description: err.message || 'Image upload failed.'
+                                          })
+                                        } finally {
+                                          setUploadLoadingField(null)
+                                        }
                                       }
                                     }}
                                   />
                                 </label>
+
                               </div>
                             </div>
                           </div>
@@ -1507,7 +1632,7 @@ export default function AdminDashboard() {
                           type="button"
                           onClick={() => {
                             const list = [...(homepageForm.testimonials || [])]
-                            const maxId = list.reduce((max, t) => Math.max(max, t.id), 0)
+                            const maxId = list.reduce((max: number, t: any) => Math.max(max, t.id || 0), 0)
                             list.push({
                               id: maxId + 1,
                               name: 'New Collector',
@@ -1518,6 +1643,9 @@ export default function AdminDashboard() {
                               quote: 'Exceptional details and weight distribution. Truly clone configurations.'
                             })
                             setHomepageForm((prev: any) => ({ ...prev, testimonials: list }))
+                            toast.success('Testimonial Added', {
+                              description: 'New review card created. Remember to click SAVE ALL SECTIONS.'
+                            })
                           }}
                           className="px-2.5 py-1 bg-gold/10 border border-gold/20 hover:bg-gold/20 text-gold rounded font-mono text-[9px] tracking-wider transition-all duration-300 flex items-center gap-1 cursor-pointer select-none"
                         >
@@ -1534,6 +1662,9 @@ export default function AdminDashboard() {
                               onClick={() => {
                                 const list = homepageForm.testimonials.filter((_: any, tIdx: number) => tIdx !== idx)
                                 setHomepageForm((prev: any) => ({ ...prev, testimonials: list }))
+                                toast.info('Testimonial Removed', {
+                                  description: 'Review card removed from homepage list.'
+                                })
                               }}
                               className="absolute top-6 right-6 text-gray-400 hover:text-red-400 p-1.5 border border-white/10 hover:border-red-500/20 rounded-lg cursor-pointer transition-all duration-200"
                               title="Delete testimonial"
@@ -1707,8 +1838,11 @@ export default function AdminDashboard() {
                               reps.push({ name: 'New Agent', number: '', isActive: true, isFeatured: false });
                               setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
                               setExpandedReps((prev) => [...prev, reps.length - 1]);
+                              toast.success('Agent Added', {
+                                description: 'New sales representative added to WhatsApp rotation.'
+                              });
                             }}
-                            className="px-3 py-1.5 bg-gold hover:bg-gold/80 text-dark text-xs font-mono font-bold rounded uppercase tracking-wider transition-colors duration-200 self-start"
+                            className="px-3 py-1.5 bg-gold hover:bg-gold/80 text-dark text-xs font-mono font-bold rounded uppercase tracking-wider transition-colors duration-200 self-start cursor-pointer"
                           >
                             + Add Agent
                           </button>
@@ -1824,11 +1958,15 @@ export default function AdminDashboard() {
                                             const reps = homepageForm.salesReps.filter((_: any, i: number) => i !== idx);
                                             setHomepageForm((prev: any) => ({ ...prev, salesReps: reps }));
                                             setExpandedReps(prev => prev.filter(i => i !== idx).map(i => i > idx ? i - 1 : i));
+                                            toast.info('Agent Removed', {
+                                              description: 'Sales representative removed from rotation.'
+                                            });
                                           }}
-                                          className="px-3 py-1 bg-red-950/40 hover:bg-red-900 border border-red-500/30 hover:border-red-500 text-red-400 hover:text-white rounded uppercase font-bold text-[10px] tracking-wider transition-all duration-200"
+                                          className="px-3 py-1 bg-red-950/40 hover:bg-red-900 border border-red-500/30 hover:border-red-500 text-red-400 hover:text-white rounded uppercase font-bold text-[10px] tracking-wider transition-all duration-200 cursor-pointer"
                                         >
                                           Delete Agent
                                         </button>
+
                                       </div>
                                     </div>
                                   )}
@@ -2016,7 +2154,12 @@ export default function AdminDashboard() {
                         <button
                           key={category}
                           type="button"
-                          onClick={() => setProductForm(prev => ({ ...prev, audience: category }))}
+                          onClick={() => {
+                            setProductForm(prev => ({ ...prev, audience: category }))
+                            toast.info(`Audience Set: ${category}`, {
+                              description: `Watch categorized under ${category}'s luxury collection.`
+                            })
+                          }}
                           className={`px-3 py-2.5 rounded-lg text-xs font-bold tracking-wider transition-all duration-300 ${
                             productForm.audience === category
                               ? 'bg-gold text-black shadow-md shadow-gold/10'
@@ -2030,21 +2173,18 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Edition / Maker</label>
                     <input
                       type="text"
-                      required
-                      placeholder="e.g. Swiss Edition / Premium"
+                      placeholder="e.g. Clean Factory V3"
                       value={productForm.factory}
                       onChange={(e) => setProductForm(prev => ({ ...prev, factory: e.target.value }))}
                       className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Price (USD)</label>
                     <input
@@ -2056,6 +2196,7 @@ export default function AdminDashboard() {
                       className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
                     />
                   </div>
+
                   <div className="space-y-1">
                     <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Price (AED)</label>
                     <input
@@ -2072,11 +2213,11 @@ export default function AdminDashboard() {
                 {/* Watch Photos & Gallery Manager */}
                 <div className="space-y-3 p-5 rounded-2xl bg-white/[0.02] border border-white/5 font-mono sm:col-span-2">
                   <div>
-                    <h4 className="text-gold uppercase tracking-wider text-xs font-bold">
-                      Watch Photos & Gallery Manager
+                    <h4 className="text-gold uppercase tracking-wider text-xs font-bold flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5" /> Watch Photos & Gallery Manager
                     </h4>
                     <p className="text-[10px] text-gray-400 mt-1 leading-relaxed">
-                      Manage all photos for this watch. The photo marked as <span className="text-gold font-bold">Main Cover</span> will be the primary catalog cover image. Other photos will appear in the slider on the watch detail page.
+                      Manage all photos for this watch. The photo marked as <span className="text-gold font-bold">Main Cover</span> will be the primary catalog cover image & hero banner. Other photos will appear in the slider on the watch detail page.
                     </p>
                   </div>
 
@@ -2087,20 +2228,30 @@ export default function AdminDashboard() {
                       return (
                         <div 
                           key={index}
-                          className={`flex items-center gap-3 p-3 bg-black/40 border rounded-xl transition-all duration-300 ${
-                            isMain ? 'border-gold/50 shadow-[0_0_15px_rgba(217,165,32,0.1)]' : 'border-white/5'
+                          className={`flex items-center gap-3 p-3 bg-black/40 border rounded-xl transition-all duration-300 group ${
+                            isMain ? 'border-gold/60 shadow-[0_0_15px_rgba(217,165,32,0.15)] bg-gold/[0.03]' : 'border-white/5 hover:border-white/20'
                           }`}
                         >
-                          <div className="w-16 h-16 bg-black border border-white/10 rounded-lg p-1 flex items-center justify-center shrink-0 overflow-hidden relative group/item">
-                            <img src={imgUrl} className="max-h-full max-w-full object-contain" />
-                            <a 
-                              href={imgUrl} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center text-[8px] text-white transition-opacity duration-200"
-                            >
-                              VIEW FULL
-                            </a>
+                          <div 
+                            onClick={() => {
+                              if (!isMain) {
+                                setProductForm(prev => ({ ...prev, image: imgUrl }));
+                                toast.success('Main Cover Image Set', {
+                                  description: `Photo #${index + 1} is now set as the primary watch banner & catalog cover.`
+                                });
+                              }
+                            }}
+                            className={`w-16 h-16 bg-black border rounded-lg p-1 flex items-center justify-center shrink-0 overflow-hidden relative cursor-pointer ${
+                              isMain ? 'border-gold/50' : 'border-white/10 hover:border-gold/40'
+                            }`}
+                            title={isMain ? 'Currently Main Cover' : 'Click to set as Main Cover'}
+                          >
+                            <img src={imgUrl} className="max-h-full max-w-full object-contain" alt={`Photo ${index + 1}`} />
+                            {!isMain && (
+                              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[7px] text-gold font-bold uppercase transition-opacity duration-200 text-center px-1">
+                                SET MAIN
+                              </div>
+                            )}
                           </div>
                           
                           <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
@@ -2109,14 +2260,19 @@ export default function AdminDashboard() {
                                 #{index + 1}
                               </span>
                               {isMain ? (
-                                <span className="text-[9px] bg-gold/25 text-gold border border-gold/45 px-1.5 py-0.5 rounded font-black tracking-wider uppercase animate-pulse">
-                                  Main Cover
+                                <span className="text-[9px] bg-gold/25 text-gold border border-gold/45 px-1.5 py-0.5 rounded font-black tracking-wider uppercase animate-pulse flex items-center gap-1">
+                                  <Check className="w-2.5 h-2.5" /> Main Cover
                                 </span>
                               ) : (
                                 <button
                                   type="button"
-                                  onClick={() => setProductForm(prev => ({ ...prev, image: imgUrl }))}
-                                  className="text-[9px] text-gray-400 hover:text-gold border border-white/10 hover:border-gold/30 px-1.5 py-0.5 rounded transition-all duration-200 uppercase"
+                                  onClick={() => {
+                                    setProductForm(prev => ({ ...prev, image: imgUrl }));
+                                    toast.success('Main Cover Image Set', {
+                                      description: `Photo #${index + 1} is now set as the primary watch banner & catalog cover.`
+                                    });
+                                  }}
+                                  className="text-[9px] text-gray-400 hover:text-gold border border-white/10 hover:border-gold/40 hover:bg-gold/10 px-2 py-0.5 rounded transition-all duration-200 uppercase font-semibold"
                                 >
                                   Make Main
                                 </button>
@@ -2127,28 +2283,46 @@ export default function AdminDashboard() {
                             </span>
                           </div>
 
-                          <button 
-                            type="button"
-                            onClick={() => {
-                              setProductForm(prev => {
-                                const newImages = (prev.images || []).filter((_, i) => i !== index);
-                                // If we removed the main image, make the first available image the main image (or empty if none left)
-                                let nextMain = prev.image;
-                                if (prev.image === imgUrl) {
-                                  nextMain = newImages[0] || '';
-                                }
-                                return {
-                                  ...prev,
-                                  images: newImages,
-                                  image: nextMain
-                                };
-                              });
-                            }}
-                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 shrink-0"
-                            title="Remove Photo"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(imgUrl);
+                                toast.success('URL Copied', {
+                                  description: 'Photo URL copied to clipboard.'
+                                });
+                              }}
+                              className="p-2 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-all duration-200"
+                              title="Copy Image URL"
+                            >
+                              <Copy size={14} />
+                            </button>
+
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                setProductForm(prev => {
+                                  const newImages = (prev.images || []).filter((_, i) => i !== index);
+                                  let nextMain = prev.image;
+                                  if (prev.image === imgUrl) {
+                                    nextMain = newImages[0] || '';
+                                  }
+                                  return {
+                                    ...prev,
+                                    images: newImages,
+                                    image: nextMain
+                                  };
+                                });
+                                toast.info('Photo Removed', {
+                                  description: `Photo #${index + 1} removed from watch gallery.`
+                                });
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                              title="Remove Photo"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -2159,7 +2333,7 @@ export default function AdminDashboard() {
                         className="flex items-center gap-3 p-3 bg-black/40 border border-gold/50 shadow-[0_0_15px_rgba(217,165,32,0.1)] rounded-xl transition-all duration-300"
                       >
                         <div className="w-16 h-16 bg-black border border-white/10 rounded-lg p-1 flex items-center justify-center shrink-0 overflow-hidden relative group/item">
-                          <img src={productForm.image} className="max-h-full max-w-full object-contain" />
+                          <img src={productForm.image} className="max-h-full max-w-full object-contain" alt="Main Cover" />
                         </div>
                         
                         <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
@@ -2169,8 +2343,13 @@ export default function AdminDashboard() {
                             </span>
                             <button
                               type="button"
-                              onClick={() => setProductForm(prev => ({ ...prev, images: [...(prev.images || []), prev.image] }))}
-                              className="text-[9px] text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/40 px-1.5 py-0.5 rounded transition-all duration-200 uppercase"
+                              onClick={() => {
+                                setProductForm(prev => ({ ...prev, images: [...(prev.images || []), prev.image] }));
+                                toast.success('Added to Gallery', {
+                                  description: 'Main cover image added to watch gallery slider.'
+                                });
+                              }}
+                              className="text-[9px] text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 rounded transition-all duration-200 uppercase font-semibold"
                             >
                               Add to Gallery
                             </button>
@@ -2185,7 +2364,7 @@ export default function AdminDashboard() {
                     {(productForm.images || []).length === 0 && !productForm.image && (
                       <div className="sm:col-span-2 py-6 text-center border border-dashed border-white/10 rounded-xl bg-white/[0.005]">
                         <ImageIcon className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                        <p className="text-[11px] text-gray-500 italic">No watch photos uploaded yet. Upload a main photo or gallery photos below.</p>
+                        <p className="text-[11px] text-gray-500 italic">No watch photos uploaded yet. Upload a main photo or paste image links below.</p>
                       </div>
                     )}
                   </div>
@@ -2207,21 +2386,27 @@ export default function AdminDashboard() {
                               e.preventDefault();
                               const target = e.currentTarget;
                               const val = target.value.trim();
-                              if (val) {
-                                setProductForm(prev => {
-                                  const currentImages = prev.images || [];
-                                  const nextMain = prev.image || val;
-                                  if (!currentImages.includes(val)) {
-                                    return { 
-                                      ...prev, 
-                                      images: [...currentImages, val],
-                                      image: nextMain
-                                    };
-                                  }
-                                  return prev;
-                                });
-                                target.value = '';
+                              if (!val) {
+                                toast.error('Image URL Required', { description: 'Please enter an image link.' });
+                                return;
                               }
+                              if ((productForm.images || []).includes(val)) {
+                                toast.warning('Already in Gallery', { description: 'This image URL is already added.' });
+                                return;
+                              }
+                              setProductForm(prev => {
+                                const currentImages = prev.images || [];
+                                const nextMain = prev.image || val;
+                                return { 
+                                  ...prev, 
+                                  images: [...currentImages, val],
+                                  image: nextMain
+                                };
+                              });
+                              toast.success('Photo Added to Gallery', {
+                                description: 'New photo successfully linked to watch specifications.'
+                              });
+                              target.value = '';
                             }
                           }}
                         />
@@ -2231,24 +2416,30 @@ export default function AdminDashboard() {
                             const inputEl = document.getElementById('newGalleryImageUrlInput') as HTMLInputElement;
                             if (inputEl) {
                               const val = inputEl.value.trim();
-                              if (val) {
-                                setProductForm(prev => {
-                                  const currentImages = prev.images || [];
-                                  const nextMain = prev.image || val;
-                                  if (!currentImages.includes(val)) {
-                                    return { 
-                                      ...prev, 
-                                      images: [...currentImages, val],
-                                      image: nextMain
-                                    };
-                                  }
-                                  return prev;
-                                });
-                                inputEl.value = '';
+                              if (!val) {
+                                toast.error('Image URL Required', { description: 'Please enter an image link.' });
+                                return;
                               }
+                              if ((productForm.images || []).includes(val)) {
+                                toast.warning('Already in Gallery', { description: 'This image URL is already added.' });
+                                return;
+                              }
+                              setProductForm(prev => {
+                                const currentImages = prev.images || [];
+                                const nextMain = prev.image || val;
+                                return { 
+                                  ...prev, 
+                                  images: [...currentImages, val],
+                                  image: nextMain
+                                };
+                              });
+                              toast.success('Photo Added to Gallery', {
+                                description: 'New photo successfully linked to watch specifications.'
+                              });
+                              inputEl.value = '';
                             }
                           }}
-                          className="px-4 bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center"
+                          className="px-5 bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center cursor-pointer"
                         >
                           ADD
                         </button>
@@ -2258,7 +2449,7 @@ export default function AdminDashboard() {
                         {galleryUploadLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-gold" />
                         ) : (
-                          <ImageIcon className="w-4 h-4 text-gold" />
+                          <Upload className="w-4 h-4 text-gold" />
                         )}
                         <span>UPLOAD NEW PHOTO</span>
                         <input
