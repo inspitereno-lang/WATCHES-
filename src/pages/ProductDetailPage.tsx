@@ -403,7 +403,7 @@ export default function ProductDetailPage({
               {/* Brand badges */}
               <div className="absolute top-5 left-5 flex flex-wrap gap-2 z-10 pointer-events-none">
                 <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-black bg-gold rounded-full font-mono uppercase shadow-lg">
-                  {watch.brand}
+                  {displayBrand}
                 </span>
               </div>
 
@@ -411,9 +411,9 @@ export default function ProductDetailPage({
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 pointer-events-none">
                 <span className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest bg-black/80 border border-gold/40 text-gold px-3 py-1.5 rounded-full shadow-[0_0_12px_rgba(212,175,55,0.15)]">
                   {isHoveringImage ? (
-                    <><span>🔍</span> Click to expand</>
+                    <><span>🔍</span> {translate("Click to expand", currentLang)}</>
                   ) : (
-                    <><span>✦</span> Hover to zoom &nbsp;·&nbsp; Click to expand</>
+                    <><span>✦</span> {translate("Hover to zoom · Click to expand", currentLang)}</>
                   )}
                 </span>
               </div>
@@ -450,19 +450,23 @@ export default function ProductDetailPage({
             const current = imgs[lightboxIndex] || watch.image
             return (
               <div
-                className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+                role="dialog"
+                aria-modal="true"
+                className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
                 onClick={() => setLightboxOpen(false)}
               >
                 {/* Close button */}
                 <button
-                  className="absolute top-6 right-6 w-11 h-11 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 flex items-center justify-center text-white text-xl transition-all duration-200 z-10"
+                  aria-label="Close"
+                  className="absolute top-6 right-6 w-11 h-11 rounded-full border border-white/20 bg-white/5 hover:bg-gold hover:text-black flex items-center justify-center text-white text-xl transition-all duration-200 z-20"
                   onClick={() => setLightboxOpen(false)}
                 >✕</button>
 
                 {/* Prev arrow */}
                 {imgs.length > 1 && (
                   <button
-                    className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-white/5 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-10"
+                    aria-label="Previous"
+                    className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-20"
                     onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + imgs.length) % imgs.length) }}
                   >
                     <ChevronLeft className="w-6 h-6" />
@@ -471,21 +475,21 @@ export default function ProductDetailPage({
 
                 {/* Main lightbox image */}
                 <div
-                  className="max-w-[85vw] max-h-[85vh] flex items-center justify-center"
+                  className="max-w-[85vw] max-h-[85vh] flex items-center justify-center relative z-10"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <img
+                  <WatchImage
                     src={current}
                     alt={watch.name}
-                    className="max-w-full max-h-[85vh] object-contain drop-shadow-2xl rounded-xl"
-                    style={{ animation: 'fadeInScale 0.25s ease-out' }}
+                    className="max-w-full max-h-[85vh] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)] rounded-xl"
                   />
                 </div>
 
                 {/* Next arrow */}
                 {imgs.length > 1 && (
                   <button
-                    className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-white/5 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-10"
+                    aria-label="Next"
+                    className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/20 bg-black/70 hover:bg-gold hover:border-gold flex items-center justify-center text-white hover:text-black transition-all duration-200 z-20"
                     onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % imgs.length) }}
                   >
                     <ChevronRight className="w-6 h-6" />
@@ -494,7 +498,7 @@ export default function ProductDetailPage({
 
                 {/* Dot indicators */}
                 {imgs.length > 1 && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                     {imgs.map((_, i) => (
                       <button
                         key={i}
@@ -508,7 +512,7 @@ export default function ProductDetailPage({
                 )}
 
                 {/* Image counter */}
-                <div className="absolute bottom-6 right-6 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-6 right-6 text-xs font-mono text-gray-400 z-20">
                   {lightboxIndex + 1} / {imgs.length}
                 </div>
               </div>

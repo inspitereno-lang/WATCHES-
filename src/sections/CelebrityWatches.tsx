@@ -225,7 +225,7 @@ export default function CelebrityWatches() {
                     {translate("Seen on", currentLang)}
                   </p>
                   <h2 className="mt-2 font-display text-4xl leading-none text-white sm:text-5xl">
-                    {match.celebrity}
+                    {translate(match.celebrity, currentLang)}
                   </h2>
                   <a
                     href={match.source}
@@ -235,7 +235,7 @@ export default function CelebrityWatches() {
                       match.captionAlign === 'right' ? 'inline-flex flex-row-reverse' : 'inline-flex'
                     }`}
                   >
-                    {translate("Editorial source · ", currentLang)}{match.sourceLabel}
+                    {translate("Editorial source · ", currentLang)}{translate(match.sourceLabel, currentLang)}
                     <ExternalLink size={10} />
                   </a>
                 </div>
@@ -243,7 +243,7 @@ export default function CelebrityWatches() {
 
               <div className="icon-product relative flex min-h-[36rem] flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_45%,rgba(212,175,55,0.13),transparent_34%),linear-gradient(145deg,#100d08_0%,#070706_70%)] p-6 sm:min-h-[40rem] sm:p-8 lg:min-h-full lg:p-10">
                 <div className="pointer-events-none absolute -right-5 top-12 font-display text-[5.5rem] leading-none text-white/[0.025] sm:text-[7.5rem] lg:text-[8.5rem]">
-                  {product?.brand || match.reference.split(' ')[0]}
+                  {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
                 </div>
                 <div className="relative z-10 flex items-start justify-between border-b border-white/10 pb-5">
                   <div>
@@ -251,7 +251,7 @@ export default function CelebrityWatches() {
                       {translate("T24 catalogue edition", currentLang)}
                     </p>
                     <p className="mt-2 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-[#e8c264]">
-                      {product?.brand || match.reference.split(' ').slice(0, 2).join(' ')}
+                      {translate(product?.brand || match.reference.split(' ').slice(0, 2).join(' '), currentLang)}
                     </p>
                   </div>
                   <span className="rounded-full border border-[#e8c264]/25 px-3 py-1.5 font-body text-[8px] uppercase tracking-[0.16em] text-[#e8c264]">
@@ -279,7 +279,7 @@ export default function CelebrityWatches() {
                     {translate("The matching watch", currentLang)}
                   </p>
                   <h3 className="mt-2 max-w-xl font-display text-2xl leading-tight text-white sm:text-3xl">
-                    {match.reference}
+                    {translate(match.reference, currentLang)}
                   </h3>
                   <div className="mt-6 flex flex-col gap-5 border-t border-white/8 pt-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>

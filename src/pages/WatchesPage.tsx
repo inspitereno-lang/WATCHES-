@@ -209,7 +209,7 @@ export default function WatchesPage() {
           {translate("The Master Collection", currentLang)}
         </div>
         <h1 className="font-display text-4xl sm:text-7xl font-extralight tracking-tight leading-none text-white uppercase">
-          THE SIGNATURE <br />
+          {translate("THE SIGNATURE", currentLang)} <br />
           <span className="text-gold font-bold font-display">{translate("CATALOGUE", currentLang)}</span>
         </h1>
         <p className="max-w-2xl mx-auto font-body text-xs sm:text-sm text-silver/70 tracking-widest leading-relaxed">
@@ -234,7 +234,7 @@ export default function WatchesPage() {
                     : 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-white hover:border-gold/30'
                 }`}
               >
-                {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : brand}
+                {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
               </button>
             )
           })}
@@ -336,7 +336,7 @@ export default function WatchesPage() {
                   >
                     {brands.map((brand) => (
                       <option key={brand} value={brand}>
-                        {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : brand}
+                        {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
                       </option>
                     ))}
                   </select>
@@ -379,7 +379,7 @@ export default function WatchesPage() {
                         className={`min-w-0 rounded-lg px-2 py-2.5 text-[10px] uppercase transition font-mono ${
                           selectedAudience === audience
                             ? 'bg-gold text-black font-bold'
-                            : 'text-gray-400'
+                            : 'text-gray-400 hover:text-white'
                         }`}
                       >
                         {translate(audience === 'ALL' ? 'ALL' : audience === 'Womens' ? 'WOMENS' : 'MENS', currentLang)}
@@ -398,26 +398,18 @@ export default function WatchesPage() {
                     onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
                     className="w-full rounded-xl border border-white/10 bg-[#151518] px-4 py-3 text-sm text-white outline-none focus:border-gold font-mono"
                   >
-                    <option value="default">{translate('ALL', currentLang)}</option>
-                    <option value="priceAsc">Price: Low to High</option>
-                    <option value="priceDesc">Price: High to Low</option>
+                    <option value="default">{translate('Default', currentLang)}</option>
+                    <option value="priceAsc">{translate("Price: Low to High", currentLang)}</option>
+                    <option value="priceDesc">{translate("Price: High to Low", currentLang)}</option>
                   </select>
                 </label>
               </div>
 
-              <div className="grid grid-cols-[auto_1fr] gap-3 border-t border-white/10 bg-[#0d0d0f] p-4">
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 text-gray-400"
-                  aria-label={translate("Reset Filters", currentLang)}
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </button>
+              <div className="border-t border-white/10 p-4">
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="rounded-xl bg-gold px-5 py-3 text-xs font-bold uppercase tracking-wider text-black font-mono"
+                  className="w-full rounded-xl bg-gold px-5 py-3 text-xs font-bold uppercase tracking-wider text-black font-mono"
                 >
                   {translate("View all watches", currentLang)}
                 </button>
@@ -455,7 +447,7 @@ export default function WatchesPage() {
                 className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/[0.02] hover:border-gold/30 text-xs font-mono flex items-center gap-2 transition-all duration-300"
               >
                 <span>{translate("Brand", currentLang)}:</span>
-                <span className="text-gold uppercase font-bold">{selectedBrand === 'ALL BRANDS' ? translate('ALL', currentLang) : selectedBrand}</span>
+                <span className="text-gold uppercase font-bold">{selectedBrand === 'ALL BRANDS' ? translate('ALL', currentLang) : translate(selectedBrand, currentLang)}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
               </button>
 
@@ -472,7 +464,7 @@ export default function WatchesPage() {
                       }}
                       className="w-full text-left px-3 py-2 text-xs font-mono hover:bg-white/[0.02] hover:text-gold rounded-lg flex items-center justify-between text-gray-300"
                     >
-                      <span>{brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : brand}</span>
+                      <span>{brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}</span>
                       {selectedBrand === brand && <Check className="w-3.5 h-3.5 text-gold" />}
                     </button>
                   ))}
@@ -565,9 +557,9 @@ export default function WatchesPage() {
                 <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                 <span>{translate("Sort By", currentLang)}:</span>
                 <span className="text-gold font-bold">
-                  {sortBy === 'default' && translate('ALL', currentLang)}
-                  {sortBy === 'priceAsc' && "Price: Low to High"}
-                  {sortBy === 'priceDesc' && "Price: High to Low"}
+                  {sortBy === 'default' && translate('Default', currentLang)}
+                  {sortBy === 'priceAsc' && translate("Price: Low to High", currentLang)}
+                  {sortBy === 'priceDesc' && translate("Price: High to Low", currentLang)}
                 </span>
               </button>
 
@@ -580,7 +572,7 @@ export default function WatchesPage() {
                     }}
                     className="w-full text-left px-3 py-2 text-xs font-mono hover:bg-white/[0.02] rounded-lg flex items-center justify-between text-gray-300"
                   >
-                    <span>Default</span>
+                    <span>{translate("Default", currentLang)}</span>
                     {sortBy === 'default' && <Check className="w-3.5 h-3.5 text-gold" />}
                   </button>
                   <button
@@ -590,7 +582,7 @@ export default function WatchesPage() {
                     }}
                     className="w-full text-left px-3 py-2 text-xs font-mono hover:bg-white/[0.02] rounded-lg flex items-center justify-between text-gray-300"
                   >
-                    <span>Price: Low to High</span>
+                    <span>{translate("Price: Low to High", currentLang)}</span>
                     {sortBy === 'priceAsc' && <Check className="w-3.5 h-3.5 text-gold" />}
                   </button>
                   <button
@@ -600,7 +592,7 @@ export default function WatchesPage() {
                     }}
                     className="w-full text-left px-3 py-2 text-xs font-mono hover:bg-white/[0.02] rounded-lg flex items-center justify-between text-gray-300"
                   >
-                    <span>Price: High to Low</span>
+                    <span>{translate("Price: High to Low", currentLang)}</span>
                     {sortBy === 'priceDesc' && <Check className="w-3.5 h-3.5 text-gold" />}
                   </button>
                 </div>
@@ -610,7 +602,7 @@ export default function WatchesPage() {
             {/* Clear Button */}
             <button 
               onClick={resetFilters}
-              title="Reset Filters"
+              title={translate("Reset Filters", currentLang)}
               className="p-2.5 rounded-xl border border-white/10 hover:border-red-500/30 hover:bg-red-500/5 text-gray-400 hover:text-red-400 transition-all duration-300"
             >
               <RotateCcw className="w-4 h-4" />
@@ -621,11 +613,11 @@ export default function WatchesPage() {
         {/* Results Info */}
         <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <p className="text-xs font-mono text-gray-400">
-            SHOWING <span className="text-gold font-bold">{processedWatches.length}</span> OF <span className="text-white font-bold">{totalCount}</span> MASTER TIMEPIECES
+            {translate("SHOWING", currentLang)} <span className="text-gold font-bold">{processedWatches.length}</span> {translate("OF", currentLang)} <span className="text-white font-bold">{totalCount}</span> {translate("MASTER TIMEPIECES", currentLang)}
           </p>
           <div className="flex max-w-full items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[9px] text-emerald-400 font-mono sm:text-[10px]">
             <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-            <span className="leading-relaxed">SWISS QC STANDARDS GUARANTEED</span>
+            <span className="leading-relaxed">{translate("SWISS QC STANDARDS GUARANTEED", currentLang)}</span>
           </div>
         </div>
 

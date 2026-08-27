@@ -1,12 +1,9 @@
 const TRANSLATIONS: Record<string, Record<string, string>> = {
   ar: {
-    // Navigation Links
     "COLLECTIONS": "المجموعات",
     "WATCHES": "الساعات",
     "TESTIMONIALS": "الشهادات",
     "BLOG": "المجلة",
-    
-    // Header & Buttons
     "WHATSAPP SUPPORT": "دعم واتساب",
     "WHATSAPP": "واتساب",
     "VIEW SPECS": "عرض المواصفات",
@@ -27,10 +24,8 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "LOCAL COURIER USP": "خدمة التوصيل المحلي المميزة",
     "FAST GLOBAL SHIPPING": "شحن عالمي سريع",
     "DHL & FEDEX EXPRESS": "دي إتش إل وفيدكس إكسبريس",
-    "DUTY-FREE GUARANTEE": "ضمان الإعفاء الجمركي",
-    "SECURE INSURED PARTNERS": "شركاء شحن مؤمنين وموثوقين",
-    
-    // Hero Section Copies & Labels
+    "DUTY-FREE GUARANTEE": "ضمان معفى من الرسوم",
+    "SECURE INSURED PARTNERS": "شركاء شحن مؤمّنون وموثوقون",
     "SWISS | PRECISION": "الدقة | السويسرية",
     "SWISS PRECISION": "الدقة السويسرية",
     "SWISS": "سويسري",
@@ -44,16 +39,12 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "PREMIUM OYSTERSTEEL": "فولاذ أويسترستيل فاخر",
     "1:1 BUILD": "صناعة ١:١",
     "SWISS 1:1 BUILD": "صناعة سويسرية ١:١",
-
-    // Hero Stats
     "FREE": "مجانًا",
     "Same-day delivery": "توصيل في نفس اليوم",
     "2 YR": "سنتين",
     "Service warranty": "ضمان الخدمة",
     "COD": "الدفع عند الاستلام",
     "Multiple payments": "طرق دفع متعددة",
-
-    // Specifications Fields (table keys)
     "Brand": "الماركة",
     "Model": "الموديل",
     "Reference": "الرقم المرجعي",
@@ -65,8 +56,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Crystal Glass": "زجاج الكريستال",
     "Water Testing": "فحص مقاومة الماء",
     "Service Warranty": "ضمان الخدمة",
-
-    // Specs Bar
     "SWISS MOVEMENT": "حركة سويسرية",
     "Automatic Caliber": "كاليبر أوتوماتيكي",
     "904L OYSTERSTEEL": "فولاذ أويسترستيل 904L",
@@ -75,8 +64,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Scratch Proof": "مقاوم للخدش",
     "WATER RESISTANT": "مقاوم للماء",
     "Pressure Tested": "مفحوص تحت الضغط",
-
-    // Architecture of Time (Luminescence) Section
     "ARCHITECTURE": "هندسة",
     "OF TIME": "الوقت",
     "ARCHITECTURE OF TIME": "هندسة الوقت",
@@ -86,8 +73,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Discover the best copy watches and super clone watches in Dubai, crafted with replica-watch detailing, refined case architecture, exposed movement depth, and polished gold finishing for collectors seeking premium replica watches in Dubai.": "اكتشف أفضل الساعات الماستر كوبي وساعات السوبر كلون في دبي، المصنوعة بتفاصيل دقيقة، وهيكل علبة راقٍ، وعمق حركة مكشوف، وتشطيبات ذهبية مصقولة لهواة الساعات الفاخرة في دبي.",
     "Discover the ultimate collection of superclone watches and superclone watches in Dubai. At T24, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.": "اكتشف المجموعة النهائية من ساعات السوبر كلون وساعات السوبر كلون في دبي. في تي ٢٤، نقدم أفضل ساعات السوبر كلون التي شهدتها دبي على الإطلاق، والمصممة بتفاصيل ساعات تقليدية ١:١، وهيكل علبة راقٍ، وعمق حركة ميكانيكي مكشوف، وتشطيب ذهبي مصقول. نحن المصدر الرائد لهواة جمع الساعات الباحثين عن ساعات تقليدية ممتازة في دبي وساعات دبي التقليدية ذات الوزن الأصلي والمعايرة بالكامل لدقة الارتداء اليومي.",
     "At T24 Watches, the engineering of our master copy timepieces represents the ultimate synthesis of form and function. Discover the finest selection of superclone watches and premium superclone watches in Dubai, meticulously crafted to replicate original luxury standards. As the premier destination for superclone watches Dubai collectors trust, each watch features a 1:1 case architecture, scratch-resistant sapphire glass, and a fully calibrated clone movement. For those seeking the highest quality replica watches in Dubai, our collection delivers identical luxury weights and detailed hand-finishing, making us the benchmark for Dubai replica watches and premium copy watches.": "في تي 24 للساعات، تمثل هندسة ساعاتنا الماستر كوبي التكامل الأمثل بين الشكل والأداء. اكتشف أرقى تشكيلة من ساعات السوبر كلون وساعات السوبر كلون في دبي، المصممة بدقة لتحاكي المعايير الفاخرة الأصلية. بصفتنا الوجهة الأولى لساعات السوبر كلون التي يثق بها هواة الجمع في دبي، تتميز كل ساعة بهيكل علبة ١:١، وزجاج سافير مقاوم للخدش، وحركة كلون معايرة بالكامل لدقة الاستخدام اليومي.",
-
-    // Maison Aeterna (Atelier) Section
     "T24": "تي 24",
     "ATELIER": "المشغل",
     "At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.": "في تي 24 للساعات، نقدم أفضل الساعات الماستر كوبي في دبي. يتخصص مشغل الساعات المخصص لدينا في اختيار ومعايرة وضبط ساعات السوبر كلون ١:١ التي يفضلها جامعو الساعات في دبي. كل ساعة سوبر كلون في دبي نقوم بتسليمها يدويًا مصممة باستخدام توزيع وزن متطابق وحركات مسح سويسرية خالية من العيوب.",
@@ -95,8 +80,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.": "من تكوينات دايتونا إلى إصدارات ألياف الكربون NTPT المعقدة، نحن نمثل قمة ساعات الماستر كوبي التي تقدمها دبي. نحن نستخدم فولاذ 904L الراقي المقاوم للتآكل، وزجاج السافير، والأساور الثقيلة لضمان تميز مجموعة الساعات الكلون في دبي.",
     "FROM THE EYES OF THE ARTISAN": "من منظور الحرفي",
     "Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision": "تخضع كل ساعة مخصصة من تي 24 للمعايرة واختبار الضغط لضمان الدقة اليومية الموثوقة",
-
-    // New Arrivals & Craftsmanship
     "NEW ARRIVALS": "وصل حديثاً",
     "EXQUISITE CRAFTSMANSHIP": "حرفية استثنائية",
     "BEST SELLER": "الأكثر مبيعًا",
@@ -109,8 +92,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "1:1 Swiss Master Copy Edition": "إصدار ماستر كوبي سويسري ١:١",
     "1:1 Master Copy Edition": "إصدار ماستر كوبي ١:١",
     "1:1 Flyback Chrono Master Copy": "كرونوغراف فلايباك ماستر كوبي ١:١",
-
-    // Home / Signature Collection Filter
     "ALL BRANDS": "جميع الماركات",
     "ALL CATEGORIES": "جميع الفئات",
     "MENS": "رجالي",
@@ -137,15 +118,13 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "In stock": "متوفر",
     "SIGNATURE TIMEPIECE": "ساعة مميزة",
     "LOAD MORE WATCHES": "تحميل المزيد من الساعات",
-    "NO WATCHES MATCHING YOUR SEARCH. PLEASE BROWSE ALL BRAND PILLS.": "لا توجد ساعات تطابق بحثك. يرجى تصفح جميع الماركات.",
-    "Select a brand to view available model variants.": "اختر ماركة لعرض موديلات الساعات المتاحة.",
-    "Suggestions by Brand": "مقترحات حسب الماركة",
-    "Suggestions by Range": "مقترحات حسب الفئة والموديل",
+    "NO WATCHES MATCHING YOUR SEARCH. PLEASE BROWSE ALL BRAND PILLS.": "لا توجد ساعات تطابق بحثك. يرجى تصفح أزرار الماركات أعلاه.",
+    "Select a brand to view available model variants.": "اختر ماركة لعرض الموديلات المتوفرة.",
+    "Suggestions by Brand": "اقتراحات حسب الماركة",
+    "Suggestions by Range": "اقتراحات حسب التشكيلة",
     "SHOWING": "عرض",
     "OF": "من",
-    "HIGH-QUALITY MODELS AVAILABLE": "من الموديلات عالية الجودة المتاحة",
-
-    // Delivery Promise
+    "HIGH-QUALITY MODELS AVAILABLE": "موديل عالي الجودة متاح",
     "WHITE GLOVE DELIVERY": "توصيل فاخر وفوري",
     "SAME-DAY FREE DELIVERY IN DUBAI & UAE": "توصيل مجاني بنفس اليوم في دبي والإمارات",
     "Direct hand-delivery across Dubai, Abu Dhabi, Sharjah, and all Emirates with zero advance payment.": "توصيل يدوي مباشر في دبي وأبوظبي والشارقة وجميع الإمارات دون أي دفع مسبق.",
@@ -169,8 +148,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Tracked shipping to Saudi Arabia, Qatar, Kuwait, Bahrain, and Oman.": "شحن قابل للتتبع إلى السعودية وقطر والكويت والبحرين وعُمان.",
     "Door-to-door international dispatch supported by our Dubai team.": "شحن دولي من الباب إلى الباب بدعم من فريقنا في دبي.",
     "Complimentary same-day delivery in Dubai, free delivery across the UAE, and secure worldwide shipping to the USA and GCC countries.": "توصيل مجاني في اليوم نفسه داخل دبي، وتوصيل مجاني في الإمارات، وشحن عالمي آمن إلى الولايات المتحدة ودول الخليج.",
-
-    // Celebrity Matches Section
     "CELEBRITY MATCHES": "ساعات المشاهير",
     "CELEBRITY": "المشاهير",
     "MATCHES": "المطابقة",
@@ -192,8 +169,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Editorial source · ": "المصدر التحريري · ",
     "T24 catalogue edition": "إصدار كتالوج تي 24",
     "Editorial watch-spotting only. Celebrity images show original references; no affiliation or endorsement of T24 Watches is implied.": "لرصد الساعات التحريرية فقط. تُظهر صور المشاهير الموديلات الأصلية؛ ولا يُقصد بها أي انتساب أو تأييد لـ T24 Watches.",
-
-    // Blog / Journal Page & Articles
     "How to Choose a Premium Replica Watch in Dubai": "كيف تختار ساعة ماستر كوبي فاخرة في دبي",
     "A complete quality-control guide covering the reference, movement, dial, crystal, case finishing, bracelet feel, fit, delivery, and after-sales support.": "دليل شامل لمراقبة الجودة يغطي الرقم المرجعي، الحركة، الميناء، الزجاج، تشطيب العلبة، ملمس السوار، المقاس، التوصيل، وخدمة ما بعد البيع.",
     "The Architecture of a 1:1 Clone Movement": "هندسة حركة الساعات الكلون ١:١",
@@ -253,20 +228,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Read article": "اقرأ المقال",
     "Read Article": "اقرأ المقال",
     "READ ARTICLE": "اقرأ المقال",
-    "Read more →": "اقرأ المزيد ←"
-    ,"No journal articles are available.": "لا توجد مقالات متاحة حاليًا."
-    ,"Article not found": "المقال غير موجود"
-    ,"Return to the journal": "العودة إلى المجلة"
-    ,"Back to journal": "العودة إلى المجلة"
-    ,"In this guide": "في هذا الدليل"
-    ,"Continue shopping": "تابع التسوق"
-    ,"Compare the references in our catalogue.": "قارن بين الموديلات في كتالوجنا."
-    ,"Explore collections →": "استكشف المجموعات ←"
-    ,"Continue exploring": "واصل الاستكشاف"
-    ,"Browse every available timepiece.": "تصفّح جميع الساعات المتاحة."
-    ,"View all watches": "عرض جميع الساعات",
-
-    // Testimonials Translations
+    "Read more →": "اقرأ المزيد ←",
     "CUSTOMER REVIEWS": "آراء العملاء",
     "REPUTATION IS": "السمعة هي",
     "EVERYTHING": "كل شيء",
@@ -278,14 +240,12 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "ROLEX DAYTONA PANDA": "رولكس دايتونا باندا",
     "Absolutely mind-blowing. I own a genuine Datejust, but I wanted a Daytona for daily wear without the risk. The weight, bezel luster, and mechanical chronograph sweep are identical. Hand-delivered in Dubai within 4 hours!": "أمر مذهل للغاية. أمتلك ساعة ديت جست أصلية، لكنني أردت دايتونا للاستخدام اليومي دون قلق. الوزن، ولمعان الإطار، وحركة الكرونوغراف الميكانيكية متطابقة تماماً. تم التوصيل اليدوي في دبي خلال 4 ساعات!",
     "Absolutely mind-blowing. I own a genuine Datejust, but I wanted a Daytona for daily wear without the risk. The weight, bezel luster, and mechanical chronograph sweep are identical. Hand-delivered in Dubai within 4 hours": "أمر مذهل للغاية. أمتلك ساعة ديت جست أصلية، لكنني أردت دايتونا للاستخدام اليومي دون قلق. الوزن، ولمعان الإطار، وحركة الكرونوغراف الميكانيكية متطابقة تماماً. تم التوصيل اليدوي في دبي خلال 4 ساعات!",
-
     "Lucas Sterling": "لوكاس ستيرلينغ",
     "London, UK": "لندن، المملكة المتحدة",
     "Finance Director": "مدير مالي",
     "Patek Philippe Nautilus 5711": "باتيك فيليب نوتيلوس 5711",
     "PATEK PHILIPPE NAUTILUS 5711": "باتيك فيليب نوتيلوس 5711",
     "I was skeptical about the 8.3mm thickness, but the proportions are excellent. It fits beautifully on wrist. The blue-grey gradient dial shifts beautifully in direct light. Direct WhatsApp ordering was fast and smooth.": "كنت متشككًا بشأن سُمك 8.3 مم، لكن الأبعاد ممتازة وتستقر على المعصم بانسيابية. الميناء المتدرج باللون الأزرق والرمادي يتغير بروعة تحت الضوء المباشر. الطلب عبر واتساب كان سريعاً وسلساً.",
-
     "Sarah Jenkins": "سارة جنكينز",
     "Los Angeles, USA": "لوس أنجلوس، الولايات المتحدة",
     "Creative Director": "مديرة إبداعية",
@@ -293,7 +253,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "ROLEX DATEJUST 41 WIMBLEDON": "رولكس ديت جست 41 ويمبلدون",
     "The Wimbledon slate Roman dial is a masterpiece of precision. The fluted bezel catches light beautifully. Incredible premium customer service from their Dubai desk!": "ميناء ويمبلدون الروماني باللون الرمادي تحفة فنية من الدقة. الإطار المخدد يعكس الضوء بشكل رائع. خدمة عملاء ممتازة واستثنائية من مكتبهم في دبي!",
     "The Wimbledon slate Roman dial is a masterpiece of precision. The fluted bezel catches light beautifully. Incredible premium customer service from their Dubai desk": "ميناء ويمبلدون الروماني باللون الرمادي تحفة فنية من الدقة. الإطار المخدد يعكس الضوء بشكل رائع. خدمة عملاء ممتازة واستثنائية من مكتبهم في دبي!",
-
     "Khalid Bin-Fahd": "خالد بن فهد",
     "Riyadh, Saudi Arabia": "الرياض، المملكة العربية السعودية",
     "Business Owner": "رائد أعمال",
@@ -301,14 +260,12 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "AUDEMARS PIGUET ROYAL OAK 15500": "أوديمار بيجيه رويال أوك 15500",
     "Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%!": "حرفية لا تُصدق في سوار الفولاذ المقاوم للصدأ المصقول. الوصلات تنزلق بسلاسة دون أي احتكاك وتعكس الضوء بجمال. توصيل سريع إلى الرياض. أنصح بها 100%!",
     "Unbelievable craftsmanship on the brushed stainless steel bracelet. The links slide smoothly without any friction, catching light beautifully. Fast courier delivery to Riyadh. Recommended 100%": "حرفية لا تُصدق في سوار الفولاذ المقاوم للصدأ المصقول. الوصلات تنزلق بسلاسة دون أي احتكاك وتعكس الضوء بجمال. توصيل سريع إلى الرياض. أنصح بها 100%!",
-
     "Jean-Pierre Moreau": "جان بيير مورو",
     "Geneva, Switzerland": "جنيف، سويسرا",
     "Horological Enthusiast": "خبير ساعات",
     "Vacheron Constantin Overseas": "فاشيرون كونستانتين أوفرسيز",
     "VACHERON CONSTANTIN OVERSEAS": "فاشيرون كونستانتين أوفرسيز",
     "Living in Geneva, I appreciate quality watchmaking. The Maltese Cross bezel finish and the quick-release steel strap mechanism work exactly like the original. Truly exceptional copy quality.": "بإقامتي في جنيف، أقدر صناعة الساعات الراقية. تشطيب إطار صليب مالطا وآلية السوار الفولاذي سريعة الفك تعمل تماماً مثل الأصل. جودة ماستر كوبي استثنائية حقاً.",
-
     "Amara Okafor": "أمارا أوكافور",
     "Lagos, Nigeria": "لاغوس، نيجيريا",
     "Art Director": "مدير فني",
@@ -316,8 +273,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "AP ROYAL OAK DOUBLE BALANCE WHEEL": "أوديمار بيجيه رويال أوك دبل بالانس ويل",
     "The skeleton dial is breathtaking. You can see the double balance wheels beating in perfect synchronization. The gold plating color is exceptionally rich and heavy. Exceeded all expectations!": "الميناء المفرغ (سكلتون) يسحر الأنفاس. يمكنك رؤية عجلات التوازن المزدوجة تنبض بتزامن تام. لون الطلاء الذهبي ثري وثقيل للغاية. فاقت كل التوقعات!",
     "The skeleton dial is breathtaking. You can see the double balance wheels beating in perfect synchronization. The gold plating color is exceptionally rich and heavy. Exceeded all expectations": "الميناء المفرغ (سكلتون) يسحر الأنفاس. يمكنك رؤية عجلات التوازن المزدوجة تنبض بتزامن تام. لون الطلاء الذهبي ثري وثقيل للغاية. فاقت كل التوقعات!",
-
-    // Specs Bar Translations
     "SWISS MOVEMENT 1:1": "حركة سويسرية ١:١",
     "Automatic Sweep Movement": "حركة مسح أوتوماتيكية",
     "VS3235 & Caliber 4130 Clones": "كاليبر VS3235 و4130 كلون",
@@ -326,8 +281,86 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Genuine Luxury Weight": "وزن فاخر ومطابق للأصل",
     "Anti-Reflective Coating": "طبقة مانعة للانعكاس",
     "Scratch-Proof Durability": "متانة مقاومة للخدش",
-
-    // Footer Translations
+    "THE MASTER COLLECTION": "المجموعة الرئيسية",
+    "The Master Collection": "المجموعة الرئيسية",
+    "The Master collection": "المجموعة الرئيسية",
+    "THE SIGNATURE": "التشكيلة المميزة",
+    "The Signature": "التشكيلة المميزة",
+    "The signature": "التشكيلة المميزة",
+    "CATALOGUE": "الكتالوج",
+    "Catalogue": "الكتالوج",
+    "Explore our comprehensive index of 1:1 luxury replica watches. Configured with genuine weights, exact dimensions, and premium materials to ensure zero distinction from local boutiques.": "استكشف فهرسنا الشامل لساعات الماستر كوبي الفاخرة ١:١. مصممة بأوزان أصلية، وأبعاد دقيقة، ومواد فائقة الجودة لضمان التطابق التام مع الساعات الأصلية.",
+    "Search by model, brand, category, or ref...": "البحث عن طريق الموديل، الماركة، الفئة، أو الطراز...",
+    "Reset Filters": "إعادة ضبط التصفية",
+    "All Brands": "جميع الماركات",
+    "All Categories": "جميع الفئات",
+    "Womens": "نسائي",
+    "Mens": "رجالي",
+    "Sort By": "الترتيب حسب",
+    "Default": "الافتراضي",
+    "Price: Low to High": "السعر: من الأقل للأعلى",
+    "Price: High to Low": "السعر: من الأعلى للأقل",
+    "Showing": "عرض",
+    "of": "من",
+    "MASTER TIMEPIECES": "ساعات ماستر كوبي",
+    "Master Timepieces": "ساعات ماستر كوبي",
+    "SWISS QC STANDARDS GUARANTEED": "معايير الجودة السويسرية مضمونة",
+    "Swiss QC Standards Guaranteed": "معايير الجودة السويسرية مضمونة",
+    "View Specs": "عرض المواصفات",
+    "Audemars Piguet": "أوديمار بيجيه",
+    "AUDEMARS PIGUET": "أوديمار بيجيه",
+    "Rolex": "رولكس",
+    "ROLEX": "رولكس",
+    "Patek Philippe": "باتيك فيليب",
+    "PATEK PHILIPPE": "باتيك فيليب",
+    "Richard Mille": "ريتشارد ميل",
+    "RICHARD MILLE": "ريتشارد ميل",
+    "Hublot": "هوبلو",
+    "HUBLOT": "هوبلو",
+    "Cartier": "كارتييه",
+    "CARTIER": "كارتييه",
+    "Vacheron Constantin": "فاشيرون كونستانتين",
+    "VACHERON CONSTANTIN": "فاشيرون كونستانتين",
+    "Breitling": "بريتلينغ",
+    "BREITLING": "بريتلينغ",
+    "Chopard": "شوبارد",
+    "CHOPARD": "شوبارد",
+    "IWC": "آي دبليو سي",
+    "Omega": "أوميغا",
+    "OMEGA": "أوميغا",
+    "TAG Heuer": "تاغ هوير",
+    "TAG HEUER": "تاغ هوير",
+    "Rafael Nadal": "رافائيل نادال",
+    "Alexander Zverev": "ألكسندر زفيريف",
+    "Lewis Hamilton": "لويس هاملتون",
+    "Lando Norris": "لاندو نوريس",
+    "Oracle Time": "أوراكل تايم",
+    "ORACLE TIME": "أوراكل تايم",
+    "Watch Paparazzi": "واتش باباراتزي",
+    "GQ": "جي كيو",
+    "Richard Mille RM 27-04 Tourbillon Rafael Nadal": "ريتشارد ميل RM 27-04 توربيون رافائيل نادال",
+    "Richard Mille RM 67-02 Alexander Zverev": "ريتشارد ميل RM 67-02 ألكسندر زفيريف",
+    "Patek Philippe Nautilus 5980/1R Rose Gold": "باتيك فيليب نوتيلوس 5980/1R ذهب وردي",
+    "Richard Mille RM 67-02 McLaren": "ريتشارد ميل RM 67-02 مكلارين",
+    "Order Securely via WhatsApp": "اطلب بأمان عبر الواتساب",
+    "Click to expand": "انقر للتكبير",
+    "Hover to zoom · Click to expand": "مرر للتكبير · انقر للتوسيع",
+    "Hover to zoom \\u00a0·\\u00a0 Click to expand": "مرر للتكبير · انقر للتوسيع",
+    "Factory": "المصنع",
+    "Case": "العلبة",
+    "Casing": "العلبة",
+    "Bezel": "الإطار",
+    "Glass": "الزجاج",
+    "Water Resistance": "مقاومة الماء",
+    "Warranty": "الضمان",
+    "Audience": "الفئة",
+    "Product Overview": "نظرة عامة على المنتج",
+    "Key Features": "الميزات الرئيسية",
+    "Back to Catalogue": "العودة إلى الكتالوج",
+    "Direct Hand-Delivery in UAE": "توصيل يدوي مباشر في الإمارات",
+    "Free Delivery in Dubai": "توصيل مجاني في دبي",
+    "2-Year Warranty Included": "ضمان سنتين مشمول",
+    "Cash on Delivery Available": "الدفع عند الاستلام متاح",
     "CONTACT US": "اتصل بنا",
     "CUSTOMER SERVICE": "خدمة العملاء",
     "CHAT VIA WHATSAPP": "الدردشة عبر الواتساب",
@@ -340,7 +373,6 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Patek Philippe Watches": "ساعات باتيك فيليب",
     "Audemars Piguet Watches": "ساعات أوديمار بيجيه",
     "Richard Mille Watches": "ساعات ريتشارد ميل",
-    "Vacheron Constantin": "فاشيرون كونستانتين",
     "Rolex 1:1 Clones": "رولكس كلون ١:١",
     "Patek Philippe Clones": "باتيك فيليب كلون ١:١",
     "Audemars Piguet Clones": "أوديمار بيجيه كلون ١:١",
@@ -361,6 +393,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Secure Packaging": "تغليف آمن",
     "Hi T24 Watches! I'm visiting your website and would like to inquire about your premium watch collection.": "مرحبًا تي 24 للساعات! أنا أزور موقعكم وأود الاستفسار عن مجموعة الساعات الفاخرة المتاحة لديكم.",
     "Hi T24 Watches! I'm visiting your website and would like to inquire about your premium 1:1 Swiss Clone watch collection.": "مرحبًا تي 24 للساعات! أنا أزور موقعكم وأود الاستفسار عن مجموعة ساعات الماستر كوبي الفاخرة.",
+
   }
 };
 
