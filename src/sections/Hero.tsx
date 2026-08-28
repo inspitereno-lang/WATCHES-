@@ -27,10 +27,11 @@ interface HeroProps {
   }>
 }
 
-const DEFAULT_HERO_VIDEOS = [
+const DEFAULT_DESKTOP_VIDEOS = [
   'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4',
   'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902117/t24_watches_videos/hero_video_orbiting_clean.mp4',
 ]
+const DEFAULT_DESKTOP_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787902113/t24_watches_videos/hero_video_transition_clean.jpg'
 
 const DEFAULT_MOBILE_VIDEO = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'
 const DEFAULT_MOBILE_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787901807/t24_watches_videos/hero_video_mobile_clean.jpg'
@@ -43,7 +44,8 @@ export default function Hero({
   heroCtaLabel = 'VIEW COLLECTION',
   heroCtaTarget = '#store',
   heroWatchImageUrl = '/watch-diver-green.jpg',
-  heroVideos = DEFAULT_HERO_VIDEOS,
+  heroVideos = DEFAULT_DESKTOP_VIDEOS,
+  heroVideoUrl,
   heroMobileVideoUrl = DEFAULT_MOBILE_VIDEO,
   heroWatchLabelLine1 = 'SWISS',
   heroWatchLabelLine2 = 'DUBAI EDITION',
@@ -66,34 +68,29 @@ export default function Hero({
   const statsRef = useRef<HTMLDivElement>(null)
   const markerRef = useRef<HTMLDivElement>(null)
 
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
+  const desktopVideoRef = useRef<HTMLVideoElement | null>(null)
   const mobileVideoRef = useRef<HTMLVideoElement | null>(null)
   const [activeVideoIdx, setActiveVideoIdx] = useState(0)
 
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
-  const videoList = heroVideos && heroVideos.length ? heroVideos : DEFAULT_HERO_VIDEOS
+  const desktopVideoList = heroVideos && heroVideos.length ? heroVideos : DEFAULT_DESKTOP_VIDEOS
+  const currentDesktopSrc = heroVideoUrl && heroVideoUrl.startsWith('http')
+    ? heroVideoUrl
+    : (desktopVideoList[activeVideoIdx] || desktopVideoList[0])
 
-  // Handle Desktop Video Sequence Switching
-  const handleVideoEnded = (idx: number) => {
-    const nextIdx = (idx + 1) % videoList.length
-    setActiveVideoIdx(nextIdx)
-    const nextVideo = videoRefs.current[nextIdx]
-    if (nextVideo) {
-      nextVideo.currentTime = 0
-      nextVideo.play().catch(() => {})
-    }
-  }
-
-  // Ensure initial video plays and handles iOS Low Power Mode autoplay restrictions
+  // Ensure initial video plays and handles autoplay restrictions
   useEffect(() => {
     const startPlayback = () => {
-      const firstVideo = videoRefs.current[0]
-      if (firstVideo) {
-        firstVideo.muted = true
-        firstVideo.playsInline = true
-        firstVideo.play().catch(() => {})
+      if (desktopVideoRef.current) {
+        const desk = desktopVideoRef.current
+        desk.muted = true
+        desk.defaultMuted = true
+        desk.playsInline = true
+        desk.setAttribute('playsinline', '')
+        desk.setAttribute('webkit-playsinline', '')
+        desk.play().catch(() => {})
       }
       if (mobileVideoRef.current) {
         const mob = mobileVideoRef.current
@@ -108,27 +105,26 @@ export default function Hero({
 
     startPlayback()
 
-    // Unlock playback on first user touch/click/scroll (vital for iOS Low Power Mode)
+    // Unlock playback on user gesture
     const unlockOnGesture = () => {
+      if (desktopVideoRef.current && desktopVideoRef.current.paused) {
+        desktopVideoRef.current.play().catch(() => {})
+      }
       if (mobileVideoRef.current && mobileVideoRef.current.paused) {
         mobileVideoRef.current.play().catch(() => {})
-      }
-      const activeDesktop = videoRefs.current[activeVideoIdx]
-      if (activeDesktop && activeDesktop.paused) {
-        activeDesktop.play().catch(() => {})
       }
     }
 
     window.addEventListener('touchstart', unlockOnGesture, { passive: true, once: true })
-    window.addEventListener('touchend', unlockOnGesture, { passive: true, once: true })
     window.addEventListener('click', unlockOnGesture, { passive: true, once: true })
     window.addEventListener('scroll', unlockOnGesture, { passive: true, once: true })
+    window.addEventListener('mousemove', unlockOnGesture, { passive: true, once: true })
 
     return () => {
       window.removeEventListener('touchstart', unlockOnGesture)
-      window.removeEventListener('touchend', unlockOnGesture)
       window.removeEventListener('click', unlockOnGesture)
       window.removeEventListener('scroll', unlockOnGesture)
+      window.removeEventListener('mousemove', unlockOnGesture)
     }
   }, [activeVideoIdx])
 
@@ -257,34 +253,46 @@ export default function Hero({
         ref={watchPanelRef}
         className="absolute inset-0 -z-20 overflow-hidden pointer-events-none"
       >
-        {/* Desktop / Tablet Sequential Clean Video Player */}
-        <div className="hidden sm:block absolute inset-0">
-          {videoList.map((src, idx) => (
-            <video
-              key={src}
-              ref={(el) => { videoRefs.current[idx] = el }}
-              src={src}
-              autoPlay={idx === 0}
-              muted
-              playsInline
-              preload="auto"
-              onEnded={() => handleVideoEnded(idx)}
-              className={`absolute inset-0 h-full w-full object-cover ${
-                isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
-              } transition-opacity duration-1000 ${
-                idx === activeVideoIdx ? 'opacity-90' : 'opacity-0 pointer-events-none'
-              } brightness-[1.10] contrast-[1.08] saturate-[1.12]`}
-            />
-          ))}
+        {/* Desktop / Tablet Clean Video Player */}
+        <div className="hidden sm:block absolute inset-0 pointer-events-none">
+          <video
+            ref={desktopVideoRef}
+            src={currentDesktopSrc}
+            poster={DEFAULT_DESKTOP_POSTER}
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            preload="auto"
+            onEnded={() => {
+              if (!heroVideoUrl || !heroVideoUrl.startsWith('http')) {
+                setActiveVideoIdx((prev) => (prev + 1) % desktopVideoList.length)
+              }
+            }}
+            onCanPlay={(e) => {
+              e.currentTarget.muted = true
+              e.currentTarget.play().catch(() => {})
+            }}
+            onLoadedData={(e) => {
+              e.currentTarget.muted = true
+              e.currentTarget.play().catch(() => {})
+            }}
+            className={`absolute inset-0 h-full w-full object-cover ${
+              isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
+            } opacity-90 brightness-[1.10] contrast-[1.08] saturate-[1.12] transition-opacity duration-700 pointer-events-none`}
+          />
 
           {/* Desktop Subtle Contrast Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050403] via-transparent to-[#050403]/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050403] via-transparent to-[#050403]/60 pointer-events-none" />
           <div
             className={`absolute inset-0 ${
               isRtl
                 ? 'bg-gradient-to-l from-[#050403]/90 via-[#050403]/60 to-transparent'
                 : 'bg-gradient-to-r from-[#050403]/90 via-[#050403]/60 to-transparent'
-            } w-[65%]` }
+            } w-[65%] pointer-events-none`}
           />
         </div>
 

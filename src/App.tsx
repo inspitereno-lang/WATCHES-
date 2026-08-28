@@ -133,8 +133,8 @@ export default function App() {
                   heroCtaLabel={homepageData?.heroCtaLabel}
                   heroCtaTarget={homepageData?.heroCtaTarget}
                   heroWatchImageUrl={homepageData?.heroWatchImageUrl}
-                  heroVideoUrl={homepageData?.heroVideoUrl || '/videos/hero-banner.mp4'}
-                  heroMobileVideoUrl={homepageData?.heroMobileVideoUrl || 'https://res.cloudinary.com/dwqxzzqpn/video/upload/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'}
+                  heroVideoUrl={homepageData?.heroVideoUrl && homepageData.heroVideoUrl.startsWith('http') ? homepageData.heroVideoUrl : 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4'}
+                  heroMobileVideoUrl={homepageData?.heroMobileVideoUrl && homepageData.heroMobileVideoUrl.startsWith('http') ? homepageData.heroMobileVideoUrl : 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'}
                   heroWatchLabelLine1={homepageData?.heroWatchLabelLine1}
                   heroWatchLabelLine2={homepageData?.heroWatchLabelLine2}
                   heroWatchLabelLine3={homepageData?.heroWatchLabelLine3}
