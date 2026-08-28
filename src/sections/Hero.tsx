@@ -175,7 +175,7 @@ export default function Hero({
       }
       if (mob && mob.paused) {
         mob.muted = true
-        mob.play().catch(() => {})
+        mob.play().then(() => setMobileVideoStarted(true)).catch(() => {})
         bothPlaying = false
       }
 
@@ -183,6 +183,8 @@ export default function Hero({
         unlocked = true
         window.removeEventListener('touchstart', unlockOnGesture)
         window.removeEventListener('touchend', unlockOnGesture)
+        window.removeEventListener('touchmove', unlockOnGesture)
+        window.removeEventListener('pointerdown', unlockOnGesture)
         window.removeEventListener('click', unlockOnGesture)
         window.removeEventListener('scroll', unlockOnGesture)
         window.removeEventListener('mousemove', unlockOnGesture)
@@ -192,6 +194,8 @@ export default function Hero({
 
     window.addEventListener('touchstart', unlockOnGesture, { passive: true })
     window.addEventListener('touchend', unlockOnGesture, { passive: true })
+    window.addEventListener('touchmove', unlockOnGesture, { passive: true })
+    window.addEventListener('pointerdown', unlockOnGesture, { passive: true })
     window.addEventListener('click', unlockOnGesture, { passive: true })
     window.addEventListener('scroll', unlockOnGesture, { passive: true })
     window.addEventListener('mousemove', unlockOnGesture, { passive: true })
@@ -200,6 +204,8 @@ export default function Hero({
     return () => {
       window.removeEventListener('touchstart', unlockOnGesture)
       window.removeEventListener('touchend', unlockOnGesture)
+      window.removeEventListener('touchmove', unlockOnGesture)
+      window.removeEventListener('pointerdown', unlockOnGesture)
       window.removeEventListener('click', unlockOnGesture)
       window.removeEventListener('scroll', unlockOnGesture)
       window.removeEventListener('mousemove', unlockOnGesture)
@@ -303,9 +309,20 @@ export default function Hero({
 
   const titleLines = (heroData.title || 'SWISS | PRECISION').split(' | ')
   const collectionTarget =
-    !heroData.ctaTarget || heroData.ctaTarget === '#store'
-      ? '/collections'
+    !heroData.ctaTarget || heroData.ctaTarget === '#store' || heroData.ctaTarget === '/collections'
+      ? '#collections'
       : heroData.ctaTarget
+
+  const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (collectionTarget.startsWith('#')) {
+      e.preventDefault()
+      const target = document.querySelector(collectionTarget)
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
+
   const displayStats = heroData.stats?.length ? heroData.stats : [
     { value: 'FREE', label: 'Same-day delivery' },
     { value: '2 YR', label: 'Service warranty' },
@@ -430,11 +447,11 @@ export default function Hero({
           />
         </div>
 
-        {/* Mobile Portrait 9:16 Video Player */}
+        {/* Mobile Portrait 9:16 Video Player with Zero Native Play Button Overlays */}
         <div
           className="block sm:hidden absolute inset-0 pointer-events-none bg-cover bg-center"
           style={{
-            backgroundImage: mobileVideoStarted ? 'none' : `url(${DEFAULT_MOBILE_POSTER})`,
+            backgroundImage: `url(${DEFAULT_MOBILE_POSTER})`,
           }}
         >
           <video
@@ -450,15 +467,21 @@ export default function Hero({
             onCanPlay={(e) => {
               const v = e.currentTarget
               v.muted = true
-              v.play().catch(() => {})
+              v.play().then(() => {
+                setMobileVideoStarted(true)
+              }).catch(() => {})
             }}
             onLoadedData={(e) => {
               const v = e.currentTarget
               v.muted = true
-              v.play().catch(() => {})
+              v.play().then(() => {
+                setMobileVideoStarted(true)
+              }).catch(() => {})
             }}
             onPlaying={() => setMobileVideoStarted(true)}
-            className="absolute inset-0 h-full w-full object-cover object-center brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none"
+            className={`absolute inset-0 h-full w-full object-cover object-center brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none transition-opacity duration-700 ${
+              mobileVideoStarted ? 'opacity-100' : 'opacity-0'
+            }`}
           >
             <source
               src="https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787901807/t24_watches_videos/hero_video_mobile_clean.webm"
@@ -529,7 +552,8 @@ export default function Hero({
             <a
               ref={ctaRef}
               href={collectionTarget}
-              className="relative z-20 group inline-flex w-fit items-center gap-3.5 sm:gap-4 rounded-full border border-[#ebcb7a]/80 bg-gradient-to-r from-[#d9a520] via-[#e8c264] to-[#ebcb7a] px-6 py-3.5 sm:px-7 sm:py-4 font-body text-xs font-bold uppercase tracking-[0.22em] text-[#090604] shadow-[0_12px_45px_rgba(217,165,32,0.45),0_0_35px_rgba(232,194,100,0.3)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_24px_90px_rgba(217,165,32,0.6),0_0_58px_rgba(235,203,122,0.4)]"
+              onClick={handleCtaClick}
+              className="relative z-20 group inline-flex w-fit items-center gap-3.5 sm:gap-4 rounded-full border border-[#ebcb7a]/80 bg-gradient-to-r from-[#d9a520] via-[#e8c264] to-[#ebcb7a] px-6 py-3.5 sm:px-7 sm:py-4 font-body text-xs font-bold uppercase tracking-[0.22em] text-[#090604] shadow-[0_12px_45px_rgba(217,165,32,0.45),0_0_35px_rgba(232,194,100,0.3)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_24px_90px_rgba(217,165,32,0.6),0_0_58px_rgba(235,203,122,0.4)] cursor-pointer"
             >
               <span>{heroData.ctaLabel}</span>
               <ArrowRight size={16} className={`transition duration-300 ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />

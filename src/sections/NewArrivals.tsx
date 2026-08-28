@@ -127,7 +127,7 @@ export default function NewArrivals({
   }
 
   return (
-    <section className="bg-black py-20 lg:py-28 px-6 lg:px-16 w-full text-white relative overflow-hidden">
+    <section id="collections" className="bg-black py-20 lg:py-28 px-6 lg:px-16 w-full text-white relative overflow-hidden">
       {/* Background ambient accents */}
       <div className="absolute right-[-10rem] top-1/4 h-[30rem] w-[30rem] rounded-full bg-[#e8c264]/[0.02] blur-[150px] pointer-events-none" />
       <div className="absolute left-[-10rem] bottom-1/4 h-[30rem] w-[30rem] rounded-full bg-silver/[0.01] blur-[150px] pointer-events-none" />
