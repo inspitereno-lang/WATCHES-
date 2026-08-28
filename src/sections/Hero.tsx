@@ -27,13 +27,7 @@ interface HeroProps {
   }>
 }
 
-const DEFAULT_DESKTOP_VIDEOS = [
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4',
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902117/t24_watches_videos/hero_video_orbiting_clean.mp4',
-]
 const DEFAULT_DESKTOP_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787902113/t24_watches_videos/hero_video_transition_clean.jpg'
-
-const DEFAULT_MOBILE_VIDEO = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'
 const DEFAULT_MOBILE_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787901807/t24_watches_videos/hero_video_mobile_clean.jpg'
 
 export default function Hero({
@@ -45,7 +39,7 @@ export default function Hero({
   heroCtaTarget = '#store',
   heroWatchImageUrl = '/watch-diver-green.jpg',
   heroVideoUrl,
-  heroMobileVideoUrl = DEFAULT_MOBILE_VIDEO,
+  heroMobileVideoUrl,
   heroWatchLabelLine1 = 'SWISS',
   heroWatchLabelLine2 = 'DUBAI EDITION',
   heroWatchLabelLine3 = 'PREMIUM OYSTERSTEEL',
@@ -309,12 +303,13 @@ export default function Hero({
         ref={watchPanelRef}
         className="absolute inset-0 -z-20 overflow-hidden pointer-events-none"
       >
-        {/* Desktop / Tablet Clean Video Player */}
-        <div className="hidden sm:block absolute inset-0 pointer-events-none">
+        {/* Desktop / Tablet Video Player */}
+        <div
+          className="hidden sm:block absolute inset-0 pointer-events-none bg-cover bg-center"
+          style={{ backgroundImage: `url(${DEFAULT_DESKTOP_POSTER})` }}
+        >
           <video
             ref={setDesktopVideoRef}
-            src={heroVideoUrl && heroVideoUrl.startsWith('http') ? heroVideoUrl : DEFAULT_DESKTOP_VIDEOS[0]}
-            poster={DEFAULT_DESKTOP_POSTER}
             autoPlay
             loop
             muted
@@ -336,7 +331,20 @@ export default function Hero({
             className={`absolute inset-0 h-full w-full object-cover ${
               isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
             } opacity-90 brightness-[1.10] contrast-[1.08] saturate-[1.12] pointer-events-none`}
-          />
+          >
+            <source
+              src={heroVideoUrl && heroVideoUrl.startsWith('http')
+                ? heroVideoUrl.replace('.mp4', '.webm').replace('vc_h264', 'vc_vp9')
+                : 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787902113/t24_watches_videos/hero_video_transition_clean.webm'}
+              type="video/webm"
+            />
+            <source
+              src={heroVideoUrl && heroVideoUrl.startsWith('http')
+                ? heroVideoUrl
+                : 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4'}
+              type="video/mp4"
+            />
+          </video>
 
           {/* Desktop Subtle Contrast Gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#050403] via-transparent to-[#050403]/60 pointer-events-none" />
@@ -349,12 +357,13 @@ export default function Hero({
           />
         </div>
 
-        {/* Mobile Portrait 9:16 Watermark-Free Video Player with Clean, Bright Visibility */}
-        <div className="block sm:hidden absolute inset-0 pointer-events-none">
+        {/* Mobile Portrait 9:16 Video Player */}
+        <div
+          className="block sm:hidden absolute inset-0 pointer-events-none bg-cover bg-center"
+          style={{ backgroundImage: `url(${DEFAULT_MOBILE_POSTER})` }}
+        >
           <video
             ref={setMobileVideoRef}
-            src={heroMobileVideoUrl || DEFAULT_MOBILE_VIDEO}
-            poster={DEFAULT_MOBILE_POSTER}
             autoPlay
             loop
             muted
@@ -374,8 +383,17 @@ export default function Hero({
               v.play().catch(() => {})
             }}
             className="absolute inset-0 h-full w-full object-cover object-center opacity-95 brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none"
-          />
-          {/* Subtle Mobile Vignettes - Keeping the Watch in the Center Clear & Luminous */}
+          >
+            <source
+              src="https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787901807/t24_watches_videos/hero_video_mobile_clean.webm"
+              type="video/webm"
+            />
+            <source
+              src={heroMobileVideoUrl || 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'}
+              type="video/mp4"
+            />
+          </video>
+          {/* Subtle Mobile Vignettes */}
           <div className="absolute top-0 inset-x-0 h-36 bg-gradient-to-b from-[#050403]/80 via-[#050403]/30 to-transparent pointer-events-none" />
           <div className="absolute bottom-0 inset-x-0 h-44 bg-gradient-to-t from-[#050403]/90 via-[#050403]/40 to-transparent pointer-events-none" />
           <div className="absolute inset-0 bg-black/20 pointer-events-none" />
