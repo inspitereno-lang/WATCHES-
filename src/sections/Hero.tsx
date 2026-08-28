@@ -71,18 +71,19 @@ export default function Hero({
   const statsRef = useRef<HTMLDivElement>(null)
   const markerRef = useRef<HTMLDivElement>(null)
 
-  const desktopVideoRef = useRef<HTMLVideoElement | null>(null)
+  const desktopVideoRef0 = useRef<HTMLVideoElement | null>(null)
+  const desktopVideoRef1 = useRef<HTMLVideoElement | null>(null)
   const mobileVideoRef = useRef<HTMLVideoElement | null>(null)
-  const [, setActiveVideoIdx] = useState(0)
+  const [activeDesktopIdx, setActiveDesktopIdx] = useState(0)
   const [desktopVideoStarted, setDesktopVideoStarted] = useState(false)
   const [mobileVideoStarted, setMobileVideoStarted] = useState(false)
 
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
-  // Ref callback for desktop video — fires when element mounts/changes
-  const setDesktopVideoRef = (el: HTMLVideoElement | null) => {
-    desktopVideoRef.current = el
+  // Ref callback for desktop video 0
+  const setDesktopVideoRef0 = (el: HTMLVideoElement | null) => {
+    desktopVideoRef0.current = el
     if (el) {
       el.muted = true
       // @ts-ignore
@@ -90,10 +91,21 @@ export default function Hero({
       el.setAttribute('muted', '')
       el.setAttribute('playsinline', '')
       el.setAttribute('webkit-playsinline', '')
-      // Small delay to let browser attach the source
       setTimeout(() => { el.play().catch(() => {}) }, 50)
       setTimeout(() => { el.play().catch(() => {}) }, 300)
-      setTimeout(() => { el.play().catch(() => {}) }, 1000)
+    }
+  }
+
+  // Ref callback for desktop video 1
+  const setDesktopVideoRef1 = (el: HTMLVideoElement | null) => {
+    desktopVideoRef1.current = el
+    if (el) {
+      el.muted = true
+      // @ts-ignore
+      el.defaultMuted = true
+      el.setAttribute('muted', '')
+      el.setAttribute('playsinline', '')
+      el.setAttribute('webkit-playsinline', '')
     }
   }
 
@@ -113,16 +125,16 @@ export default function Hero({
     }
   }
 
-  // Persistent retry: keep trying to play every 500ms until both are playing
+  // Persistent retry: keep trying to play until active video is playing
   useEffect(() => {
     const interval = setInterval(() => {
-      const desk = desktopVideoRef.current
+      const desk0 = desktopVideoRef0.current
       const mob = mobileVideoRef.current
       let allPlaying = true
 
-      if (desk && desk.paused) {
-        desk.muted = true
-        desk.play().catch(() => {})
+      if (desk0 && desk0.paused && activeDesktopIdx === 0) {
+        desk0.muted = true
+        desk0.play().catch(() => {})
         allPlaying = false
       }
       if (mob && mob.paused) {
@@ -134,27 +146,31 @@ export default function Hero({
       if (allPlaying) clearInterval(interval)
     }, 500)
 
-    // Stop retrying after 10 seconds to avoid battery drain
     const timeout = setTimeout(() => clearInterval(interval), 10000)
 
     return () => {
       clearInterval(interval)
       clearTimeout(timeout)
     }
-  }, [])
+  }, [activeDesktopIdx])
 
   // Unlock on ANY user gesture (not once — keep listening until videos play)
   useEffect(() => {
     let unlocked = false
     const unlockOnGesture = () => {
       if (unlocked) return
-      const desk = desktopVideoRef.current
+      const desk0 = desktopVideoRef0.current
+      const desk1 = desktopVideoRef1.current
       const mob = mobileVideoRef.current
       let bothPlaying = true
 
-      if (desk && desk.paused) {
-        desk.muted = true
-        desk.play().catch(() => {})
+      if (activeDesktopIdx === 0 && desk0 && desk0.paused) {
+        desk0.muted = true
+        desk0.play().catch(() => {})
+        bothPlaying = false
+      } else if (activeDesktopIdx === 1 && desk1 && desk1.paused) {
+        desk1.muted = true
+        desk1.play().catch(() => {})
         bothPlaying = false
       }
       if (mob && mob.paused) {
@@ -316,15 +332,16 @@ export default function Hero({
         ref={watchPanelRef}
         className="absolute inset-0 -z-20 overflow-hidden pointer-events-none"
       >
-        {/* Desktop / Tablet Video Player with 2-video sequence */}
+        {/* Desktop / Tablet Video Player with Dual-Buffer Seamless Cross-Fade */}
         <div
           className="hidden sm:block absolute inset-0 pointer-events-none bg-cover bg-center transition-opacity duration-700"
           style={{
             backgroundImage: desktopVideoStarted ? 'none' : `url(${DEFAULT_DESKTOP_POSTER})`,
           }}
         >
+          {/* Video 0: Transition Watch */}
           <video
-            ref={setDesktopVideoRef}
+            ref={setDesktopVideoRef0}
             autoPlay
             muted
             playsInline
@@ -335,35 +352,25 @@ export default function Hero({
             onCanPlay={(e) => {
               const v = e.currentTarget
               v.muted = true
-              v.play().catch(() => {})
+              if (activeDesktopIdx === 0) v.play().catch(() => {})
             }}
-            onLoadedData={(e) => {
-              const v = e.currentTarget
-              v.muted = true
-              v.play().catch(() => {})
+            onPlaying={() => {
+              if (activeDesktopIdx === 0) setDesktopVideoStarted(true)
             }}
-            onPlaying={() => setDesktopVideoStarted(true)}
             onEnded={() => {
-              // Switch to next video in the sequence
-              setActiveVideoIdx((prev) => {
-                const next = (prev + 1) % DESKTOP_VIDEOS_MP4.length
-                const video = desktopVideoRef.current
-                if (video) {
-                  // Check if browser supports WebM by looking at current source
-                  const canWebM = video.canPlayType('video/webm; codecs="vp9"')
-                  video.src = canWebM
-                    ? DESKTOP_VIDEOS_WEBM[next]
-                    : DESKTOP_VIDEOS_MP4[next]
-                  video.load()
-                  video.muted = true
-                  video.play().catch(() => {})
-                }
-                return next
-              })
+              const v1 = desktopVideoRef1.current
+              if (v1) {
+                v1.currentTime = 0
+                v1.muted = true
+                v1.play().catch(() => {})
+              }
+              setActiveDesktopIdx(1)
             }}
             className={`absolute inset-0 h-full w-full object-cover ${
               isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
-            } brightness-[1.10] contrast-[1.08] saturate-[1.12] pointer-events-none`}
+            } brightness-[1.10] contrast-[1.08] saturate-[1.12] transition-opacity duration-1000 ${
+              activeDesktopIdx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
           >
             <source
               src={heroVideoUrl && heroVideoUrl.startsWith('http')
@@ -379,14 +386,47 @@ export default function Hero({
             />
           </video>
 
+          {/* Video 1: Orbiting Watch (Preloaded & Ready) */}
+          <video
+            ref={setDesktopVideoRef1}
+            muted
+            playsInline
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            preload="auto"
+            onCanPlay={(e) => {
+              const v = e.currentTarget
+              v.muted = true
+              if (activeDesktopIdx === 1) v.play().catch(() => {})
+            }}
+            onEnded={() => {
+              const v0 = desktopVideoRef0.current
+              if (v0) {
+                v0.currentTime = 0
+                v0.muted = true
+                v0.play().catch(() => {})
+              }
+              setActiveDesktopIdx(0)
+            }}
+            className={`absolute inset-0 h-full w-full object-cover ${
+              isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
+            } brightness-[1.10] contrast-[1.08] saturate-[1.12] transition-opacity duration-1000 ${
+              activeDesktopIdx === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          >
+            <source src={DESKTOP_VIDEOS_WEBM[1]} type="video/webm" />
+            <source src={DESKTOP_VIDEOS_MP4[1]} type="video/mp4" />
+          </video>
+
           {/* Desktop Subtle Contrast Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050403] via-transparent to-[#050403]/60 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050403] via-transparent to-[#050403]/60 z-20 pointer-events-none" />
           <div
             className={`absolute inset-0 ${
               isRtl
                 ? 'bg-gradient-to-l from-[#050403]/90 via-[#050403]/60 to-transparent'
                 : 'bg-gradient-to-r from-[#050403]/90 via-[#050403]/60 to-transparent'
-            } w-[65%] pointer-events-none`}
+            } w-[65%] z-20 pointer-events-none`}
           />
         </div>
 
