@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, useEffect } from 'react'
+import { useLayoutEffect, useRef, useEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
@@ -44,7 +44,6 @@ export default function Hero({
   heroCtaLabel = 'VIEW COLLECTION',
   heroCtaTarget = '#store',
   heroWatchImageUrl = '/watch-diver-green.jpg',
-  heroVideos = DEFAULT_DESKTOP_VIDEOS,
   heroVideoUrl,
   heroMobileVideoUrl = DEFAULT_MOBILE_VIDEO,
   heroWatchLabelLine1 = 'SWISS',
@@ -70,63 +69,120 @@ export default function Hero({
 
   const desktopVideoRef = useRef<HTMLVideoElement | null>(null)
   const mobileVideoRef = useRef<HTMLVideoElement | null>(null)
-  const [activeVideoIdx, setActiveVideoIdx] = useState(0)
 
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
-  const desktopVideoList = heroVideos && heroVideos.length ? heroVideos : DEFAULT_DESKTOP_VIDEOS
-  const currentDesktopSrc = heroVideoUrl && heroVideoUrl.startsWith('http')
-    ? heroVideoUrl
-    : (desktopVideoList[activeVideoIdx] || desktopVideoList[0])
+  // Ref callback for desktop video — fires when element mounts/changes
+  const setDesktopVideoRef = (el: HTMLVideoElement | null) => {
+    desktopVideoRef.current = el
+    if (el) {
+      el.muted = true
+      // @ts-ignore
+      el.defaultMuted = true
+      el.setAttribute('muted', '')
+      el.setAttribute('playsinline', '')
+      el.setAttribute('webkit-playsinline', '')
+      // Small delay to let browser attach the source
+      setTimeout(() => { el.play().catch(() => {}) }, 50)
+      setTimeout(() => { el.play().catch(() => {}) }, 300)
+      setTimeout(() => { el.play().catch(() => {}) }, 1000)
+    }
+  }
 
-  // Ensure initial video plays and handles autoplay restrictions
+  // Ref callback for mobile video
+  const setMobileVideoRef = (el: HTMLVideoElement | null) => {
+    mobileVideoRef.current = el
+    if (el) {
+      el.muted = true
+      // @ts-ignore
+      el.defaultMuted = true
+      el.setAttribute('muted', '')
+      el.setAttribute('playsinline', '')
+      el.setAttribute('webkit-playsinline', '')
+      setTimeout(() => { el.play().catch(() => {}) }, 50)
+      setTimeout(() => { el.play().catch(() => {}) }, 300)
+      setTimeout(() => { el.play().catch(() => {}) }, 1000)
+    }
+  }
+
+  // Persistent retry: keep trying to play every 500ms until both are playing
   useEffect(() => {
-    const startPlayback = () => {
-      if (desktopVideoRef.current) {
-        const desk = desktopVideoRef.current
+    const interval = setInterval(() => {
+      const desk = desktopVideoRef.current
+      const mob = mobileVideoRef.current
+      let allPlaying = true
+
+      if (desk && desk.paused) {
         desk.muted = true
-        desk.defaultMuted = true
-        desk.playsInline = true
-        desk.setAttribute('playsinline', '')
-        desk.setAttribute('webkit-playsinline', '')
         desk.play().catch(() => {})
+        allPlaying = false
       }
-      if (mobileVideoRef.current) {
-        const mob = mobileVideoRef.current
+      if (mob && mob.paused) {
         mob.muted = true
-        mob.defaultMuted = true
-        mob.playsInline = true
-        mob.setAttribute('playsinline', '')
-        mob.setAttribute('webkit-playsinline', '')
         mob.play().catch(() => {})
+        allPlaying = false
       }
+
+      if (allPlaying) clearInterval(interval)
+    }, 500)
+
+    // Stop retrying after 10 seconds to avoid battery drain
+    const timeout = setTimeout(() => clearInterval(interval), 10000)
+
+    return () => {
+      clearInterval(interval)
+      clearTimeout(timeout)
     }
+  }, [])
 
-    startPlayback()
-
-    // Unlock playback on user gesture
+  // Unlock on ANY user gesture (not once — keep listening until videos play)
+  useEffect(() => {
+    let unlocked = false
     const unlockOnGesture = () => {
-      if (desktopVideoRef.current && desktopVideoRef.current.paused) {
-        desktopVideoRef.current.play().catch(() => {})
+      if (unlocked) return
+      const desk = desktopVideoRef.current
+      const mob = mobileVideoRef.current
+      let bothPlaying = true
+
+      if (desk && desk.paused) {
+        desk.muted = true
+        desk.play().catch(() => {})
+        bothPlaying = false
       }
-      if (mobileVideoRef.current && mobileVideoRef.current.paused) {
-        mobileVideoRef.current.play().catch(() => {})
+      if (mob && mob.paused) {
+        mob.muted = true
+        mob.play().catch(() => {})
+        bothPlaying = false
+      }
+
+      if (bothPlaying) {
+        unlocked = true
+        window.removeEventListener('touchstart', unlockOnGesture)
+        window.removeEventListener('touchend', unlockOnGesture)
+        window.removeEventListener('click', unlockOnGesture)
+        window.removeEventListener('scroll', unlockOnGesture)
+        window.removeEventListener('mousemove', unlockOnGesture)
+        window.removeEventListener('keydown', unlockOnGesture)
       }
     }
 
-    window.addEventListener('touchstart', unlockOnGesture, { passive: true, once: true })
-    window.addEventListener('click', unlockOnGesture, { passive: true, once: true })
-    window.addEventListener('scroll', unlockOnGesture, { passive: true, once: true })
-    window.addEventListener('mousemove', unlockOnGesture, { passive: true, once: true })
+    window.addEventListener('touchstart', unlockOnGesture, { passive: true })
+    window.addEventListener('touchend', unlockOnGesture, { passive: true })
+    window.addEventListener('click', unlockOnGesture, { passive: true })
+    window.addEventListener('scroll', unlockOnGesture, { passive: true })
+    window.addEventListener('mousemove', unlockOnGesture, { passive: true })
+    window.addEventListener('keydown', unlockOnGesture, { passive: true })
 
     return () => {
       window.removeEventListener('touchstart', unlockOnGesture)
+      window.removeEventListener('touchend', unlockOnGesture)
       window.removeEventListener('click', unlockOnGesture)
       window.removeEventListener('scroll', unlockOnGesture)
       window.removeEventListener('mousemove', unlockOnGesture)
+      window.removeEventListener('keydown', unlockOnGesture)
     }
-  }, [activeVideoIdx])
+  }, [])
 
   const heroData = {
     title: translate(heroTitle, currentLang),
@@ -256,8 +312,8 @@ export default function Hero({
         {/* Desktop / Tablet Clean Video Player */}
         <div className="hidden sm:block absolute inset-0 pointer-events-none">
           <video
-            ref={desktopVideoRef}
-            src={currentDesktopSrc}
+            ref={setDesktopVideoRef}
+            src={heroVideoUrl && heroVideoUrl.startsWith('http') ? heroVideoUrl : DEFAULT_DESKTOP_VIDEOS[0]}
             poster={DEFAULT_DESKTOP_POSTER}
             autoPlay
             loop
@@ -267,22 +323,19 @@ export default function Hero({
             disablePictureInPicture
             disableRemotePlayback
             preload="auto"
-            onEnded={() => {
-              if (!heroVideoUrl || !heroVideoUrl.startsWith('http')) {
-                setActiveVideoIdx((prev) => (prev + 1) % desktopVideoList.length)
-              }
-            }}
             onCanPlay={(e) => {
-              e.currentTarget.muted = true
-              e.currentTarget.play().catch(() => {})
+              const v = e.currentTarget
+              v.muted = true
+              v.play().catch(() => {})
             }}
             onLoadedData={(e) => {
-              e.currentTarget.muted = true
-              e.currentTarget.play().catch(() => {})
+              const v = e.currentTarget
+              v.muted = true
+              v.play().catch(() => {})
             }}
             className={`absolute inset-0 h-full w-full object-cover ${
               isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
-            } opacity-90 brightness-[1.10] contrast-[1.08] saturate-[1.12] transition-opacity duration-700 pointer-events-none`}
+            } opacity-90 brightness-[1.10] contrast-[1.08] saturate-[1.12] pointer-events-none`}
           />
 
           {/* Desktop Subtle Contrast Gradients */}
@@ -299,7 +352,7 @@ export default function Hero({
         {/* Mobile Portrait 9:16 Watermark-Free Video Player with Clean, Bright Visibility */}
         <div className="block sm:hidden absolute inset-0 pointer-events-none">
           <video
-            ref={mobileVideoRef}
+            ref={setMobileVideoRef}
             src={heroMobileVideoUrl || DEFAULT_MOBILE_VIDEO}
             poster={DEFAULT_MOBILE_POSTER}
             autoPlay
@@ -311,10 +364,14 @@ export default function Hero({
             disableRemotePlayback
             preload="auto"
             onCanPlay={(e) => {
-              e.currentTarget.play().catch(() => {})
+              const v = e.currentTarget
+              v.muted = true
+              v.play().catch(() => {})
             }}
             onLoadedData={(e) => {
-              e.currentTarget.play().catch(() => {})
+              const v = e.currentTarget
+              v.muted = true
+              v.play().catch(() => {})
             }}
             className="absolute inset-0 h-full w-full object-cover object-center opacity-95 brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none"
           />
