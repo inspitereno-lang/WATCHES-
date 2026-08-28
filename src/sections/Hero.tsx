@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useEffect } from 'react'
+import { useLayoutEffect, useRef, useEffect, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
@@ -29,6 +29,16 @@ interface HeroProps {
 
 const DEFAULT_DESKTOP_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787902113/t24_watches_videos/hero_video_transition_clean.jpg'
 const DEFAULT_MOBILE_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787901807/t24_watches_videos/hero_video_mobile_clean.jpg'
+
+// Desktop video sequence: 2 videos that alternate
+const DESKTOP_VIDEOS_WEBM = [
+  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787902113/t24_watches_videos/hero_video_transition_clean.webm',
+  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787902117/t24_watches_videos/hero_video_orbiting_clean.webm',
+]
+const DESKTOP_VIDEOS_MP4 = [
+  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4',
+  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787902117/t24_watches_videos/hero_video_orbiting_clean.mp4',
+]
 
 export default function Hero({
   heroTitle = 'SWISS | PRECISION',
@@ -63,6 +73,9 @@ export default function Hero({
 
   const desktopVideoRef = useRef<HTMLVideoElement | null>(null)
   const mobileVideoRef = useRef<HTMLVideoElement | null>(null)
+  const [, setActiveVideoIdx] = useState(0)
+  const [desktopVideoStarted, setDesktopVideoStarted] = useState(false)
+  const [mobileVideoStarted, setMobileVideoStarted] = useState(false)
 
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
@@ -303,15 +316,16 @@ export default function Hero({
         ref={watchPanelRef}
         className="absolute inset-0 -z-20 overflow-hidden pointer-events-none"
       >
-        {/* Desktop / Tablet Video Player */}
+        {/* Desktop / Tablet Video Player with 2-video sequence */}
         <div
-          className="hidden sm:block absolute inset-0 pointer-events-none bg-cover bg-center"
-          style={{ backgroundImage: `url(${DEFAULT_DESKTOP_POSTER})` }}
+          className="hidden sm:block absolute inset-0 pointer-events-none bg-cover bg-center transition-opacity duration-700"
+          style={{
+            backgroundImage: desktopVideoStarted ? 'none' : `url(${DEFAULT_DESKTOP_POSTER})`,
+          }}
         >
           <video
             ref={setDesktopVideoRef}
             autoPlay
-            loop
             muted
             playsInline
             controls={false}
@@ -328,20 +342,39 @@ export default function Hero({
               v.muted = true
               v.play().catch(() => {})
             }}
+            onPlaying={() => setDesktopVideoStarted(true)}
+            onEnded={() => {
+              // Switch to next video in the sequence
+              setActiveVideoIdx((prev) => {
+                const next = (prev + 1) % DESKTOP_VIDEOS_MP4.length
+                const video = desktopVideoRef.current
+                if (video) {
+                  // Check if browser supports WebM by looking at current source
+                  const canWebM = video.canPlayType('video/webm; codecs="vp9"')
+                  video.src = canWebM
+                    ? DESKTOP_VIDEOS_WEBM[next]
+                    : DESKTOP_VIDEOS_MP4[next]
+                  video.load()
+                  video.muted = true
+                  video.play().catch(() => {})
+                }
+                return next
+              })
+            }}
             className={`absolute inset-0 h-full w-full object-cover ${
               isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
-            } opacity-90 brightness-[1.10] contrast-[1.08] saturate-[1.12] pointer-events-none`}
+            } brightness-[1.10] contrast-[1.08] saturate-[1.12] pointer-events-none`}
           >
             <source
               src={heroVideoUrl && heroVideoUrl.startsWith('http')
                 ? heroVideoUrl.replace('.mp4', '.webm').replace('vc_h264', 'vc_vp9')
-                : 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787902113/t24_watches_videos/hero_video_transition_clean.webm'}
+                : DESKTOP_VIDEOS_WEBM[0]}
               type="video/webm"
             />
             <source
               src={heroVideoUrl && heroVideoUrl.startsWith('http')
                 ? heroVideoUrl
-                : 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4'}
+                : DESKTOP_VIDEOS_MP4[0]}
               type="video/mp4"
             />
           </video>
@@ -360,7 +393,9 @@ export default function Hero({
         {/* Mobile Portrait 9:16 Video Player */}
         <div
           className="block sm:hidden absolute inset-0 pointer-events-none bg-cover bg-center"
-          style={{ backgroundImage: `url(${DEFAULT_MOBILE_POSTER})` }}
+          style={{
+            backgroundImage: mobileVideoStarted ? 'none' : `url(${DEFAULT_MOBILE_POSTER})`,
+          }}
         >
           <video
             ref={setMobileVideoRef}
@@ -382,7 +417,8 @@ export default function Hero({
               v.muted = true
               v.play().catch(() => {})
             }}
-            className="absolute inset-0 h-full w-full object-cover object-center opacity-95 brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none"
+            onPlaying={() => setMobileVideoStarted(true)}
+            className="absolute inset-0 h-full w-full object-cover object-center brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none"
           >
             <source
               src="https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787901807/t24_watches_videos/hero_video_mobile_clean.webm"
