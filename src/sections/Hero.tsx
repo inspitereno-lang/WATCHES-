@@ -28,11 +28,12 @@ interface HeroProps {
 }
 
 const DEFAULT_HERO_VIDEOS = [
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4',
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/v1787902117/t24_watches_videos/hero_video_orbiting_clean.mp4',
+  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4',
+  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787902117/t24_watches_videos/hero_video_orbiting_clean.mp4',
 ]
 
-const DEFAULT_MOBILE_VIDEO = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'
+const DEFAULT_MOBILE_VIDEO = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,vc_h264/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'
+const DEFAULT_MOBILE_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787901807/t24_watches_videos/hero_video_mobile_clean.jpg'
 
 export default function Hero({
   heroTitle = 'SWISS | PRECISION',
@@ -85,16 +86,51 @@ export default function Hero({
     }
   }
 
-  // Ensure initial video plays
+  // Ensure initial video plays and handles iOS Low Power Mode autoplay restrictions
   useEffect(() => {
-    const firstVideo = videoRefs.current[0]
-    if (firstVideo) {
-      firstVideo.play().catch(() => {})
+    const startPlayback = () => {
+      const firstVideo = videoRefs.current[0]
+      if (firstVideo) {
+        firstVideo.muted = true
+        firstVideo.playsInline = true
+        firstVideo.play().catch(() => {})
+      }
+      if (mobileVideoRef.current) {
+        const mob = mobileVideoRef.current
+        mob.muted = true
+        mob.defaultMuted = true
+        mob.playsInline = true
+        mob.setAttribute('playsinline', '')
+        mob.setAttribute('webkit-playsinline', '')
+        mob.play().catch(() => {})
+      }
     }
-    if (mobileVideoRef.current) {
-      mobileVideoRef.current.play().catch(() => {})
+
+    startPlayback()
+
+    // Unlock playback on first user touch/click/scroll (vital for iOS Low Power Mode)
+    const unlockOnGesture = () => {
+      if (mobileVideoRef.current && mobileVideoRef.current.paused) {
+        mobileVideoRef.current.play().catch(() => {})
+      }
+      const activeDesktop = videoRefs.current[activeVideoIdx]
+      if (activeDesktop && activeDesktop.paused) {
+        activeDesktop.play().catch(() => {})
+      }
     }
-  }, [])
+
+    window.addEventListener('touchstart', unlockOnGesture, { passive: true, once: true })
+    window.addEventListener('touchend', unlockOnGesture, { passive: true, once: true })
+    window.addEventListener('click', unlockOnGesture, { passive: true, once: true })
+    window.addEventListener('scroll', unlockOnGesture, { passive: true, once: true })
+
+    return () => {
+      window.removeEventListener('touchstart', unlockOnGesture)
+      window.removeEventListener('touchend', unlockOnGesture)
+      window.removeEventListener('click', unlockOnGesture)
+      window.removeEventListener('scroll', unlockOnGesture)
+    }
+  }, [activeVideoIdx])
 
   const heroData = {
     title: translate(heroTitle, currentLang),
@@ -253,16 +289,26 @@ export default function Hero({
         </div>
 
         {/* Mobile Portrait 9:16 Watermark-Free Video Player with Clean, Bright Visibility */}
-        <div className="block sm:hidden absolute inset-0">
+        <div className="block sm:hidden absolute inset-0 pointer-events-none">
           <video
             ref={mobileVideoRef}
             src={heroMobileVideoUrl || DEFAULT_MOBILE_VIDEO}
+            poster={DEFAULT_MOBILE_POSTER}
             autoPlay
             loop
             muted
             playsInline
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
             preload="auto"
-            className="absolute inset-0 h-full w-full object-cover object-center opacity-95 brightness-[1.15] contrast-[1.10] saturate-[1.15]"
+            onCanPlay={(e) => {
+              e.currentTarget.play().catch(() => {})
+            }}
+            onLoadedData={(e) => {
+              e.currentTarget.play().catch(() => {})
+            }}
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-95 brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none"
           />
           {/* Subtle Mobile Vignettes - Keeping the Watch in the Center Clear & Luminous */}
           <div className="absolute top-0 inset-x-0 h-36 bg-gradient-to-b from-[#050403]/80 via-[#050403]/30 to-transparent pointer-events-none" />
