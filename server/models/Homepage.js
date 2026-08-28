@@ -101,6 +101,14 @@ const homepageSchema = new mongoose.Schema(
       required: true,
       default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171809/t24_watches_defaults/eehkzalmujmziwekwq9a.png',
     },
+    heroVideoUrl: {
+      type: String,
+      default: '/videos/hero-banner.mp4',
+    },
+    heroMobileVideoUrl: {
+      type: String,
+      default: 'https://res.cloudinary.com/dwqxzzqpn/video/upload/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4',
+    },
     heroWatchLabelLine1: { type: String, default: 'SWISS' },
     heroWatchLabelLine2: { type: String, default: 'DUBAI EDITION' },
     heroWatchLabelLine3: { type: String, default: 'PREMIUM OYSTERSTEEL' },
@@ -218,20 +226,20 @@ const homepageSchema = new mongoose.Schema(
     lumeImage: { type: String, default: 'https://dubaiwatchstores.com/wp-content/uploads/2025/12/IMG_1196.webp' },
 
     // HERITAGE SECTION (Maison Atelier)
-    heritageHeading1: { type: String, default: 'T24' },
+    heritageHeading1: { type: String, default: 'DWG' },
     heritageHeading2: { type: String, default: 'ATELIER' },
-    heritageDesc1: { type: String, default: 'At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.' },
+    heritageDesc1: { type: String, default: 'At Dubai Watches Gallery, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.' },
     heritageDesc2: { type: String, default: 'As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.' },
-    heritageDesc3: { type: String, default: 'From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.' },
+    heritageDesc3: { type: String, default: 'From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of super clone watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.' },
     heritageImage: { type: String, default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg' },
     heritageCaptionLabel: { type: String, default: 'FROM THE EYES OF THE ARTISAN' },
-    heritageCaptionText: { type: String, default: 'Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision' },
+    heritageCaptionText: { type: String, default: 'Every custom timepiece undergoes calibration and pressure testing to ensure confident daily precision' },
 
     // ARCHITECTURE OF TIME SECTION
     architectureHeading1: { type: String, default: 'ARCHITECTURE' },
     architectureHeading2: { type: String, default: 'OF TIME' },
     architectureSubhead: { type: String, default: 'CASE, DIAL, MOVEMENT' },
-    architectureDesc: { type: String, default: 'Discover the ultimate collection of superclone watches and superclone watches in Dubai. At T24, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.' },
+    architectureDesc: { type: String, default: 'Discover the ultimate collection of superclone watches and superclone watches in Dubai. At Dubai Watches Gallery, we offer the finest superclone watches Dubai has ever seen, engineered with 1:1 replica-watch detailing, refined case architecture, exposed mechanical caliber movement depth, and polished gold finishing. We are the leading source for collectors seeking premium replica watches in Dubai and authentic-weight Dubai replica watches, fully calibrated for daily-wear precision.' },
     architectureImage: { type: String, default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp' },
     architectureImageAlt: { type: String, default: 'Watchmaker assembling a gold skeleton watch movement' },
 
@@ -272,7 +280,7 @@ const homepageSchema = new mongoose.Schema(
           role: 'Creative Director',
           watchBought: 'Rolex Datejust 41 Wimbledon (Premium Edition)',
           rating: 5,
-          quote: 'The Wimbledon slate Roman dial dial is a masterpiece of precision. The fluted bezel catches light like real gold. The master copy bezel luster is superb. Incredible premium customer service from their Dubai desk!',
+          quote: 'The Wimbledon slate Roman dial dial is a masterpiece of precision. The fluted bezel catches light like real gold. The super clone bezel luster is superb. Incredible premium customer service from their Dubai desk!',
           avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face'
         },
         {
@@ -298,14 +306,14 @@ const homepageSchema = new mongoose.Schema(
     // FOOTER SECTION
     footerHeading: { type: String, default: 'CONTACT US' },
     footerWhatsAppNumber: { type: String, default: '971501234567' },
-    footerWhatsAppMessage: { type: String, default: 'Hi T24 Watches! I\'m visiting your website and would like to inquire about your premium 1:1 Master Copy watch collection.' },
+    footerWhatsAppMessage: { type: String, default: 'Hi Dubai Watches Gallery! I\'m visiting your website and would like to inquire about your premium 1:1 Super Clone watch collection.' },
     footerContactImage: { type: String, default: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171812/t24_watches_defaults/hk3mfvm17mljab3czc5h.jpg' },
     footerLinks: {
       type: [footerGroupSchema],
       default: [
         {
           title: 'COLLECTIONS',
-          links: ['Rolex 1:1 Master Copies', 'Patek Philippe Master Copies', 'Audemars Piguet Master Copies', 'Richard Mille Master Copies', 'Vacheron Constantin'],
+          links: ['Rolex 1:1 Super Clones', 'Patek Philippe Super Clones', 'Audemars Piguet Super Clones', 'Richard Mille Super Clones', 'Vacheron Constantin'],
         },
         {
           title: 'OUR SPECIFICATIONS',
@@ -316,12 +324,12 @@ const homepageSchema = new mongoose.Schema(
           links: ['WhatsApp Order Desk', 'QC Photo Review', 'GCC Secure Delivery', 'Secure Packaging'],
         },
         {
-          title: 'T24 REPLICA ASSURANCE',
+          title: 'DWG REPLICA ASSURANCE',
           links: ['1:1 Weight Guarantee', 'AAA+ Precision Sweeping', 'Indistinguishable Engravings', 'Dual Waterproof Seals'],
         }
       ]
     },
-    footerCopyright: { type: String, default: '© 2026 T24 Watches Dubai. All rights reserved. Premium 1:1 Master Copy replica timepieces.' }
+    footerCopyright: { type: String, default: '© 2026 Dubai Watches Gallery. All rights reserved. Premium 1:1 Super Clone replica timepieces.' }
   },
   {
     timestamps: true,

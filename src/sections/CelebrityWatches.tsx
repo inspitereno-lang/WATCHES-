@@ -23,8 +23,10 @@ interface CelebrityMatch {
   productId: number
   reference: string
   image: string
+  watchImage?: string
   imagePosition?: string
   imageScale?: number
+  imageTransformOrigin?: string
   captionAlign?: 'left' | 'right'
   source: string
   sourceLabel: string
@@ -43,6 +45,26 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
     sourceLabel: 'GQ',
   },
   {
+    celebrity: 'Shah Rukh Khan',
+    productId: 149,
+    reference: 'Audemars Piguet Royal Oak Perpetual Calendar Blue Ceramic',
+    image: '/images/collections/shah-rukh-khan-portrait.png',
+    watchImage: '/images/collections/shah-rukh-khan-royal-oak-blue.png',
+    imagePosition: 'center top',
+    source: 'https://blog.iflwatches.com/a-peek-into-shah-rukh-khan-watch-collection/',
+    sourceLabel: 'IFL Watches',
+  },
+  {
+    celebrity: 'Sergio Ramos',
+    productId: 256,
+    reference: 'Patek Philippe Aquanaut Chronograph 5968A-001 Orange',
+    image: '/images/collections/sergio-ramos-portrait.png',
+    watchImage: '/images/collections/sergio-ramos-aquanaut-orange.png',
+    imagePosition: 'center top',
+    source: 'https://www.instagram.com/p/DWYm235iGkR/',
+    sourceLabel: 'Instagram',
+  },
+  {
     celebrity: 'Alexander Zverev',
     productId: 118,
     reference: 'Richard Mille RM 67-02 Alexander Zverev',
@@ -53,27 +75,6 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
     captionAlign: 'right',
     source: 'https://watchpaparazzi.com/spotted.php?id=8cb9b89f-0326-40df-84b0-86ed75542157',
     sourceLabel: 'Watch Paparazzi',
-  },
-  {
-    celebrity: 'Lewis Hamilton',
-    productId: 259,
-    reference: 'Patek Philippe Nautilus 5980/1R Rose Gold',
-    image:
-      'https://watchpaparazzi.com/img/pairings/907a07b1-f845-4a94-b1d8-3ef95dc0d56c.jpg',
-    imagePosition: 'left center',
-    imageScale: 1.55,
-    source: 'https://watchpaparazzi.com/spotted.php?id=907a07b1-f845-4a94-b1d8-3ef95dc0d56c',
-    sourceLabel: 'Watch Paparazzi',
-  },
-  {
-    celebrity: 'Lando Norris',
-    productId: 116,
-    reference: 'Richard Mille RM 67-02 McLaren',
-    image:
-      'https://oracleoftime.com/wp-content/uploads/2023/02/Lando-Norris-Mclaren-Richard-Mille-RM-67-02-Automatic-Extra-Flat.jpg',
-    imagePosition: 'center 24%',
-    source: 'https://oracleoftime.com/f1-drivers-watches-2023/',
-    sourceLabel: 'Oracle Time',
   },
 ]
 
@@ -92,10 +93,13 @@ export default function CelebrityWatches() {
       })
       .then((data: { matches?: CelebrityMatch[] }) => {
         if (!active || !data.matches) return
+        const remoteByProductId = new Map(
+          data.matches.map((remoteMatch) => [remoteMatch.productId, remoteMatch])
+        )
         setMatches(
-          data.matches.map((remoteMatch) => ({
-            ...FALLBACK_MATCHES.find((match) => match.productId === remoteMatch.productId),
-            ...remoteMatch,
+          FALLBACK_MATCHES.map((match) => ({
+            ...match,
+            product: remoteByProductId.get(match.productId)?.product || null,
           }))
         )
       })
@@ -174,7 +178,7 @@ export default function CelebrityWatches() {
 
       <header className="icon-edit-intro relative mx-auto max-w-7xl px-6 pb-12 pt-14 text-center lg:px-12 lg:pb-20 lg:pt-20">
         <p className="font-body text-[9px] font-semibold uppercase tracking-[0.32em] text-[#e8c264]">
-          {translate("T24 Icon Edit · 2026", currentLang)}
+          {translate("DWG Icon Edit · 2026", currentLang)}
         </p>
         <h1 className="mt-5 font-display text-5xl font-light leading-none sm:text-6xl lg:text-8xl">
           {translate("Worn by", currentLang)} <span className="italic text-[#e8c264]">{translate("Icons", currentLang)}</span>
@@ -203,7 +207,7 @@ export default function CelebrityWatches() {
                   style={{
                     objectPosition: match.imagePosition || 'center center',
                     transform: `scale(${match.imageScale || 1})`,
-                    transformOrigin: 'left center',
+                    transformOrigin: match.imageTransformOrigin || 'left center',
                   }}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
@@ -248,7 +252,7 @@ export default function CelebrityWatches() {
                 <div className="relative z-10 flex items-start justify-between border-b border-white/10 pb-5">
                   <div>
                     <p className="font-body text-[8px] uppercase tracking-[0.22em] text-white/35">
-                      {translate("T24 catalogue edition", currentLang)}
+                      {translate("DWG catalogue edition", currentLang)}
                     </p>
                     <p className="mt-2 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-[#e8c264]">
                       {translate(product?.brand || match.reference.split(' ').slice(0, 2).join(' '), currentLang)}
@@ -262,10 +266,10 @@ export default function CelebrityWatches() {
                 <div className="relative flex flex-1 items-center justify-center py-8">
                   <div className="absolute h-[17rem] w-[17rem] rounded-full border border-[#e8c264]/15 sm:h-[21rem] sm:w-[21rem]" />
                   <div className="absolute h-[13rem] w-[13rem] rounded-full border border-[#e8c264]/10 sm:h-[17rem] sm:w-[17rem]" />
-                  {product?.image ? (
+                  {match.watchImage || product?.image ? (
                     <WatchImage
-                      src={product.image}
-                      alt={product.name}
+                      src={match.watchImage || product?.image || ''}
+                      alt={match.reference}
                       loading={index === 0 ? 'eager' : 'lazy'}
                       className="icon-watch relative z-10 max-h-[20rem] max-w-[82%] object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.75)] sm:max-h-[25rem] lg:max-h-[28rem]"
                     />
@@ -307,7 +311,7 @@ export default function CelebrityWatches() {
       </div>
 
       <p className="relative mx-auto mt-8 max-w-[92rem] px-6 font-body text-[9px] leading-5 tracking-[0.08em] text-white/25 lg:px-12">
-        {translate("Editorial watch-spotting only. Celebrity images show original references; no affiliation or endorsement of T24 Watches is implied.", currentLang)}
+        {translate("Editorial watch-spotting only. Celebrity images show original references; no affiliation or endorsement of Dubai Watches Gallery is implied.", currentLang)}
       </p>
     </section>
   )

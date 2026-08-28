@@ -11,6 +11,7 @@ import Product from './models/Product.js';
 import Homepage from './models/Homepage.js';
 import User from './models/User.js';
 import BlogPost from './models/BlogPost.js';
+import Accessory from './models/Accessory.js';
 import { DEFAULT_BLOG_POSTS } from './data/blogPosts.js';
 import auth from './middleware/auth.js';
 
@@ -176,7 +177,7 @@ app.get('/api/homepage', async (req, res) => {
     const dynamicArrivals = latestProducts.map(p => ({
       id: p.id,
       name: p.name,
-      type: p.movement || '1:1 Master Copy Edition',
+      type: p.movement || '1:1 Super Clone Edition',
       image: p.image,
       label: p.brand.toUpperCase(),
       priceUSD: p.priceUSD,
@@ -237,10 +238,12 @@ const withAudience = (product) => {
       .replace(/\b(Clean|VSF|3K|BTF|ZF|PPF|OMF|APS|ARF|Noob)\s+Factory\b/gi, 'Swiss Edition')
       .replace(/\b(Clean|VSF|3K|BTF|ZF|PPF|OMF|APS|ARF|Noob)\b/gi, 'Swiss')
       .replace(/\bfactory\b/gi, 'Edition')
-      .replace(/swiss\s+clone/gi, 'master copy')
-      .replace(/swiss\s+clones/gi, 'master copies')
-      .replace(/mirror\s+copy/gi, 'master copy')
-      .replace(/mirror\s+copies/gi, 'master copies');
+      .replace(/swiss\s+clone/gi, 'super clone')
+      .replace(/swiss\s+clones/gi, 'super clones')
+      .replace(/mirror\s+copy/gi, 'super clone')
+      .replace(/mirror\s+copies/gi, 'super clones')
+      .replace(/master\s+copy/gi, 'super clone')
+      .replace(/master\s+copies/gi, 'super clones');
   };
 
   let name = cleanText(plainProduct.name);
@@ -295,8 +298,10 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['PRECISION', 'الدقة'],
   ['SUPER CLONE WATCHES DUBAI', 'ساعات سوبر كلون دبي'],
   ['SUPER CLONE WATCHES IN DUBAI', 'ساعات سوبر كلون في دبي'],
-  ['Best replica watches in Dubai. Master copy watches & clone watches.', 'أفضل الساعات الماستر كوبي في دبي. ساعات طبق الأصل وساعات كلون.'],
-  ['BEST REPLICA WATCHES IN DUBAI. MASTER COPY WATCHES & CLONE WATCHES.', 'أفضل الساعات الماستر كوبي في دبي. ساعات طبق الأصل وساعات كلون.'],
+  ['Best replica watches in Dubai. Super clone watches & clone watches.', 'أفضل ساعات السوبر كلون في دبي. ساعات طبق الأصل وساعات كلون.'],
+  ['BEST REPLICA WATCHES IN DUBAI. SUPER CLONE WATCHES & CLONE WATCHES.', 'أفضل ساعات السوبر كلون في دبي. ساعات طبق الأصل وساعات كلون.'],
+  ['Best replica watches in Dubai. Master copy watches & clone watches.', 'أفضل ساعات السوبر كلون في دبي. ساعات طبق الأصل وساعات كلون.'],
+  ['BEST REPLICA WATCHES IN DUBAI. MASTER COPY WATCHES & CLONE WATCHES.', 'أفضل ساعات السوبر كلون في دبي. ساعات طبق الأصل وساعات كلون.'],
   ["Dubai's ultimate boutique for 1:1 super clone watches. Hand-calibrated with flawless sweep movements, premium Oystersteel, and sapphire crystals. Cash on delivery available.", "بوتيك دبي الرائد لساعات السوبر كلون ١:١. معايرة يدوياً بحركات انسيابية متقنة، وفولاذ أويسترستيل الفاخر، وزجاج السافير. الدفع عند الاستلام متوفر."],
   ['VIEW COLLECTION', 'عرض المجموعة'],
   ['SWISS 1:1 BUILD', 'صناعة سويسرية ١:١'],
@@ -383,11 +388,17 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['Watch two: the refined option', 'الساعة الثانية: الخيار الأنيق'],
   ['Watch three: the expressive piece', 'الساعة الثالثة: القطعة الجريئة'],
   ['Make every addition earn its place', 'اجعل كل إضافة تستحق مكانها'],
-  ['master copy', 'ماستر كوبي'],
-  ['Master Copy', 'ماستر كوبي'],
-  ['1:1 Master Copy Edition', 'إصدار ماستر كوبي ١:١'],
-  ['1:1 Swiss Master Copy Edition', 'إصدار ماستر كوبي سويسري ١:١'],
-  ['1:1 Flyback Chrono Master Copy', 'كرونوغراف فلايباك ماستر كوبي ١:١'],
+  ['super clone', 'سوبر كلون'],
+  ['Super Clone', 'سوبر كلون'],
+  ['Super clone', 'سوبر كلون'],
+  ['1:1 Super Clone Edition', 'إصدار سوبر كلون ١:١'],
+  ['1:1 Swiss Super Clone Edition', 'إصدار سوبر كلون سويسري ١:١'],
+  ['1:1 Flyback Chrono Super Clone', 'كرونوغراف فلايباك سوبر كلون ١:١'],
+  ['master copy', 'سوبر كلون'],
+  ['Master Copy', 'سوبر كلون'],
+  ['1:1 Master Copy Edition', 'إصدار سوبر كلون ١:١'],
+  ['1:1 Swiss Master Copy Edition', 'إصدار سوبر كلون سويسري ١:١'],
+  ['1:1 Flyback Chrono Master Copy', 'كرونوغراف فلايباك سوبر كلون ١:١'],
   ['Automatic Swiss Clone', 'ساعة كلون سويسرية أوتوماتيكية'],
   ['Swiss QC Standards Guaranteed', 'معايير الجودة السويسرية مضمونة'],
   ['SWISS QC STANDARDS GUARANTEED', 'معايير الجودة السويسرية مضمونة'],
@@ -549,6 +560,10 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['VACHERON CONSTANTIN', 'فاشيرون كونستانتين'],
   ['Breitling', 'بريتلينغ'],
   ['BREITLING', 'بريتلينغ'],
+  ['Panerai', 'بانيراي'],
+  ['PANERAI', 'بانيراي'],
+  ['Roger Dubuis', 'روجيه دوبوي'],
+  ['ROGER DUBUIS', 'روجيه دوبوي'],
   ['Chopard', 'شوبارد'],
   ['CHOPARD', 'شوبارد'],
   ['IWC', 'آي دبليو سي'],
@@ -560,16 +575,18 @@ const STATIC_AR_TRANSLATIONS = new Map([
   // Celebrity Matches
   ['Rafael Nadal', 'رافائيل نادال'],
   ['Alexander Zverev', 'ألكسندر زفيريف'],
-  ['Lewis Hamilton', 'لويس هاملتون'],
-  ['Lando Norris', 'لاندو نوريس'],
+  ['Sergio Ramos', 'سيرخيو راموس'],
+  ['Shah Rukh Khan', 'شاه روخ خان'],
   ['Oracle Time', 'أوراكل تايم'],
   ['ORACLE TIME', 'أوراكل تايم'],
   ['Watch Paparazzi', 'واتش باباراتزي'],
   ['GQ', 'جي كيو'],
   ['Richard Mille RM 27-04 Tourbillon Rafael Nadal', 'ريتشارد ميل RM 27-04 توربيون رافائيل نادال'],
   ['Richard Mille RM 67-02 Alexander Zverev', 'ريتشارد ميل RM 67-02 ألكسندر زفيريف'],
-  ['Patek Philippe Nautilus 5980/1R Rose Gold', 'باتيك فيليب نوتيلوس 5980/1R ذهب وردي'],
-  ['Richard Mille RM 67-02 McLaren', 'ريتشارد ميل RM 67-02 مكلارين'],
+  ['Patek Philippe Aquanaut Chronograph 5968A-001 Orange', 'باتيك فيليب أكوانوت كرونوغراف 5968A-001 برتقالي'],
+  ['Audemars Piguet Royal Oak Perpetual Calendar Blue Ceramic', 'أوديمار بيغيه رويال أوك بالتقويم الدائم من السيراميك الأزرق'],
+  ['Instagram', 'إنستغرام'],
+  ['IFL Watches', 'آي إف إل واتشز'],
 
   // Product Detail
   ['DUTY-FREE GUARANTEE', 'ضمان معفى من الرسوم'],
@@ -639,8 +656,8 @@ async function translateText(text, to = 'ar') {
         .replace(/ساعات سوبر كلون/g, 'ساعات سوبر كلون ماستر كوبي')
         .replace(/١:١/g, '1:1')
         .replace(/1: 1/g, '1:1')
-        .replace(/Master Copy/gi, 'ماستر كوبي')
-        .replace(/master copy/gi, 'ماستر كوبي')
+        .replace(/Master Copy/gi, 'سوبر كلون')
+        .replace(/master copy/gi, 'سوبر كلون')
         .replace(/master copies/gi, 'ماستر كوبي')
         .replace(/super clone/gi, 'سوبر كلون')
         .replace(/superclone/gi, 'سوبر كلون')
@@ -859,29 +876,38 @@ app.post('/api/translate/batch', async (req, res) => {
 // 1.8 Fetch Category Filters List (Brands, Audiences, and Brand-to-Model mappings)
 app.get('/api/categories', async (req, res) => {
   try {
-    const defaultBrands = [
+    const BRAND_ORDER = [
       'Richard Mille',
       'Audemars Piguet',
       'Patek Philippe',
       'Rolex',
       'Hublot',
-      'Cartier',
       'Vacheron Constantin',
       'Omega',
+      'Cartier',
+      'Panerai',
       'IWC',
       'Breitling',
+      'Roger Dubuis',
       'Chopard',
       'TAG Heuer'
     ];
 
+    const defaultBrands = [...BRAND_ORDER];
+
     const defaultBrandModels = {
-      'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
-      'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
-      'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications'],
       'Richard Mille': ['RM 11-03', 'RM 35-02', 'RM 67-02', 'RM 21-02', 'RM 55'],
+      'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
+      'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications', 'Twenty-4', 'Gondolo', 'Calatrava'],
+      'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
       'Hublot': ['Big Bang', 'Classic Fusion', 'Spirit of Big Bang'],
-      'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère'],
-      'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques']
+      'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques', 'Traditionnelle'],
+      'Omega': ['Speedmaster', 'Seamaster', 'Constellation', 'De Ville'],
+      'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère', 'Ballon Bleu'],
+      'Panerai': ['Luminor', 'Radiomir', 'Submersible'],
+      'IWC': ['Portugieser', 'Pilot', 'Portofino', 'Ingenieur'],
+      'Breitling': ['Navitimer', 'Chronomat', 'Superocean', 'Premier'],
+      'Roger Dubuis': ['Excalibur', 'Knights of the Round Table', 'Velvet']
     };
 
     // Query database for all products
@@ -918,15 +944,32 @@ app.get('/api/categories', async (req, res) => {
       }
     });
 
-    // Convert to sorted lists
-    const brandsList = Array.from(brandsSet).sort((a, b) => a.localeCompare(b));
+    // Convert to sorted lists using BRAND_ORDER sequence
+    const normalizeBrand = (b) => b.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const brandOrderMap = new Map();
+    BRAND_ORDER.forEach((b, idx) => {
+      brandOrderMap.set(normalizeBrand(b), idx);
+    });
+
+    const getBrandRank = (b) => {
+      const norm = normalizeBrand(b);
+      return brandOrderMap.has(norm) ? brandOrderMap.get(norm) : 999;
+    };
+
+    const brandsList = Array.from(brandsSet).sort((a, b) => {
+      const rankA = getBrandRank(a);
+      const rankB = getBrandRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      return a.localeCompare(b);
+    });
+
     const formattedBrandModels = {};
     for (const brand in brandModels) {
       formattedBrandModels[brand] = Array.from(brandModels[brand]).sort((a, b) => a.localeCompare(b));
     }
 
     const brands = ['ALL BRANDS', ...brandsList];
-    const audiences = ['ALL', 'Womens', 'Mens'];
+    const audiences = ['ALL', 'Mens', 'Womens'];
 
     return res.status(200).json({
       brands,
@@ -986,11 +1029,45 @@ app.get('/api/products', async (req, res) => {
     const itemLimit = parseInt(limit);
     const skip = (currentPage - 1) * itemLimit;
 
+    const BRAND_ORDER = [
+      'Richard Mille',
+      'Audemars Piguet',
+      'Patek Philippe',
+      'Rolex',
+      'Hublot',
+      'Vacheron Constantin',
+      'Omega',
+      'Cartier',
+      'Panerai',
+      'IWC',
+      'Breitling',
+      'Roger Dubuis',
+      'Chopard',
+      'TAG Heuer'
+    ];
+
+    const brandBranches = BRAND_ORDER.map((bName, idx) => ({
+      case: { $eq: ['$brand', bName] },
+      then: idx + 1
+    }));
+
     const totalItems = await Product.countDocuments(query);
-    const products = await Product.find(query)
-      .sort({ id: -1 }) // Sort by ID descending
-      .skip(skip)
-      .limit(itemLimit);
+    const products = await Product.aggregate([
+      { $match: query },
+      {
+        $addFields: {
+          brandRank: {
+            $switch: {
+              branches: brandBranches,
+              default: 99
+            }
+          }
+        }
+      },
+      { $sort: { brandRank: 1, id: -1 } },
+      { $skip: skip },
+      { $limit: itemLimit }
+    ]);
 
     // Compute dynamic category counts matching the current search & brand filters
     const countsQueryAll = { isVisible: { $ne: false } };
@@ -1048,6 +1125,64 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// Backend-curated product-detail suggestions. Mixed mode is deliberately
+// interleaved so one brand cannot fill the whole carousel.
+app.get('/api/products/suggestions', async (req, res) => {
+  try {
+    const SUGGESTION_BRANDS = [
+      'Patek Philippe',
+      'Audemars Piguet',
+      'Rolex',
+      'Richard Mille',
+    ];
+    const requestedBrand = String(req.query.brand || 'MIXED');
+    const selectedBrand = SUGGESTION_BRANDS.find(
+      (brand) => brand.toLowerCase() === requestedBrand.toLowerCase()
+    );
+    const brands = selectedBrand ? [selectedBrand] : SUGGESTION_BRANDS;
+    const requestedLimit = Number.parseInt(String(req.query.limit || '16'), 10);
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 32)
+      : 16;
+    const productId = Number.parseInt(String(req.query.productId || ''), 10);
+    const perBrandLimit = selectedBrand ? limit : Math.ceil(limit / brands.length) + 2;
+
+    const lists = await Promise.all(
+      brands.map((brand) => Product.find({
+        brand: new RegExp(`^${brand}$`, 'i'),
+        isVisible: { $ne: false },
+        ...(Number.isFinite(productId) ? { id: { $ne: productId } } : {}),
+      })
+        .sort({ id: -1 })
+        .limit(perBrandLimit))
+    );
+
+    const products = [];
+    const longestList = Math.max(...lists.map((list) => list.length), 0);
+    for (let index = 0; index < longestList && products.length < limit; index += 1) {
+      for (const list of lists) {
+        if (list[index] && products.length < limit) {
+          products.push(list[index]);
+        }
+      }
+    }
+
+    let finalProducts = products.map(withAudience);
+    if (req.query.lang === 'ar') {
+      finalProducts = await Promise.all(finalProducts.map((product) => translateProduct(product, 'ar')));
+    }
+
+    return res.status(200).json({
+      products: finalProducts,
+      mode: selectedBrand ? 'brand' : 'mixed',
+      brands,
+    });
+  } catch (err) {
+    console.error('GET /api/products/suggestions error:', err);
+    return res.status(500).json({ error: 'Server error loading brand suggestions.' });
+  }
+});
+
 const celebrityMatches = [
   {
     celebrity: 'Rafael Nadal',
@@ -1059,6 +1194,26 @@ const celebrityMatches = [
     sourceLabel: 'GQ',
   },
   {
+    celebrity: 'Shah Rukh Khan',
+    productId: 149,
+    reference: 'Audemars Piguet Royal Oak Perpetual Calendar Blue Ceramic',
+    image: '/images/collections/shah-rukh-khan-portrait.png',
+    watchImage: '/images/collections/shah-rukh-khan-royal-oak-blue.png',
+    imagePosition: 'center top',
+    source: 'https://blog.iflwatches.com/a-peek-into-shah-rukh-khan-watch-collection/',
+    sourceLabel: 'IFL Watches',
+  },
+  {
+    celebrity: 'Sergio Ramos',
+    productId: 256,
+    reference: 'Patek Philippe Aquanaut Chronograph 5968A-001 Orange',
+    image: '/images/collections/sergio-ramos-portrait.png',
+    watchImage: '/images/collections/sergio-ramos-aquanaut-orange.png',
+    imagePosition: 'center top',
+    source: 'https://www.instagram.com/p/DWYm235iGkR/',
+    sourceLabel: 'Instagram',
+  },
+  {
     celebrity: 'Alexander Zverev',
     productId: 118,
     reference: 'Richard Mille RM 67-02 Alexander Zverev',
@@ -1068,25 +1223,6 @@ const celebrityMatches = [
     captionAlign: 'right',
     source: 'https://watchpaparazzi.com/spotted.php?id=8cb9b89f-0326-40df-84b0-86ed75542157',
     sourceLabel: 'Watch Paparazzi',
-  },
-  {
-    celebrity: 'Lewis Hamilton',
-    productId: 259,
-    reference: 'Patek Philippe Nautilus 5980/1R Rose Gold',
-    image: 'https://watchpaparazzi.com/img/pairings/907a07b1-f845-4a94-b1d8-3ef95dc0d56c.jpg',
-    imagePosition: 'left center',
-    imageScale: 1.55,
-    source: 'https://watchpaparazzi.com/spotted.php?id=907a07b1-f845-4a94-b1d8-3ef95dc0d56c',
-    sourceLabel: 'Watch Paparazzi',
-  },
-  {
-    celebrity: 'Lando Norris',
-    productId: 116,
-    reference: 'Richard Mille RM 67-02 McLaren',
-    image: 'https://oracleoftime.com/wp-content/uploads/2023/02/Lando-Norris-Mclaren-Richard-Mille-RM-67-02-Automatic-Extra-Flat.jpg',
-    imagePosition: 'center 24%',
-    source: 'https://oracleoftime.com/f1-drivers-watches-2023/',
-    sourceLabel: 'Oracle Time',
   },
 ];
 
@@ -1184,6 +1320,9 @@ app.get('/api/blogs/:slug', async (req, res) => {
 app.get('/api/products/:id', async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
+    if (isNaN(productId)) {
+      return res.status(400).json({ error: 'Invalid product ID.' });
+    }
     const watch = await Product.findOne({
       id: productId,
       isVisible: { $ne: false },
@@ -1199,6 +1338,246 @@ app.get('/api/products/:id', async (req, res) => {
   } catch (err) {
     console.error('GET /api/products/:id error:', err);
     return res.status(500).json({ error: 'Server error loading watch details.' });
+  }
+});
+
+
+// =========================================================================
+// ACCESSORIES APIS (Straps, Boxes, Winders)
+// =========================================================================
+
+const DEFAULT_ACCESSORIES = [
+  {
+    id: 1,
+    name: 'Rolex Green Wave Luxury Lacquered Box Set',
+    category: 'Boxes',
+    brandCompatibility: 'Rolex',
+    priceAED: 'AED 1,200',
+    priceUSD: '$330.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905165/t24_accessories/rolex_green_box_set.jpg',
+    material: 'Lacquered Hardwood & Leather',
+    description: 'Complete luxury presentation set including outer sleeve, inner green wave presentation box, booklet wallet, seal medallion, and warranty guarantee card folder.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 2,
+    name: 'Patek Philippe Gloss Mahogany Collector Box Set',
+    category: 'Boxes',
+    brandCompatibility: 'Patek Philippe',
+    priceAED: 'AED 1,450',
+    priceUSD: '$395.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905166/t24_accessories/patek_wooden_box_set.jpg',
+    material: 'High-Gloss Polished Mahogany & Suede',
+    description: 'Bespoke hand-crafted grand presentation box with solid brass push-piece clasp, ivory suede interior cushion, and certificate leatherette folio.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 3,
+    name: 'Audemars Piguet Octagonal Heritage Box Set',
+    category: 'Boxes',
+    brandCompatibility: 'Audemars Piguet',
+    priceAED: 'AED 1,350',
+    priceUSD: '$370.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905167/t24_accessories/ap_green_box_set.jpg',
+    material: 'Deep Green Lacquered Finish & Microfiber',
+    description: 'Signature octagonal bevel detailing, velvet cushion bed, and complete owner document folder.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 4,
+    name: 'Richard Mille Skull Technical Case Box Set',
+    category: 'Boxes',
+    brandCompatibility: 'Richard Mille',
+    priceAED: 'AED 1,600',
+    priceUSD: '$435.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905170/t24_accessories/richard_mille_case_box.jpg',
+    material: 'Carbon Composite & Pelican Shell',
+    description: 'Heavyweight matte carbon Pelican-style case with customized laser-cut high-density foam padding and authentication card enclosure.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 5,
+    name: 'Hermès Epsom Calfskin Leather Watch Strap',
+    category: 'Straps',
+    brandCompatibility: 'Universal',
+    priceAED: 'AED 750',
+    priceUSD: '$205.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905172/t24_accessories/epsom_leather_strap.jpg',
+    material: 'Full-Grain French Epsom Calfskin',
+    description: 'Hand-stitched luxury calfskin strap with quick-release spring bars. Available in 20mm and 22mm lug widths.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 6,
+    name: 'Audemars Piguet Royal Oak Offshore Rubber Diver Strap',
+    category: 'Straps',
+    brandCompatibility: 'Audemars Piguet',
+    priceAED: 'AED 850',
+    priceUSD: '$230.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905172/t24_accessories/ap_rubber_diver_strap.jpg',
+    material: 'High-Grade Vulcanized Rubber',
+    description: 'Ergonomic water-resistant rubber strap designed for Royal Oak Offshore cases with stainless steel tang buckle.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 7,
+    name: 'Patek Philippe Aquanaut Tropical Composite Strap',
+    category: 'Straps',
+    brandCompatibility: 'Patek Philippe',
+    priceAED: 'AED 800',
+    priceUSD: '$220.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905173/t24_accessories/patek_aquanaut_strap.jpg',
+    material: 'UV & Seawater Resistant Composite',
+    description: 'Ultra-flexible checkered embossed tropical composite strap tailored for Aquanaut 5167 and 5968 references.',
+    inStock: true,
+    isVisible: true,
+  },
+  {
+    id: 8,
+    name: 'Rolex Oysterflex High-Density Elastomer Strap',
+    category: 'Straps',
+    brandCompatibility: 'Rolex',
+    priceAED: 'AED 850',
+    priceUSD: '$230.00',
+    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1787905175/t24_accessories/rolex_oysterflex_strap.jpg',
+    material: 'Flexible Titanium-Nickel Core & Elastomer',
+    description: 'Features internal longitudinal cushion system for supreme wrist comfort and temperature regulation.',
+    inStock: true,
+    isVisible: true,
+  },
+];
+
+async function ensureDefaultAccessories() {
+  await Accessory.deleteMany({ category: 'Winders' });
+  const count = await Accessory.countDocuments();
+  if (count === 0) {
+    await Accessory.insertMany(DEFAULT_ACCESSORIES);
+    console.log('Seeded default luxury accessories (Straps & Presentation Boxes).');
+  }
+}
+
+// 1. Fetch Accessories List
+app.get('/api/accessories', async (req, res) => {
+  try {
+    await ensureDefaultAccessories();
+    const query = { isVisible: { $ne: false } };
+    if (req.query.category && req.query.category !== 'ALL') {
+      query.category = new RegExp(`^${req.query.category}$`, 'i');
+    }
+    if (req.query.brand) {
+      query.brandCompatibility = new RegExp(req.query.brand, 'i');
+    }
+    if (req.query.includeHidden === 'true') {
+      delete query.isVisible;
+    }
+
+    const accessories = await Accessory.find(query).sort({ id: 1 });
+    return res.status(200).json({ accessories });
+  } catch (err) {
+    console.error('GET /api/accessories error:', err);
+    return res.status(500).json({ error: 'Server error loading accessories.' });
+  }
+});
+
+// 2. Fetch Single Accessory Details
+app.get('/api/accessories/:id', async (req, res) => {
+  try {
+    await ensureDefaultAccessories();
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid accessory ID.' });
+    }
+    const item = await Accessory.findOne({ id, isVisible: { $ne: false } });
+    if (!item) {
+      return res.status(404).json({ error: 'Accessory not found.' });
+    }
+    return res.status(200).json(item);
+  } catch (err) {
+    console.error('GET /api/accessories/:id error:', err);
+    return res.status(500).json({ error: 'Server error loading accessory.' });
+  }
+});
+
+// 3. Admin Create Accessory
+app.post('/api/accessories', auth, async (req, res) => {
+  try {
+    const { name, category, brandCompatibility, priceAED, priceUSD, image, images, material, description, inStock, isVisible } = req.body;
+    if (!name || !priceAED) {
+      return res.status(400).json({ error: 'Name and price in AED are required.' });
+    }
+
+    const highest = await Accessory.findOne().sort('-id');
+    const nextId = highest ? highest.id + 1 : 1;
+
+    const accessory = new Accessory({
+      id: nextId,
+      name,
+      category: category || 'Straps',
+      brandCompatibility: brandCompatibility || 'Universal',
+      priceAED,
+      priceUSD: priceUSD || `$${Math.round(parseInt(priceAED.replace(/[^0-9]/g, '') || '0') / 3.67)}.00`,
+      image: image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
+      images: images || [],
+      material: material || '',
+      description: description || '',
+      inStock: inStock !== false,
+      isVisible: isVisible !== false,
+    });
+
+    await accessory.save();
+    return res.status(201).json({ message: 'Accessory created successfully.', accessory });
+  } catch (err) {
+    console.error('POST /api/accessories error:', err);
+    return res.status(500).json({ error: 'Server error creating accessory.' });
+  }
+});
+
+// 4. Admin Update Accessory
+app.put('/api/accessories/:id', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid accessory ID.' });
+    }
+
+    const updated = await Accessory.findOneAndUpdate(
+      { id },
+      { $set: req.body },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Accessory not found.' });
+    }
+    return res.status(200).json({ message: 'Accessory updated successfully.', accessory: updated });
+  } catch (err) {
+    console.error('PUT /api/accessories/:id error:', err);
+    return res.status(500).json({ error: 'Server error updating accessory.' });
+  }
+});
+
+// 5. Admin Delete Accessory
+app.delete('/api/accessories/:id', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid accessory ID.' });
+    }
+
+    const deleted = await Accessory.findOneAndDelete({ id });
+    if (!deleted) {
+      return res.status(404).json({ error: 'Accessory not found.' });
+    }
+    return res.status(200).json({ message: 'Accessory deleted successfully.' });
+  } catch (err) {
+    console.error('DELETE /api/accessories/:id error:', err);
+    return res.status(500).json({ error: 'Server error deleting accessory.' });
   }
 });
 

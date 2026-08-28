@@ -10,7 +10,7 @@ export default function CollectionsPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <Seo
-        title={isArabic ? 'مجموعات الساعات الفاخرة في دبي | تي 24 للساعات' : 'Luxury Replica Watch Collections Dubai | T24 Watches'}
+        title={isArabic ? 'مجموعات الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Replica Watch Collections Dubai | Dubai Watches Gallery'}
         description={isArabic ? 'تسوّق مجموعات مختارة من رولكس وريتشارد ميل وباتيك فيليب وأوديمار بيجيه في دبي مع توصيل آمن.' : 'Shop curated Rolex, Richard Mille, Patek Philippe and Audemars Piguet replica watch collections in Dubai with exact-reference guides and secure delivery.'}
         keywords={[
           'replica watches Dubai',

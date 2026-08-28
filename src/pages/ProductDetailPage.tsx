@@ -9,6 +9,7 @@ import { getSelectedRep, getWhatsAppUrl } from '../utils/whatsapp'
 gsap.registerPlugin(ScrollTrigger)
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
+import { ShippingLogosBar } from '../components/ShippingLogos'
 
 interface Watch {
   id: number
@@ -55,6 +56,15 @@ interface ProductDetailPageProps {
   defaultWhatsAppNumber?: string
 }
 
+const SUGGESTION_BRANDS = [
+  'Patek Philippe',
+  'Audemars Piguet',
+  'Rolex',
+  'Richard Mille',
+] as const
+
+const MIXED_BRANDS = 'MIXED'
+
 export default function ProductDetailPage({
   salesReps,
   defaultWhatsAppNumber = '971501234567'
@@ -63,6 +73,7 @@ export default function ProductDetailPage({
   const navigate = useNavigate()
   const [watch, setWatch] = useState<Watch | null>(null)
   const [activeImage, setActiveImage] = useState<string>('')
+  const [selectedBrand, setSelectedBrand] = useState<string>(MIXED_BRANDS)
   const [brandSuggestions, setBrandSuggestions] = useState<Watch[]>([])
   const [rangeSuggestions, setRangeSuggestions] = useState<Watch[]>([])
   const [activeTab, setActiveTab] = useState<'details' | 'specs'>('details')
@@ -227,6 +238,7 @@ export default function ProductDetailPage({
       .then((data) => {
         setWatch(data)
         setActiveImage(data.image || '')
+        setSelectedBrand(MIXED_BRANDS)
         setLoading(false)
       })
       .catch((err) => {
@@ -236,26 +248,33 @@ export default function ProductDetailPage({
       })
   }, [id, navigate])
 
-  // Fetch related products (by Brand and by Range)
+  // Fetch the backend-curated brand mix or one selected brand.
   useEffect(() => {
     if (!watch) return
-
     const lang = localStorage.getItem('t24_lang') || 'en'
-    
-    // 1. Fetch Suggestions By Brand
-    fetch(`/api/products?brand=${encodeURIComponent(watch.brand)}&limit=12&lang=${lang}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.products) {
-          const filtered = data.products
-            .filter((p: Watch) => p.id !== watch.id)
-            .slice(0, 8)
-          setBrandSuggestions(filtered)
-        }
-      })
-      .catch((err) => console.error('Failed to fetch brand suggestions:', err))
+    const params = new URLSearchParams({
+      productId: String(watch.id),
+      brand: selectedBrand,
+      limit: '16',
+      lang,
+    })
 
-    // 2. Fetch Suggestions By Range (model variant or category fallback)
+    fetch(`/api/products/suggestions?${params.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Unable to load brand suggestions')
+        return res.json()
+      })
+      .then((data) => setBrandSuggestions(data.products || []))
+      .catch((err) => {
+        console.error('Failed to fetch brand suggestions:', err)
+        setBrandSuggestions([])
+      })
+  }, [watch, selectedBrand])
+
+  // Suggestions By Range (model variant or category fallback)
+  useEffect(() => {
+    if (!watch) return
+    const lang = localStorage.getItem('t24_lang') || 'en'
     const modelToQuery = watch.model || watch.name.replace(new RegExp(watch.brand, 'i'), '').trim().split(' ')[0]
     fetch(`/api/products?model=${encodeURIComponent(modelToQuery)}&limit=12&lang=${lang}`)
       .then((res) => res.json())
@@ -339,13 +358,13 @@ export default function ProductDetailPage({
   const triggerWhatsAppOrder = () => {
     const rep = getSelectedRep(salesReps, defaultWhatsAppNumber)
     const messageText = isAr 
-      ? `مرحباً T24 Watches! أنا مهتم بشراء هذه الساعة المميزة:\n\n` +
+      ? `مرحباً Dubai Watches Gallery! أنا مهتم بشراء هذه الساعة المميزة:\n\n` +
         `⌚ *اسم الساعة:* ${displayName}\n` +
         `🏷️ *الماركة:* ${displayBrand}\n` +
         `💰 *السعر:* ${watch.priceAED} (${watch.priceUSD})\n` +
         `🔗 *رابط الموقع:* ${watch.url}\n\n` +
         `يرجى تأكيد أوقات الشحن في دول الخليج وخيارات الدفع عند الاستلام السريع. شكراً لك!`
-      : `Hello T24 Watches! I am interested in purchasing this premium watch:\n\n` +
+      : `Hello Dubai Watches Gallery! I am interested in purchasing this premium watch:\n\n` +
         `⌚ *Watch Name:* ${watch.name}\n` +
         `🏷️ *Brand:* ${watch.brand}\n` +
         `💰 *Price:* ${watch.priceAED} (${watch.priceUSD})\n` +
@@ -495,7 +514,7 @@ export default function ProductDetailPage({
                   {translate("Model", currentLang)}: {displayModel}
                 </span>
                 <span className="px-3 py-1 bg-gold/15 border border-gold/30 rounded text-xs text-gold font-mono uppercase font-bold">
-                  {translate("Master Copy", currentLang)}
+                  {translate("Super Clone", currentLang)}
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 rounded text-xs text-emerald-400 font-mono uppercase font-bold shadow-[0_0_10px_rgba(16,185,129,0.15)] flex items-center gap-1.5 animate-pulse">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
@@ -511,9 +530,6 @@ export default function ProductDetailPage({
             <div className="flex flex-wrap items-baseline gap-4 py-4 px-6 rounded-2xl bg-gold/5 border border-gold/10 inline-block w-fit anim-fade">
               <span className="text-3xl font-light text-gold tracking-tight">{watch.priceAED}</span>
               <span className="text-sm text-gray-400 font-mono">/ {watch.priceUSD}</span>
-              <span className="ml-2 px-2.5 py-0.5 text-[10px] font-mono font-semibold tracking-wider text-black bg-white rounded uppercase">
-                {translate("VAT INCLUDED", currentLang)}
-              </span>
             </div>
 
             {/* Tabs Control */}
@@ -651,7 +667,7 @@ export default function ProductDetailPage({
                   </svg>
                 </div>
                 <span className="text-[10px] sm:text-[11px] font-bold text-white font-mono uppercase tracking-wider">{translate("FAST GLOBAL SHIPPING", currentLang)}</span>
-                <span className="text-[8px] sm:text-[9px] text-gold font-mono mt-0.5 uppercase tracking-widest font-semibold">{translate("DHL & FEDEX EXPRESS", currentLang)}</span>
+                <span className="text-[8px] sm:text-[9px] text-gold font-mono mt-0.5 uppercase tracking-widest font-semibold">{translate("DHL, FEDEX & UPS", currentLang)}</span>
               </div>
 
               {/* Free Shipping */}
@@ -669,6 +685,14 @@ export default function ProductDetailPage({
                 <span className="text-[10px] sm:text-[11px] font-bold text-white font-mono uppercase tracking-wider">{translate("DUTY-FREE GUARANTEE", currentLang)}</span>
                 <span className="text-[8px] sm:text-[9px] text-gold font-mono mt-0.5 uppercase tracking-widest font-semibold">{translate("SECURE INSURED PARTNERS", currentLang)}</span>
               </div>
+            </div>
+
+            {/* Official Logistics Partners Bar */}
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
+              <span className="text-[9px] font-mono uppercase tracking-widest text-silver">
+                {translate("Official Couriers", currentLang)}:
+              </span>
+              <ShippingLogosBar />
             </div>
 
             {/* Direct WhatsApp Call to Action Button */}
@@ -690,28 +714,71 @@ export default function ProductDetailPage({
         {/* SUGGESTIONS BY BRAND */}
         {brandSuggestions.length > 0 && (
           <div className="mt-28 border-t border-white/10 pt-20">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <h2 className="text-2xl font-light tracking-tight text-white flex items-center gap-3">
-                <Compass className="w-6 h-6 text-gold animate-spin-slow" />
-                {translate("Suggestions by Brand", currentLang)}: <span className="text-gold font-mono uppercase">{watch.brand}</span>
+                <Compass className="w-6 h-6 text-gold animate-spin-slow shrink-0" />
+                <span>
+                  {translate("Suggestions by Brand", currentLang)}: <span className="text-gold font-mono uppercase font-bold">
+                    {selectedBrand === MIXED_BRANDS
+                      ? translate("MIXED BRANDS", currentLang)
+                      : selectedBrand}
+                  </span>
+                </span>
               </h2>
               {/* Navigation Arrows */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-end sm:self-auto">
                 <button 
                   onClick={scrollBrandPrev}
-                  className="w-10 h-10 rounded-full border border-white/10 bg-black/80 hover:bg-gold hover:text-black hover:border-gold flex items-center justify-center transition-all duration-300 z-10 group"
+                  className="w-10 h-10 rounded-full border border-white/10 bg-black/80 hover:bg-gold hover:text-black hover:border-gold flex items-center justify-center transition-all duration-300 z-10 group cursor-pointer"
                   aria-label="Previous Brand Suggestions"
                 >
                   <ChevronLeft className="w-5 h-5 text-white group-hover:text-black" />
                 </button>
                 <button 
                   onClick={scrollBrandNext}
-                  className="w-10 h-10 rounded-full border border-white/10 bg-black/80 hover:bg-gold hover:text-black hover:border-gold flex items-center justify-center transition-all duration-300 z-10 group"
+                  className="w-10 h-10 rounded-full border border-white/10 bg-black/80 hover:bg-gold hover:text-black hover:border-gold flex items-center justify-center transition-all duration-300 z-10 group cursor-pointer"
                   aria-label="Next Brand Suggestions"
                 >
                   <ChevronRight className="w-5 h-5 text-white group-hover:text-black" />
                 </button>
               </div>
+            </div>
+
+            {/* Backend-driven mixed and brand-specific suggestion filters */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-3 mb-6 pt-1">
+                <button
+                  onClick={() => {
+                    setSelectedBrand(MIXED_BRANDS)
+                    if (brandContainerRef.current) brandContainerRef.current.scrollLeft = 0
+                  }}
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer ${
+                    selectedBrand === MIXED_BRANDS
+                      ? 'bg-gold text-black border border-gold shadow-[0_0_15px_rgba(217,165,32,0.4)] scale-105'
+                      : 'bg-white/5 border border-white/10 text-silver/80 hover:text-white hover:border-gold/40 hover:bg-white/10'
+                  }`}
+                >
+                  {translate("MIXED BRANDS", currentLang)}
+                </button>
+
+                {SUGGESTION_BRANDS.map((b) => {
+                  const isActive = selectedBrand === b
+                  return (
+                    <button
+                      key={b}
+                      onClick={() => {
+                        setSelectedBrand(b)
+                        if (brandContainerRef.current) brandContainerRef.current.scrollLeft = 0
+                      }}
+                      className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer ${
+                        isActive
+                          ? 'bg-gold text-black border border-gold shadow-[0_0_15px_rgba(217,165,32,0.4)] scale-105'
+                          : 'bg-white/5 border border-white/10 text-silver/80 hover:text-white hover:border-gold/40 hover:bg-white/10'
+                      }`}
+                    >
+                      {translate(b, currentLang)}
+                    </button>
+                  )
+                })}
             </div>
             
             <div className="relative w-full overflow-hidden">

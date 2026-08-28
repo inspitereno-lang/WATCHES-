@@ -15,7 +15,7 @@ export function getSelectedRep(
   defaultNumber: string = '971501234567'
 ): SalesRep {
   const fallbackRep: SalesRep = {
-    name: 'T24 WhatsApp Support',
+    name: 'Dubai Watches Gallery WhatsApp Support',
     number: defaultNumber,
     isActive: true,
     isFeatured: true

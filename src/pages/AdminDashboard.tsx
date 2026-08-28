@@ -17,7 +17,8 @@ import {
   X,
   Copy,
   Sparkles,
-  Upload
+  Upload,
+  Box
 } from 'lucide-react'
 import { toast } from '../components/ui/sonner'
 
@@ -58,8 +59,28 @@ export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null)
   
   // Tab states
-  const [activeTab, setActiveTab] = useState<'products' | 'homepage'>('products')
+  const [activeTab, setActiveTab] = useState<'products' | 'homepage' | 'accessories'>('products')
   const [activeSubTab, setActiveSubTab] = useState<'hero' | 'arrivals' | 'heritage' | 'atelier' | 'catalogue' | 'testimonials' | 'footer'>('hero')
+
+  // Accessories State
+  const [accessories, setAccessories] = useState<any[]>([])
+  const [accessoriesLoading, setAccessoriesLoading] = useState(false)
+  const [accessoryCategoryFilter, setAccessoryCategoryFilter] = useState('ALL')
+  const [editingAccessory, setEditingAccessory] = useState<any | null>(null)
+  const [isAccessoryModalOpen, setIsAccessoryModalOpen] = useState(false)
+  const [accessoryDeleteConfirmId, setAccessoryDeleteConfirmId] = useState<number | null>(null)
+  const [accessoryForm, setAccessoryForm] = useState({
+    name: '',
+    category: 'Straps',
+    brandCompatibility: 'Universal',
+    priceAED: '',
+    priceUSD: '',
+    image: '',
+    material: '',
+    description: '',
+    inStock: true,
+    isVisible: true,
+  })
 
   // Homepage Settings form state
   const [homepageForm, setHomepageForm] = useState<any>({
@@ -274,6 +295,154 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Error fetching categories:', err)
+    }
+  }
+
+  // Fetch Accessories
+  const fetchAdminAccessories = async () => {
+    setAccessoriesLoading(true)
+    try {
+      const res = await fetch('/api/accessories?includeHidden=true')
+      if (res.ok) {
+        const data = await res.json()
+        setAccessories(data.accessories || [])
+      }
+    } catch (err) {
+      console.error('Error fetching accessories:', err)
+    } finally {
+      setAccessoriesLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'accessories') {
+      fetchAdminAccessories()
+    }
+  }, [activeTab])
+
+  const handleOpenAccessoryModal = (acc?: any) => {
+    if (acc) {
+      setEditingAccessory(acc)
+      setAccessoryForm({
+        name: acc.name || '',
+        category: acc.category || 'Straps',
+        brandCompatibility: acc.brandCompatibility || 'Universal',
+        priceAED: acc.priceAED || '',
+        priceUSD: acc.priceUSD || '',
+        image: acc.image || '',
+        material: acc.material || '',
+        description: acc.description || '',
+        inStock: acc.inStock !== false,
+        isVisible: acc.isVisible !== false,
+      })
+    } else {
+      setEditingAccessory(null)
+      setAccessoryForm({
+        name: '',
+        category: 'Straps',
+        brandCompatibility: 'Universal',
+        priceAED: '',
+        priceUSD: '',
+        image: '',
+        material: '',
+        description: '',
+        inStock: true,
+        isVisible: true,
+      })
+    }
+    setIsAccessoryModalOpen(true)
+  }
+
+  const handleSaveAccessory = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!accessoryForm.name || !accessoryForm.priceAED) {
+      toast.error('Validation Error', { description: 'Please fill in Name and Price AED.' })
+      return
+    }
+
+    try {
+      const method = editingAccessory ? 'PUT' : 'POST'
+      const url = editingAccessory ? `/api/accessories/${editingAccessory.id}` : '/api/accessories'
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(accessoryForm),
+      })
+
+      if (res.ok) {
+        toast.success(editingAccessory ? 'Accessory Updated' : 'Accessory Created', {
+          description: `${accessoryForm.name} saved successfully.`
+        })
+        setIsAccessoryModalOpen(false)
+        setEditingAccessory(null)
+        fetchAdminAccessories()
+      } else {
+        const err = await res.json()
+        toast.error('Save Failed', { description: err.error || 'Failed to save accessory.' })
+      }
+    } catch (err) {
+      toast.error('Network Error', { description: 'Failed to connect to server.' })
+    }
+  }
+
+  const handleToggleAccessoryStock = async (acc: any) => {
+    try {
+      const res = await fetch(`/api/accessories/${acc.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ inStock: !acc.inStock }),
+      })
+      if (res.ok) {
+        toast.success('Stock Status Updated')
+        fetchAdminAccessories()
+      }
+    } catch (err) {
+      toast.error('Failed to update stock status')
+    }
+  }
+
+  const handleToggleAccessoryVisibility = async (acc: any) => {
+    try {
+      const res = await fetch(`/api/accessories/${acc.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isVisible: !acc.isVisible }),
+      })
+      if (res.ok) {
+        toast.success(acc.isVisible ? 'Accessory Hidden' : 'Accessory Made Visible')
+        fetchAdminAccessories()
+      }
+    } catch (err) {
+      toast.error('Failed to update visibility')
+    }
+  }
+
+  const handleDeleteAccessory = async (id: number) => {
+    try {
+      const res = await fetch(`/api/accessories/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (res.ok) {
+        toast.success('Accessory Deleted')
+        setAccessoryDeleteConfirmId(null)
+        fetchAdminAccessories()
+      } else {
+        toast.error('Failed to delete accessory')
+      }
+    } catch (err) {
+      toast.error('Network error deleting accessory')
     }
   }
 
@@ -649,7 +818,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3">
           <Database className="w-5 h-5 text-gold" />
           <h1 className="text-lg tracking-tight font-light text-white">
-            T24 WATCHES <span className="text-gold font-semibold">DUBAI CMS</span>
+            DUBAI WATCHES GALLERY <span className="text-gold font-semibold">CMS</span>
           </h1>
         </div>
         <div className="flex items-center gap-4">
@@ -685,6 +854,18 @@ export default function AdminDashboard() {
             >
               <Sliders className="w-4 h-4 shrink-0" />
               WATCH CATALOGUE
+            </button>
+
+            <button
+              onClick={() => setActiveTab('accessories')}
+              className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
+                activeTab === 'accessories'
+                  ? 'bg-gold text-black font-bold shadow-md shadow-gold/20'
+                  : 'bg-white/[0.02] border border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <Box className="w-4 h-4 shrink-0" />
+              ACCESSORIES (STRAPS & BOXES)
             </button>
 
             {[
@@ -893,6 +1074,145 @@ export default function AdminDashboard() {
                 <div className="h-64 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-center px-4">
                   <Sliders className="w-8 h-8 text-gold opacity-50 mb-3" />
                   <p className="text-xs text-gray-500 font-mono uppercase">No watches registered matching search query.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: ACCESSORIES INVENTORY MANAGEMENT */}
+          {activeTab === 'accessories' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-light text-white">Accessories & Custom Sets</h2>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5">
+                    MANAGE LUXURY STRAPS AND PRESENTATION BOXES IN THE DATABASE
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenAccessoryModal()}
+                  className="px-4 py-2.5 bg-gold text-black rounded-xl text-xs font-mono font-bold tracking-wider hover:bg-gold-light transition-all duration-300 flex items-center gap-2 shadow-lg shadow-gold/20 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4" /> ADD NEW ACCESSORY
+                </button>
+              </div>
+
+              {/* Filters Bar */}
+              <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-white/5">
+                {(['ALL', 'Straps', 'Boxes'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setAccessoryCategoryFilter(cat)}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all duration-300 ${
+                      accessoryCategoryFilter === cat
+                        ? 'bg-gold text-black font-bold'
+                        : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {cat === 'ALL' ? 'ALL ACCESSORIES' : cat.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              {/* Accessories Grid / List */}
+              {accessoriesLoading ? (
+                <div className="h-64 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-gold animate-spin" />
+                </div>
+              ) : accessories.filter((a) => accessoryCategoryFilter === 'ALL' || a.category.toLowerCase() === accessoryCategoryFilter.toLowerCase()).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {accessories
+                    .filter((a) => accessoryCategoryFilter === 'ALL' || a.category.toLowerCase() === accessoryCategoryFilter.toLowerCase())
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className={`rounded-2xl border bg-white/[0.02] p-4 flex flex-col justify-between transition-all duration-300 ${
+                          item.isVisible ? 'border-white/10 hover:border-gold/40' : 'border-red-500/20 opacity-60'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="w-16 h-16 rounded-xl bg-black border border-white/10 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                              <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-gold/10 text-gold border border-gold/20">
+                                  {item.category}
+                                </span>
+                                {item.brandCompatibility && (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-white/5 text-gray-300 border border-white/10">
+                                    {item.brandCompatibility}
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="text-xs font-medium text-white line-clamp-1">{item.name}</h4>
+                              <div className="flex items-baseline gap-2 mt-1">
+                                <span className="text-xs font-mono font-bold text-gold">{item.priceAED}</span>
+                                <span className="text-[10px] font-mono text-gray-500">{item.priceUSD}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {item.material && (
+                            <p className="text-[10px] font-mono text-gray-400 line-clamp-1 mb-2">
+                              Material: {item.material}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleToggleAccessoryStock(item)}
+                              className={`px-2 py-1 rounded text-[9px] font-mono font-bold uppercase transition-colors ${
+                                item.inStock
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20'
+                                  : 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'
+                              }`}
+                            >
+                              {item.inStock ? 'IN STOCK' : 'OUT OF STOCK'}
+                            </button>
+
+                            <button
+                              onClick={() => handleToggleAccessoryVisibility(item)}
+                              title={item.isVisible ? 'Hide from storefront' : 'Show on storefront'}
+                              className={`p-1.5 rounded-lg border transition-colors ${
+                                item.isVisible
+                                  ? 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+                                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+                              }`}
+                            >
+                              {item.isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleOpenAccessoryModal(item)}
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold transition-colors"
+                              title="Edit Accessory"
+                            >
+                              <FileEdit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setAccessoryDeleteConfirmId(item.id)}
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 text-gray-300 hover:text-red-400 transition-colors"
+                              title="Delete Accessory"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="h-64 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-center px-4">
+                  <Box className="w-8 h-8 text-gold opacity-50 mb-3" />
+                  <p className="text-xs text-gray-500 font-mono uppercase">No accessories found in this category.</p>
                 </div>
               )}
             </div>
@@ -2766,6 +3086,252 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => handleDeleteProduct(deleteConfirmId)}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-900/30"
+                >
+                  DELETE
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ACCESSORY ADD / EDIT MODAL */}
+      {isAccessoryModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 overflow-y-auto flex items-center justify-center" data-lenis-prevent>
+          <div className="relative w-full max-w-2xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl my-8 mx-auto font-mono text-xs">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
+              <div>
+                <h3 className="text-lg font-light text-white">
+                  {editingAccessory ? 'Edit Luxury Accessory' : 'Add New Luxury Accessory'}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  STRAP, PRESENTATION BOX, OR WATCH WINDER
+                </p>
+              </div>
+              <button
+                onClick={() => setIsAccessoryModalOpen(false)}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAccessory} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Accessory Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={accessoryForm.name}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g. Rolex Green Wave Luxury Box Set"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Category *</label>
+                  <select
+                    value={accessoryForm.category}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, category: e.target.value as any }))}
+                    className="w-full px-4 py-3 rounded-xl bg-black border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  >
+                    <option value="Straps">Straps (Leather / Rubber / Composite)</option>
+                    <option value="Boxes">Boxes (Presentation Sets)</option>
+                    <option value="Accessories">Accessories (General / Care)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Brand Compatibility</label>
+                  <input
+                    type="text"
+                    value={accessoryForm.brandCompatibility}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, brandCompatibility: e.target.value }))}
+                    placeholder="e.g. Rolex, Audemars Piguet, or Universal"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Material / Construction</label>
+                  <input
+                    type="text"
+                    value={accessoryForm.material}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, material: e.target.value }))}
+                    placeholder="e.g. Full-Grain Epsom Calfskin"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Price in AED *</label>
+                  <input
+                    type="text"
+                    required
+                    value={accessoryForm.priceAED}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setAccessoryForm((prev) => {
+                        const num = parseInt(val.replace(/[^0-9]/g, '') || '0')
+                        const usd = num > 0 ? `$${Math.round(num / 3.67)}.00` : ''
+                        return { ...prev, priceAED: val, priceUSD: usd || prev.priceUSD }
+                      })
+                    }}
+                    placeholder="e.g. AED 850"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Price in USD</label>
+                  <input
+                    type="text"
+                    value={accessoryForm.priceUSD}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, priceUSD: e.target.value }))}
+                    placeholder="e.g. $230.00"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Image Input with Upload support */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Image URL / Upload *</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    required
+                    value={accessoryForm.image}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, image: e.target.value }))}
+                    placeholder="https://images.unsplash.com/... or upload"
+                    className="flex-1 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
+                  />
+                  <label className="px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold cursor-pointer transition-colors flex items-center gap-1.5 shrink-0">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const toastId = toast.loading('Uploading accessory image...')
+                        const formData = new FormData()
+                        formData.append('image', file)
+                        try {
+                          const res = await fetch('/api/admin/upload', {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${token}` },
+                            body: formData,
+                          })
+                          const data = await res.json()
+                          if (res.ok && data.url) {
+                            setAccessoryForm((prev) => ({ ...prev, image: data.url }))
+                            toast.success('Image Uploaded', { id: toastId })
+                          } else {
+                            toast.error('Upload Failed', { id: toastId, description: data.error })
+                          }
+                        } catch (err: any) {
+                          toast.error('Upload Error', { id: toastId, description: err.message })
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {accessoryForm.image && (
+                  <div className="w-20 h-20 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center overflow-hidden">
+                    <img src={accessoryForm.image} alt="Preview" className="max-h-full max-w-full object-contain" />
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1">
+                <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Description</label>
+                <textarea
+                  rows={3}
+                  value={accessoryForm.description}
+                  onChange={(e) => setAccessoryForm((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="Detailed specifications, clasp materials, compatibility..."
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white resize-none"
+                />
+              </div>
+
+              {/* Checkboxes */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <label className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={accessoryForm.inStock}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, inStock: e.target.checked }))}
+                    className="accent-gold w-4 h-4"
+                  />
+                  <span className="text-xs text-white">MARK AS IN STOCK</span>
+                </label>
+                <label className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={accessoryForm.isVisible}
+                    onChange={(e) => setAccessoryForm((prev) => ({ ...prev, isVisible: e.target.checked }))}
+                    className="accent-gold w-4 h-4"
+                  />
+                  <span className="text-xs text-white">SHOW ON STOREFRONT</span>
+                </label>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsAccessoryModalOpen(false)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-gold hover:bg-gold-light text-black font-bold rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-gold/20"
+                >
+                  {editingAccessory ? 'UPDATE ACCESSORY' : 'CREATE ACCESSORY'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ACCESSORY DELETE CONFIRMATION MODAL */}
+      {accessoryDeleteConfirmId !== null && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 flex items-center justify-center" data-lenis-prevent>
+          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Confirm Accessory Deletion</h3>
+                <p className="text-gray-400 mt-2">
+                  Are you sure you want to delete this accessory?
+                </p>
+                <p className="text-[10px] text-red-400 uppercase mt-2">
+                  This action is irreversible.
+                </p>
+              </div>
+              <div className="flex gap-3 w-full pt-4">
+                <button
+                  type="button"
+                  onClick={() => setAccessoryDeleteConfirmId(null)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteAccessory(accessoryDeleteConfirmId)}
                   className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-900/30"
                 >
                   DELETE

@@ -16,6 +16,7 @@ import Footer from './sections/Footer'
 import ProductDetailPage from './pages/ProductDetailPage'
 import WatchesPage from './pages/WatchesPage'
 import CollectionsPage from './pages/CollectionsPage'
+import AccessoriesPage from './pages/AccessoriesPage'
 import BlogPage from './pages/BlogPage'
 import BlogArticlePage from './pages/BlogArticlePage'
 import AdminLogin from './pages/AdminLogin'
@@ -23,6 +24,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import ScrollToTop from './components/ScrollToTop'
 import ArabicLocalizer from './components/ArabicLocalizer'
 import { Toaster } from './components/ui/sonner'
+import { EngagementPopup } from './components/EngagementPopup'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -108,6 +110,10 @@ export default function App() {
       <Toaster />
       <ArabicLocalizer />
       <ScrollToTop />
+      <EngagementPopup
+        salesReps={homepageData?.salesReps}
+        footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+      />
       <Routes>
         <Route 
           path="/" 
@@ -127,6 +133,8 @@ export default function App() {
                   heroCtaLabel={homepageData?.heroCtaLabel}
                   heroCtaTarget={homepageData?.heroCtaTarget}
                   heroWatchImageUrl={homepageData?.heroWatchImageUrl}
+                  heroVideoUrl={homepageData?.heroVideoUrl || '/videos/hero-banner.mp4'}
+                  heroMobileVideoUrl={homepageData?.heroMobileVideoUrl || 'https://res.cloudinary.com/dwqxzzqpn/video/upload/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'}
                   heroWatchLabelLine1={homepageData?.heroWatchLabelLine1}
                   heroWatchLabelLine2={homepageData?.heroWatchLabelLine2}
                   heroWatchLabelLine3={homepageData?.heroWatchLabelLine3}
@@ -215,6 +223,33 @@ export default function App() {
               />
               <main>
                 <WatchesPage />
+              </main>
+              <Footer 
+                footerHeading={homepageData?.footerHeading}
+                footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+                footerLinks={homepageData?.footerLinks}
+                footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
+                salesReps={homepageData?.salesReps}
+              />
+            </>
+          } 
+        />
+        <Route 
+          path="/accessories" 
+          element={
+            <>
+              <Header 
+                salesReps={homepageData?.salesReps}
+                defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                defaultWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+              />
+              <main>
+                <AccessoriesPage 
+                  salesReps={homepageData?.salesReps}
+                  defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                />
               </main>
               <Footer 
                 footerHeading={homepageData?.footerHeading}

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { translate } from '../utils/translate'
 import { getSelectedRep, getWhatsAppUrl, type SalesRep } from '../utils/whatsapp'
+import { ShippingLogosBar } from '../components/ShippingLogos'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -21,57 +23,23 @@ interface FooterProps {
   salesReps?: SalesRep[]
 }
 
-const defaultFooterLinks: LinkGroup[] = [
-  {
-    title: 'COLLECTIONS',
-    links: [
-      'Rolex 1:1 Clones',
-      'Patek Philippe Clones',
-      'Audemars Piguet Clones',
-      'Richard Mille Clones',
-      'Vacheron Constantin',
-    ],
-  },
-  {
-    title: 'OUR SPECIFICATIONS',
-    links: [
-      'Clone Caliber Movement',
-      '904L Anti-Corrosive Steel',
-      'Bespoke Bezel Finishes',
-      'Ultra-Clear Sapphire Glass',
-    ],
-  },
-  {
-    title: 'CUSTOMER SERVICE',
-    links: [
-      'WhatsApp Order Desk',
-      'QC Photo Review',
-      'GCC Secure Delivery',
-      'Secure Packaging',
-    ],
-  },
-  {
-    title: 'T24 REPLICA ASSURANCE',
-    links: [
-      '1:1 Weight Guarantee',
-      'AAA+ Precision Sweeping',
-      'Indistinguishable Engravings',
-      'Dual Waterproof Seals',
-    ],
-  },
-]
+const essentialFooterLinks = [
+  { label: 'HOME', to: '/' },
+  { label: 'WATCHES', to: '/watches' },
+  { label: 'COLLECTIONS', to: '/collections' },
+  { label: 'ACCESSORIES', to: '/accessories' },
+  { label: 'JOURNAL', to: '/blog' },
+] as const
 
 export default function Footer({
   footerHeading = 'CONTACT US',
   footerWhatsAppNumber = '971501234567',
-  footerWhatsAppMessage = "Hi T24 Watches! I'm visiting your website and would like to inquire about your premium watch collection.",
-  footerLinks = defaultFooterLinks,
-  footerCopyright = '© 2026 T24 Watches Dubai. All rights reserved. Premium timepieces.',
+  footerWhatsAppMessage = "Hi Dubai Watches Gallery! I'm visiting your website and would like to inquire about your premium watch collection.",
+  footerCopyright = '© 2026 Dubai Watches Gallery. All rights reserved. Premium timepieces.',
   footerContactImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171812/t24_watches_defaults/hk3mfvm17mljab3czc5h.jpg',
   salesReps,
 }: FooterProps) {
   const sectionRef = useRef<HTMLElement>(null)
-  const linksList = footerLinks && footerLinks.length > 0 ? footerLinks : defaultFooterLinks
   const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   const [selectedRep, setSelectedRep] = useState<SalesRep | null>(null)
@@ -136,7 +104,7 @@ export default function Footer({
     }, section)
 
     return () => ctx.revert()
-  }, [linksList])
+  }, [])
 
   return (
     <footer ref={sectionRef} className="relative">
@@ -177,48 +145,59 @@ export default function Footer({
       {/* Main Footer Content */}
       <div className="bg-dark py-16 lg:py-20">
         <div className="w-full px-6 lg:px-12 xl:px-20">
-          {/* Links Grid */}
-          <div className="footer-links grid grid-cols-2 sm:grid-cols-4 gap-8 mb-16">
-            {linksList.map((group, idx) => (
-              <div key={idx}>
-                <h4 className="font-body text-[10px] tracking-[0.2em] text-gold mb-4 uppercase font-semibold">
-                  {translate(group.title, currentLang)}
-                </h4>
-                <ul className="space-y-2.5">
-                  {group.links && group.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="footer-link font-body text-xs text-silver hover:text-white transition-colors duration-300"
-                      >
-                        {translate(link, currentLang)}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          {/* Essential navigation only: every item maps to a real app route. */}
+          <nav className="footer-links mb-14" aria-label="Footer navigation">
+            <h4 className="font-body text-[10px] tracking-[0.25em] text-gold mb-5 uppercase font-semibold">
+              {translate('EXPLORE', currentLang)}
+            </h4>
+            <ul className="flex flex-wrap items-center gap-x-8 gap-y-4">
+              {essentialFooterLinks.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="footer-link inline-block font-body text-xs tracking-[0.12em] text-silver hover:text-gold transition-colors duration-300"
+                  >
+                    {translate(link.label, currentLang)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-          {/* Payment Icons & Copyright */}
-          <div className="footer-bottom flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-white/10">
-            {/* Secure Payment Methods */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded font-mono text-[9px] text-gold tracking-widest uppercase">
-                {translate('CASH ON DELIVERY (GCC)', currentLang)}
-              </span>
-              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded font-mono text-[9px] text-gold tracking-widest uppercase">
-                {translate('USDT / CRYPTO', currentLang)}
-              </span>
-              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded font-mono text-[9px] text-gold tracking-widest uppercase">
-                {translate('BANK TRANSFER', currentLang)}
-              </span>
+          {/* Payment Badges, Shipping Partners & Copyright */}
+          <div className="footer-bottom pt-8 border-t border-white/10 flex flex-col gap-6">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-5">
+              {/* Payment Methods */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded font-mono text-[9px] text-gold tracking-widest uppercase font-semibold shadow-sm">
+                  {translate('CASH ON DELIVERY (GCC)', currentLang)}
+                </span>
+                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded font-mono text-[9px] text-gold tracking-widest uppercase font-semibold shadow-sm">
+                  {translate('USD / CARD PAYMENTS', currentLang)}
+                </span>
+                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded font-mono text-[9px] text-gold tracking-widest uppercase font-semibold shadow-sm">
+                  {translate('BANK TRANSFER', currentLang)}
+                </span>
+              </div>
+
+              {/* Official Logistics Partners */}
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-silver/80">
+                  {translate('Official Logistics Partners', currentLang)}:
+                </span>
+                <ShippingLogosBar />
+              </div>
             </div>
 
             {/* Copyright */}
-            <p className="font-body text-[10px] text-silver tracking-wider">
-              {translate(footerCopyright, currentLang)}
-            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/5 text-center sm:text-left">
+              <p className="font-body text-[10px] text-silver tracking-wider">
+                {translate(footerCopyright, currentLang)}
+              </p>
+              <p className="font-mono text-[9px] text-gray-500 tracking-widest uppercase">
+                {translate('Global Insured Delivery via DHL • FedEx • UPS', currentLang)}
+              </p>
+            </div>
           </div>
         </div>
       </div>

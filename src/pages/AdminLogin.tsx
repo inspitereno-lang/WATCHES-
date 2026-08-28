@@ -52,7 +52,7 @@ export default function AdminLogin() {
       localStorage.setItem('adminUser', JSON.stringify(data.user))
       toast.success('Access Authorized', {
         id: toastId,
-        description: 'Welcome back to T24 Watches Dubai CMS panel.'
+        description: 'Welcome back to Dubai Watches Gallery CMS panel.'
       })
       navigate('/admin')
     } catch (err: any) {
@@ -90,7 +90,7 @@ export default function AdminLogin() {
             SECURE ACCESS GATEWAY
           </span>
           <h1 className="text-2xl font-light tracking-tight text-white mt-2">
-            T24 WATCHES <span className="text-gold font-semibold">DUBAI</span>
+            DUBAI WATCHES <span className="text-gold font-semibold">GALLERY</span>
           </h1>
           <p className="text-xs text-gray-500 font-mono mt-1 uppercase">
             Administrative Control Panel

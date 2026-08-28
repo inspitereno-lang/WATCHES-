@@ -45,23 +45,30 @@ const PRIMARY_BRANDS = [
   'Patek Philippe',
   'Rolex',
   'Hublot',
-  'Cartier',
   'Vacheron Constantin',
   'Omega',
+  'Cartier',
+  'Panerai',
   'IWC',
   'Breitling',
+  'Roger Dubuis',
   'Chopard',
   'TAG Heuer'
 ]
 
 const BRAND_MODELS: Record<string, string[]> = {
-  'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
-  'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
-  'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications'],
   'Richard Mille': ['RM 11-03', 'RM 35-02', 'RM 67-02', 'RM 21-02', 'RM 55'],
+  'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
+  'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications', 'Twenty-4', 'Gondolo', 'Calatrava'],
+  'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
   'Hublot': ['Big Bang', 'Classic Fusion', 'Spirit of Big Bang'],
-  'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère'],
-  'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques']
+  'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques', 'Traditionnelle'],
+  'Omega': ['Speedmaster', 'Seamaster', 'Constellation', 'De Ville'],
+  'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère', 'Ballon Bleu'],
+  'Panerai': ['Luminor', 'Radiomir', 'Submersible'],
+  'IWC': ['Portugieser', 'Pilot', 'Portofino', 'Ingenieur'],
+  'Breitling': ['Navitimer', 'Chronomat', 'Superocean', 'Premier'],
+  'Roger Dubuis': ['Excalibur', 'Knights of the Round Table', 'Velvet']
 }
 
 export default function WatchesPage() {
@@ -218,8 +225,8 @@ export default function WatchesPage() {
         </p>
 
         {/* Brand visual pills row */}
-        <div className="flex flex-wrap justify-center gap-2 pt-6 max-w-4xl mx-auto">
-          {brands.slice(0, 7).map((brand) => {
+        <div className="flex flex-wrap justify-center gap-2 pt-6 max-w-5xl mx-auto">
+          {brands.map((brand) => {
             const isSelected = selectedBrand === brand;
             return (
               <button

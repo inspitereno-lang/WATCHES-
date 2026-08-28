@@ -37,7 +37,7 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[#070706] pb-24 pt-20 text-white">
       <Seo
-        title={isArabic ? 'مجلة الساعات الفاخرة في دبي | تي 24 للساعات' : 'Luxury Watch Journal Dubai | T24 Watches'}
+        title={isArabic ? 'مجلة الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Watch Journal Dubai | Dubai Watches Gallery'}
         description={isArabic ? 'اقرأ أدلة عملية للشراء وشرحًا لموديلات الساعات ونصائح للعناية بالساعات الفاخرة في دبي.' : 'Read practical buying guides, watch-reference explainers, and care advice for replica watches and luxury-inspired timepieces in Dubai.'}
         keywords={[
           'watch blog Dubai',
@@ -61,7 +61,7 @@ export default function BlogPage() {
         <div className="relative mx-auto max-w-7xl px-6 py-20 text-center lg:px-12 lg:py-28">
           <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-[#e8c264]/25 bg-[#e8c264]/5 px-4 py-2 font-body text-[9px] uppercase tracking-[0.24em] text-[#e8c264]">
             <BookOpen size={14} />
-            {translate('T24 Editorial', currentLang)}
+            {translate('Dubai Watches Gallery Editorial', currentLang)}
           </div>
           <h1 className="font-display text-4xl font-light sm:text-6xl lg:text-7xl">
             {isArabic ? (

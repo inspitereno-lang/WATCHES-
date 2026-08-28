@@ -40,29 +40,36 @@ const PRIMARY_BRANDS = [
   'Patek Philippe',
   'Rolex',
   'Hublot',
+  'Vacheron Constantin',
+  'Omega',
   'Cartier'
 ]
 
 const OTHER_BRANDS = [
-  'Vacheron Constantin',
-  'Omega',
+  'Panerai',
   'IWC',
   'Breitling',
+  'Roger Dubuis',
   'Chopard',
   'TAG Heuer'
 ]
 
 const BRAND_MODELS: Record<string, string[]> = {
-  'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
-  'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
-  'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications'],
   'Richard Mille': ['RM 11-03', 'RM 35-02', 'RM 67-02', 'RM 21-02', 'RM 55'],
+  'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
+  'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications', 'Twenty-4', 'Gondolo', 'Calatrava'],
+  'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
   'Hublot': ['Big Bang', 'Classic Fusion', 'Spirit of Big Bang'],
-  'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère'],
-  'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques']
+  'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques', 'Traditionnelle'],
+  'Omega': ['Speedmaster', 'Seamaster', 'Constellation', 'De Ville'],
+  'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère', 'Ballon Bleu'],
+  'Panerai': ['Luminor', 'Radiomir', 'Submersible'],
+  'IWC': ['Portugieser', 'Pilot', 'Portofino', 'Ingenieur'],
+  'Breitling': ['Navitimer', 'Chronomat', 'Superocean', 'Premier'],
+  'Roger Dubuis': ['Excalibur', 'Knights of the Round Table', 'Velvet']
 }
 
-const AUDIENCES = ['ALL', 'Womens', 'Mens'] as const
+const AUDIENCES = ['ALL', 'Mens', 'Womens'] as const
 type AudienceFilter = typeof AUDIENCES[number]
 
 const getAudienceLabel = (watch: Watch) => {
@@ -124,8 +131,8 @@ export default function SignatureCollection({
   }, [])
 
   const cleanBrands = brands.filter(b => b !== 'ALL BRANDS')
-  const primaryBrandsList = cleanBrands.slice(0, 6)
-  const otherBrandsList = cleanBrands.slice(6)
+  const primaryBrandsList = cleanBrands.slice(0, 8)
+  const otherBrandsList = cleanBrands.slice(8)
 
   const selectedAudience = activeAudienceFilter !== undefined ? activeAudienceFilter : selectedAudienceState
   const setSelectedAudience = (aud: AudienceFilter) => {
@@ -561,7 +568,7 @@ export default function SignatureCollection({
                   const isAr = currentLang === 'ar';
                   const displayName = isAr && watch.nameAr ? watch.nameAr : watch.name;
                   const displayBrand = isAr && watch.brandAr ? watch.brandAr : watch.brand;
-                  const displayModel = isAr && watch.modelAr ? watch.modelAr : (watch.model || watch.name.replace(new RegExp(watch.brand, 'i'), '').trim() || 'Master Copy');
+                  const displayModel = isAr && watch.modelAr ? watch.modelAr : (watch.model || watch.name.replace(new RegExp(watch.brand, 'i'), '').trim() || 'Super Clone');
 
                   return (
                     <Link

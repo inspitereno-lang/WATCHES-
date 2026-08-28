@@ -36,6 +36,7 @@ const deliveryBenefits = [
 ]
 
 import { translate } from '../utils/translate'
+import { ShippingLogosBar } from '../components/ShippingLogos'
 
 export default function DeliveryPromise() {
   const currentLang = localStorage.getItem('t24_lang') || 'en'
@@ -54,7 +55,7 @@ export default function DeliveryPromise() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#d7ae4c]/30 bg-[#d7ae4c]/[0.07] px-3 py-1.5 font-body text-[9px] font-semibold uppercase tracking-[0.24em] text-[#efca6c]">
               <PackageCheck size={13} />
-              {translate("T24 delivery promise", currentLang)}
+              {translate("Dubai Watches Gallery delivery promise", currentLang)}
             </div>
             <h2 className="mt-6 max-w-3xl font-display text-5xl font-light leading-[0.94] sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
               {translate("From Dubai.", currentLang)}
@@ -76,6 +77,14 @@ export default function DeliveryPromise() {
                 <PackageCheck size={13} className="text-[#e7bd59]" />
                 {translate("Secure presentation packaging", currentLang)}
               </span>
+            </div>
+
+            {/* Shipping Partners Row */}
+            <div className="mt-6 pt-5 border-t border-[#d7ae4c]/15 flex flex-wrap items-center gap-3.5">
+              <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-[#e7bd59] font-medium">
+                {translate("Official Logistics Partners", currentLang)}:
+              </span>
+              <ShippingLogosBar />
             </div>
           </div>
         </div>
@@ -113,7 +122,7 @@ export default function DeliveryPromise() {
         </div>
 
         <a
-          href="https://wa.me/971501234567?text=Hi%20T24%20Watches%2C%20I%20would%20like%20to%20confirm%20delivery%20for%20my%20location."
+          href="https://wa.me/971501234567?text=Hi%20Dubai%20Watches%20Gallery%2C%20I%20would%20like%20to%20confirm%20delivery%20for%20my%20location."
           target="_blank"
           rel="noreferrer"
           className="group flex flex-col justify-between gap-5 bg-[linear-gradient(100deg,#b98a22_0%,#f0ce78_50%,#b98a22_100%)] px-6 py-6 text-black sm:flex-row sm:items-center lg:px-9"

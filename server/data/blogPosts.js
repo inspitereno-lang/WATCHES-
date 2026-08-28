@@ -10,7 +10,7 @@ export const DEFAULT_BLOG_POSTS = [
     publishedAt: new Date('2026-07-16T08:00:00.000Z'),
     readingMinutes: 11,
     heroImage: '/images/blog/watch-buying-guide-2026.png',
-    seoTitle: 'How to Choose a Premium Replica Watch in Dubai | T24 Watches',
+    seoTitle: 'How to Choose a Premium Replica Watch in Dubai | Dubai Watches Gallery',
     seoDescription:
       'Learn how to compare premium replica watches in Dubai using a detailed checklist for movement quality, finishing, materials, fit, delivery, and service support.',
     keywords: [
@@ -94,7 +94,7 @@ export const DEFAULT_BLOG_POSTS = [
     publishedAt: new Date('2026-07-13T08:00:00.000Z'),
     readingMinutes: 10,
     heroImage: '/hero-brands/rolex-daytona.png',
-    seoTitle: 'Rolex Daytona Replica Buying Guide Dubai | T24 Watches',
+    seoTitle: 'Rolex Daytona Replica Buying Guide Dubai | Dubai Watches Gallery',
     seoDescription:
       'Compare Rolex Daytona-inspired references, dial colours, ceramic bezels, precious-metal finishes, sizing, chronograph details, and buying considerations in Dubai.',
     keywords: [
@@ -178,7 +178,7 @@ export const DEFAULT_BLOG_POSTS = [
     publishedAt: new Date('2026-07-10T08:00:00.000Z'),
     readingMinutes: 9,
     heroImage: '/images/blog/watch-care-dubai-2026.png',
-    seoTitle: 'Luxury Watch Care in Dubai Heat and Dust | T24 Watches',
+    seoTitle: 'Luxury Watch Care in Dubai Heat and Dust | Dubai Watches Gallery',
     seoDescription:
       'Learn practical watch-care habits for Dubai heat, dust, humidity, perspiration, storage, cleaning, water resistance, and long-term maintenance.',
     keywords: [
@@ -262,7 +262,7 @@ export const DEFAULT_BLOG_POSTS = [
     publishedAt: new Date('2026-07-07T08:00:00.000Z'),
     readingMinutes: 12,
     heroImage: '/images/blog/mechanical-movement-2026.png',
-    seoTitle: 'Mechanical Watch Movements Explained | T24 Watches Dubai',
+    seoTitle: 'Mechanical Watch Movements Explained | Dubai Watches Gallery Dubai',
     seoDescription:
       'A clear guide to mechanical watch movements, automatic winding, power reserve, beat rate, jewels, chronographs, accuracy, and daily use.',
     keywords: [
@@ -346,7 +346,7 @@ export const DEFAULT_BLOG_POSTS = [
     publishedAt: new Date('2026-07-04T08:00:00.000Z'),
     readingMinutes: 8,
     heroImage: '/watch-dress-rose.jpg',
-    seoTitle: 'Watch Size and Wrist Fit Guide | T24 Watches Dubai',
+    seoTitle: 'Watch Size and Wrist Fit Guide | Dubai Watches Gallery Dubai',
     seoDescription:
       'Choose the right watch size using case diameter, lug-to-lug length, thickness, dial opening, bracelet fit, wrist shape, and personal style.',
     keywords: [
@@ -430,7 +430,7 @@ export const DEFAULT_BLOG_POSTS = [
     publishedAt: new Date('2026-07-01T08:00:00.000Z'),
     readingMinutes: 9,
     heroImage: '/watch-diver-green.jpg',
-    seoTitle: 'How to Build a Three-Watch Collection | T24 Watches Dubai',
+    seoTitle: 'How to Build a Three-Watch Collection | Dubai Watches Gallery Dubai',
     seoDescription:
       'Build a versatile three-watch collection with a daily watch, dress watch, and expressive sports model chosen for fit, colour, function, and lifestyle.',
     keywords: [

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { WatchImage } from '../components/WatchImage'
@@ -31,28 +31,28 @@ const defaultArrivals: NewArrivalItem[] = [
   {
     id: 123,
     name: 'Rolex Cosmograph Daytona 40mm – PANDA',
-    type: '1:1 Swiss Master Copy Edition',
+    type: '1:1 Swiss Super Clone Edition',
     image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372639/t24_watches_clean/vmdeatpytq76vufbbmhh.png',
     label: 'BEST SELLER',
   },
   {
     id: 119,
     name: 'Richard Mille RM 055 Bubba Watson Asia Carbon NTPT',
-    type: '1:1 Swiss Master Copy Edition',
+    type: '1:1 Swiss Super Clone Edition',
     image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372624/t24_watches_clean/ffoturqlsqn7c3aiwgif.png',
     label: 'NEW ARRIVAL',
   },
   {
     id: 114,
     name: 'Rolex Datejust 126281RBR Two-Tone Oyster Grey Dial 36mm 2023',
-    type: '1:1 Master Copy Edition',
+    type: '1:1 Super Clone Edition',
     image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372603/t24_watches_clean/jctyki5eoi9smo4s67ri.png',
     label: 'EXQUISITE',
   },
   {
     id: 103,
     name: 'Richard Mille RM 67-01 Rose Gold Skeleton Dial Extra Flat',
-    type: '1:1 Flyback Chrono Master Copy',
+    type: '1:1 Flyback Chrono Super Clone',
     image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372551/t24_watches_clean/ze5js60llxs3rgiukog3.png',
     label: 'CRAFTSMANSHIP',
   },
@@ -88,7 +88,6 @@ export default function NewArrivals({
   craftsmanshipImages: apiCraftsmanship = [],
 }: NewArrivalsProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isHovered, setIsHovered] = useState(false)
   const currentLang = localStorage.getItem('t24_lang') || 'en'
 
   // Merge API and fallbacks so there are always up to 24 items (12 arrivals, 12 craftsmanship)
@@ -115,54 +114,16 @@ export default function NewArrivals({
     }))
   ]
 
-  // Double slides list for a seamless linear marquee flow
-  const marqueeSlides = [...slides, ...slides]
-
-  // Continuous linear scrolling logic (pause on hover)
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    let animationId: number
-    const speed = 0.8 // pixels per frame
-
-    const updateScroll = () => {
-      if (!isHovered) {
-        container.scrollLeft += speed
-        
-        const halfWidth = container.scrollWidth / 2
-        if (container.scrollLeft >= halfWidth) {
-          container.scrollLeft = container.scrollLeft - halfWidth
-        }
-      }
-      animationId = requestAnimationFrame(updateScroll)
-    }
-
-    animationId = requestAnimationFrame(updateScroll)
-    return () => cancelAnimationFrame(animationId)
-  }, [isHovered])
-
   const scrollNext = () => {
     const container = containerRef.current
     if (!container) return
-    setIsHovered(true)
     container.scrollBy({ left: 300, behavior: 'smooth' })
-    setTimeout(() => {
-      setIsHovered(false)
-    }, 800)
   }
 
   const scrollPrev = () => {
     const container = containerRef.current
     if (!container) return
-    setIsHovered(true)
-    if (container.scrollLeft <= 5) {
-      container.scrollLeft = container.scrollWidth / 2
-    }
     container.scrollBy({ left: -300, behavior: 'smooth' })
-    setTimeout(() => {
-      setIsHovered(false)
-    }, 800)
   }
 
   return (
@@ -212,7 +173,7 @@ export default function NewArrivals({
             <div className="flex items-center gap-3">
               <span className="h-[1px] w-8 bg-[#e8c264]" />
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#e8c264]">
-                {translate("Hover to focus / click arrows to slide", currentLang)}
+                {translate("Click arrows to slide", currentLang)}
               </p>
             </div>
             
@@ -239,11 +200,9 @@ export default function NewArrivals({
           <div className="w-full overflow-hidden px-1 py-4">
             <div 
               ref={containerRef}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
               className="flex flex-row flex-nowrap gap-5 overflow-x-auto scrollbar-none"
             >
-              {marqueeSlides.map((item, idx) => (
+              {slides.map((item, idx) => (
                 <div 
                   key={idx}
                   className="shrink-0 w-[280px] rounded-2xl bg-[#0d0d0f] border border-white/5 backdrop-blur-md p-6 flex flex-col justify-between group hover:border-[#e8c264]/20 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"

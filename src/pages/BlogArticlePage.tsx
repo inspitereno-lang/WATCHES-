@@ -59,7 +59,7 @@ export default function BlogArticlePage() {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'T24 Watches Dubai',
+      name: 'Dubai Watches Gallery',
     },
     mainEntityOfPage: new URL(`/blog/${post.slug}`, window.location.origin).toString(),
   }

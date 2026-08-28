@@ -5,8 +5,10 @@ import { translate } from '../utils/translate'
 import { getSelectedRep, getWhatsAppUrl, type SalesRep } from '../utils/whatsapp'
 
 const navLinks: Array<{ label: string; path?: string; sectionId?: string }> = [
+  { label: 'HOME', path: '/' },
   { label: 'COLLECTIONS', path: '/collections' },
   { label: 'WATCHES', path: '/watches' },
+  { label: 'ACCESSORIES', path: '/accessories' },
   { label: 'BLOG', path: '/blog' },
 ]
 
@@ -19,7 +21,7 @@ interface HeaderProps {
 export default function Header({
   salesReps,
   defaultWhatsAppNumber = '971501234567',
-  defaultWhatsAppMessage = "Hi T24 Watches! I'm visiting your website and would like to inquire about your premium watch collection."
+  defaultWhatsAppMessage = "Hi Dubai Watches Gallery! I'm visiting your website and would like to inquire about your premium collection."
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -27,6 +29,13 @@ export default function Header({
   const location = useLocation()
   const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('t24_lang') || 'en')
   const [selectedRep, setSelectedRep] = useState<SalesRep | null>(null)
+
+  const isLinkActive = (link: (typeof navLinks)[number]) => {
+    if (link.path === '/') {
+      return location.pathname === '/'
+    }
+    return link.path && (location.pathname === link.path || location.pathname.startsWith(`${link.path}/`))
+  }
 
   useEffect(() => {
     setSelectedRep(getSelectedRep(salesReps, defaultWhatsAppNumber))
@@ -104,34 +113,14 @@ export default function Header({
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-            className="flex items-center gap-2 group"
+            aria-label="Dubai Watches Gallery home"
+            className="group flex h-full items-center"
           >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 32 32"
-              fill="none"
-              className="text-gold transition-transform duration-300 group-hover:scale-110"
-            >
-              <circle cx="16" cy="16" r="13" stroke="currentColor" strokeWidth="1.8" fill="none" strokeDasharray="4 2" />
-              <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.2" fill="none" />
-              <path
-                d="M16 6V11M16 21V26M6 16H11M21 16H26"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <path d="M16 11L19 16H13L16 11Z" fill="currentColor" />
-              <circle cx="16" cy="16" r="2.5" fill="currentColor" />
-            </svg>
-            <div className="flex flex-col">
-              <span className="font-cinzel text-base tracking-[0.25em] text-white leading-tight font-bold">
-                T24 <span className="text-gold">WATCHES</span>
-              </span>
-              <span className="font-cinzel text-[8px] tracking-[0.45em] text-silver leading-tight uppercase">
-                DUBAI WATCHES
-              </span>
-            </div>
+            <img
+              src="/dubai-watches-gallery-logo.png"
+              alt="Dubai Watches Gallery"
+              className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03] sm:h-16"
+            />
           </a>
 
           {/* Desktop Navigation */}
@@ -142,9 +131,8 @@ export default function Header({
                 href={link.path || `/#${link.sectionId}`}
                 onClick={(e) => handleNavClick(e, link)}
                 className={`nav-link font-body text-[10px] tracking-[0.14em] transition-colors duration-300 ${
-                  link.path &&
-                  (location.pathname === link.path || location.pathname.startsWith(`${link.path}/`))
-                    ? 'text-gold'
+                  isLinkActive(link)
+                    ? 'text-gold font-bold'
                     : 'text-silver hover:text-white'
                 }`}
               >
@@ -158,12 +146,12 @@ export default function Header({
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 hover:border-gold/30 bg-white/5 hover:bg-white/10 transition-all duration-300 font-mono text-[10px] text-white tracking-widest uppercase font-bold"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-white/10 hover:border-gold/30 bg-white/5 hover:bg-white/10 transition-all duration-300 font-mono text-[10px] text-white tracking-wider uppercase font-bold cursor-pointer"
               aria-label="Change Language"
             >
-              <span className={currentLang === 'en' ? 'text-gold' : 'text-gray-400'}>EN</span>
+              <span className={currentLang === 'en' ? 'text-gold font-bold' : 'text-gray-400 hover:text-white'}>English</span>
               <span className="text-gray-600">/</span>
-              <span className={currentLang === 'ar' ? 'text-gold' : 'text-gray-400'}>AR</span>
+              <span className={currentLang === 'ar' ? 'text-gold font-bold' : 'text-gray-400 hover:text-white'}>العربية</span>
             </button>
 
             {/* WhatsApp Concierge Button */}
@@ -203,7 +191,7 @@ export default function Header({
       {/* Mobile Menu */}
       <div
         className={`lg:hidden absolute top-full left-0 right-0 bg-[#070707] border-b border-white/10 shadow-2xl transition-all duration-300 overflow-hidden ${
-          mobileMenuOpen ? 'max-h-[320px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+          mobileMenuOpen ? 'max-h-[380px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
       >
         <nav className="flex flex-col px-6 pb-5 pt-3">
@@ -211,7 +199,9 @@ export default function Header({
             <a
               key={link.label}
               href={link.path || `/#${link.sectionId}`}
-              className="py-3 font-body text-sm tracking-[0.15em] text-silver hover:text-gold transition-colors duration-300 border-b border-white/5 block w-full"
+              className={`py-3 font-body text-sm tracking-[0.15em] transition-colors duration-300 border-b border-white/5 block w-full ${
+                isLinkActive(link) ? 'text-gold font-bold' : 'text-silver hover:text-gold'
+              }`}
               onClick={(e) => handleNavClick(e, link)}
             >
               {translate(link.label, currentLang)}

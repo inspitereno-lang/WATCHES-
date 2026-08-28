@@ -17,14 +17,14 @@ interface MaisonAeternaProps {
 }
 
 export default function MaisonAeterna({
-  heritageHeading1 = 'T24',
+  heritageHeading1 = 'DWG',
   heritageHeading2 = 'ATELIER',
-  heritageDesc1 = 'At T24 Watches, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.',
+  heritageDesc1 = 'At Dubai Watches Gallery, we offer the best replica watches in Dubai. Our dedicated watchmaking atelier is specializing in the selection, calibration, and tuning of 1:1 super clone watches Dubai collectors cherish. Every super clone watch in Dubai that we hand-deliver is built using identical weight distribution and flawless Swiss sweep movements.',
   heritageDesc2 = 'As a premier source for copy watches Dubai and copy watches in Dubai, our in-house watchmakers specialize in tuning and recalibrating first copy movements. From disassembling to lubricating, each timepiece is optimized to replicate the fluid sweeps, tick rates, and robustness of original luxury brands.',
-  heritageDesc3 = 'From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of master copy watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.',
+  heritageDesc3 = 'From Daytona configurations to complex NTPT carbon fiber builds, we represent the peak of super clone watches Dubai has to offer. We use high-end 904L anti-corrosive steel, sapphire glass, and heavy bracelets to ensure our clone watches Dubai collection stands out.',
   heritageImage = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg',
   heritageCaptionLabel = 'FROM THE EYES OF THE ARTISAN',
-  heritageCaptionText = 'Every custom T24 watch undergoes calibration and pressure testing to ensure confident daily precision',
+  heritageCaptionText = 'Every custom timepiece undergoes calibration and pressure testing to ensure confident daily precision',
 }: MaisonAeternaProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const currentLang = localStorage.getItem('t24_lang') || 'en'
@@ -33,7 +33,7 @@ export default function MaisonAeterna({
   const heading2 = translate(heritageHeading2, currentLang)
   const desc1 = translate(heritageDesc1, currentLang)
   const desc2 = translate(heritageDesc2, currentLang)
-  const desc3 = translate(heritageDesc3, currentLang)
+  const desc3 = translate((heritageDesc3 || '').replace(/master\s+copy/gi, 'super clone'), currentLang)
   const captionLabel = translate(heritageCaptionLabel, currentLang)
   const captionText = translate(heritageCaptionText, currentLang)
 
