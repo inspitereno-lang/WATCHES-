@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router'
-import { X, MessageCircle, Clock, ShieldCheck, ArrowRight, ChevronRight, Crown, Sparkles } from 'lucide-react'
+import { X, MessageCircle, Clock, ShieldCheck, ArrowRight, ChevronRight, Sparkles } from 'lucide-react'
 import { translate } from '../utils/translate'
 import { getSelectedRep, getWhatsAppUrl, type SalesRep } from '../utils/whatsapp'
 import { WatchImage } from './WatchImage'
@@ -184,24 +184,23 @@ export function EngagementPopup({
           <X className="w-4 h-4" />
         </button>
 
-        {/* Top Centered Brand Monogram & Crown */}
-        <div className="relative z-10 flex items-center justify-center mb-5">
+        {/* Top Centered Official Brand Logo */}
+        <div className="relative z-10 flex items-center justify-center mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-[1px] w-12 bg-gradient-to-r from-transparent via-[#d4af37]/60 to-[#d4af37]" />
-            <div className="flex flex-col items-center">
-              <Crown className="w-4 h-4 text-[#ebcb7a] mb-0.5" />
-              <span className="font-serif text-xs tracking-[0.28em] font-bold text-[#ebcb7a]">
-                DWG
-              </span>
-            </div>
-            <div className="h-[1px] w-12 bg-gradient-to-l from-transparent via-[#d4af37]/60 to-[#d4af37]" />
+            <div className="h-[1px] w-10 bg-gradient-to-r from-transparent via-[#d4af37]/60 to-[#d4af37]" />
+            <img
+              src="/dubai-watches-gallery-logo.png"
+              alt="Dubai Watches Gallery"
+              className="h-10 w-auto object-contain filter drop-shadow-[0_2px_12px_rgba(212,175,55,0.45)]"
+            />
+            <div className="h-[1px] w-10 bg-gradient-to-l from-transparent via-[#d4af37]/60 to-[#d4af37]" />
           </div>
         </div>
 
         {/* Status Badges */}
         <div className="relative z-10 flex items-center gap-2 mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#161208]/90 border border-[#d4af37]/40 text-[#ebcb7a] text-[10px] font-mono tracking-widest uppercase font-bold shadow-[0_0_15px_rgba(212,175,55,0.15)]">
-            <Crown className="w-3 h-3 text-[#ebcb7a]" />
+            <img src="/dubai-watches-gallery-logo.png" alt="" className="w-3.5 h-3.5 object-contain" />
             {translate("DUBAI WATCHES GALLERY", currentLang)}
           </span>
           <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
@@ -267,8 +266,9 @@ export function EngagementPopup({
 
               {/* Brand Pills */}
               <div className="p-3.5 rounded-2xl bg-[#0c0c10]/85 border border-[#d4af37]/25 mb-4">
-                <p className="font-mono text-[9px] uppercase tracking-widest text-[#ebcb7a] font-semibold mb-2">
-                  {translate("Instant Sourcing Available", currentLang)}:
+                <p className="font-mono text-[9px] uppercase tracking-widest text-[#ebcb7a] font-semibold mb-2 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ebcb7a] animate-ping" />
+                  {translate("AVAILABLE NOW / BUY NOW", currentLang)}:
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {['Rolex', 'Audemars Piguet', 'Patek Philippe', 'Richard Mille', 'Hublot', 'Vacheron Constantin'].map((brand) => (
