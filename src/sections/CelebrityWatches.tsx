@@ -188,7 +188,7 @@ export default function CelebrityWatches() {
         </p>
       </header>
 
-      <div className="relative mx-auto max-w-[92rem] space-y-4 sm:space-y-6 lg:space-y-12 px-3 sm:px-6 lg:px-12">
+      <div className="relative mx-auto max-w-[92rem] space-y-6 sm:space-y-8 lg:space-y-12 px-3 sm:px-6 lg:px-12">
         {matches.map((match, index) => {
           const product = match.product
           const itemNumber = String(index + 1).padStart(2, '0')
@@ -196,201 +196,122 @@ export default function CelebrityWatches() {
           return (
             <article
               key={match.celebrity}
-              className="icon-story overflow-hidden rounded-2xl border border-white/10 bg-[#0a0908] shadow-[0_20px_60px_rgba(0,0,0,0.5)] lg:rounded-[2rem]"
+              className="icon-story grid overflow-hidden rounded-2xl border border-white/10 bg-[#0a0908] shadow-[0_30px_100px_rgba(0,0,0,0.5)] lg:min-h-[42rem] lg:grid-cols-2 lg:rounded-[2rem]"
             >
-              {/* Mobile View: 2-Tile Side-by-Side Layout (< lg) */}
-              <div className="grid grid-cols-2 lg:hidden">
-                {/* Mobile Tile 1: Celebrity Portrait (Uncropped Face & Wrist) */}
-                <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden bg-[#111] border-r border-white/10">
-                  <img
-                    src={match.image}
-                    alt={`${match.celebrity} wearing ${match.reference}`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    style={{
-                      objectPosition: match.imagePosition || 'center top',
-                    }}
-                    className="absolute inset-0 h-full w-full object-cover object-top"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent" />
-                  
-                  {/* Item Number Badge */}
-                  <div className="absolute top-2 left-2 font-mono text-[8px] font-bold text-[#e8c264] bg-black/75 border border-[#e8c264]/30 px-1.5 py-0.5 rounded">
-                    {itemNumber}
-                  </div>
-
-                  {/* Exact Reference Indicator */}
-                  <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full border border-emerald-300/30 bg-black/75 px-1.5 py-0.5 text-[7px] font-mono text-emerald-300 backdrop-blur-md">
-                    <Check size={8} strokeWidth={2.5} />
-                    <span>Match</span>
-                  </div>
-
-                  {/* Celebrity Name Overlay */}
-                  <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
-                    <p className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#e8c264]">
-                      {translate("Seen on", currentLang)}
-                    </p>
-                    <h3 className="font-display text-sm leading-tight text-white font-semibold line-clamp-1">
-                      {translate(match.celebrity, currentLang)}
-                    </h3>
-                  </div>
+              {/* Celebrity Portrait Tile - Uncropped Person with object-top */}
+              <div className="icon-portrait relative h-72 sm:h-96 lg:min-h-full overflow-hidden bg-[#111]">
+                <img
+                  src={match.image}
+                  alt={`${match.celebrity} wearing ${match.reference}`}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  style={{
+                    objectPosition: match.imagePosition || 'center top',
+                  }}
+                  className="absolute inset-0 h-full w-full object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_35%,rgba(0,0,0,0.85)_100%)]" />
+                
+                {/* Reference Match Badge */}
+                <div className="absolute left-4 top-4 sm:left-6 sm:top-6 flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-300/25 bg-black/70 px-2.5 py-1 sm:px-3 sm:py-1.5 font-body text-[7.5px] sm:text-[8px] font-semibold uppercase tracking-[0.18em] text-emerald-300 backdrop-blur-md">
+                  <Check size={10} strokeWidth={2.5} />
+                  {translate("Exact reference match", currentLang)}
                 </div>
 
-                {/* Mobile Tile 2: Exact Matching Watch Card */}
-                <div className="relative flex flex-col justify-between bg-[radial-gradient(circle_at_50%_40%,rgba(212,175,55,0.14),transparent_65%),linear-gradient(145deg,#120e09_0%,#080807_75%)] p-2.5 sm:p-4">
-                  {/* Top Row: Brand & In Stock */}
-                  <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
-                    <span className="font-mono text-[8px] font-semibold uppercase tracking-wider text-[#e8c264] truncate">
-                      {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
-                    </span>
-                    <span className="text-[7px] uppercase font-mono tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full shrink-0">
-                      {translate("In stock", currentLang)}
-                    </span>
-                  </div>
+                {/* Index Number */}
+                <div className="absolute right-4 top-4 sm:right-6 sm:top-6 font-display text-4xl sm:text-6xl lg:text-7xl text-white/20">
+                  {itemNumber}
+                </div>
 
-                  {/* Watch Image with subtle circular aura */}
-                  <div className="relative flex items-center justify-center py-2 flex-1 my-auto">
-                    <div className="absolute h-20 w-20 sm:h-24 sm:w-24 rounded-full border border-[#e8c264]/15" />
-                    {match.watchImage || product?.image ? (
-                      <WatchImage
-                        src={match.watchImage || product?.image || ''}
-                        alt={match.reference}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                        className="icon-watch relative z-10 max-h-20 sm:max-h-24 max-w-[85%] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.8)]"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
-                    )}
-                  </div>
-
-                  {/* Watch Title, Price & Shop Button */}
-                  <div className="space-y-1.5 pt-1.5 border-t border-white/10">
-                    <h4 className="font-display text-[9.5px] sm:text-xs leading-tight text-white line-clamp-1">
-                      {translate(match.reference, currentLang)}
-                    </h4>
-                    <div className="flex items-center justify-between gap-1">
-                      <p className="font-mono text-[9.5px] sm:text-xs font-bold text-[#e8c264]">
-                        {product?.priceAED || 'View price'}
-                      </p>
-                      <Link
-                        to={`/product/${match.productId}`}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#e8c264] px-2.5 py-1 font-body text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e]"
-                      >
-                        <ShoppingBag size={9} />
-                        {translate("Shop", currentLang)}
-                      </Link>
-                    </div>
-                  </div>
+                {/* Seen on Name Overlay */}
+                <div
+                  className={`absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 lg:bottom-8 lg:left-8 lg:right-8 ${
+                    match.captionAlign === 'right' ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  <p className="font-body text-[8px] sm:text-[9px] uppercase tracking-[0.24em] text-[#e8c264]">
+                    {translate("Seen on", currentLang)}
+                  </p>
+                  <h2 className="mt-1 font-display text-2xl sm:text-4xl lg:text-5xl leading-none text-white">
+                    {translate(match.celebrity, currentLang)}
+                  </h2>
+                  <a
+                    href={match.source}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`mt-2 sm:mt-3 items-center gap-1.5 font-body text-[7.5px] sm:text-[8px] uppercase tracking-[0.16em] text-white/45 transition hover:text-white ${
+                      match.captionAlign === 'right' ? 'inline-flex flex-row-reverse' : 'inline-flex'
+                    }`}
+                  >
+                    {translate("Editorial source · ", currentLang)}{translate(match.sourceLabel, currentLang)}
+                    <ExternalLink size={9} />
+                  </a>
                 </div>
               </div>
 
-              {/* Desktop View: Full Editorial 2-Column Split (lg+) */}
-              <div className="hidden lg:grid lg:min-h-[42rem] lg:grid-cols-2">
-                <div className="icon-portrait relative min-h-full overflow-hidden bg-[#111]">
-                  <img
-                    src={match.image}
-                    alt={`${match.celebrity} wearing ${match.reference}`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    style={{
-                      objectPosition: match.imagePosition || 'center center',
-                      transform: `scale(${match.imageScale || 1})`,
-                      transformOrigin: match.imageTransformOrigin || 'left center',
-                    }}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.04)_45%,rgba(0,0,0,0.82)_100%)]" />
-                  <div className="absolute left-7 top-7 flex items-center gap-2 rounded-full border border-emerald-300/25 bg-black/65 px-3 py-1.5 font-body text-[8px] font-semibold uppercase tracking-[0.18em] text-emerald-300 backdrop-blur-md">
-                    <Check size={11} strokeWidth={2.5} />
-                    {translate("Exact reference match", currentLang)}
-                  </div>
-                  <div className="absolute right-7 top-7 font-display text-7xl text-white/20">
-                    {itemNumber}
-                  </div>
-
-                  <div
-                    className={`absolute bottom-8 left-8 right-8 ${
-                      match.captionAlign === 'right' ? 'text-right' : 'text-left'
-                    }`}
-                  >
-                    <p className="font-body text-[9px] uppercase tracking-[0.24em] text-[#e8c264]">
-                      {translate("Seen on", currentLang)}
-                    </p>
-                    <h2 className="mt-2 font-display text-5xl leading-none text-white">
-                      {translate(match.celebrity, currentLang)}
-                    </h2>
-                    <a
-                      href={match.source}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`mt-4 items-center gap-1.5 font-body text-[8px] uppercase tracking-[0.16em] text-white/45 transition hover:text-white ${
-                        match.captionAlign === 'right' ? 'inline-flex flex-row-reverse' : 'inline-flex'
-                      }`}
-                    >
-                      {translate("Editorial source · ", currentLang)}{translate(match.sourceLabel, currentLang)}
-                      <ExternalLink size={10} />
-                    </a>
-                  </div>
+              {/* Exact Matching Luxury Watch Tile - BIG Watch with Watermark Brand Background */}
+              <div className="icon-product relative flex flex-col justify-between overflow-hidden bg-[radial-gradient(circle_at_50%_45%,rgba(212,175,55,0.14),transparent_35%),linear-gradient(145deg,#120e09_0%,#070706_70%)] p-5 sm:p-8 lg:p-10 min-h-[26rem] sm:min-h-[34rem] lg:min-h-full">
+                {/* Big Background Watermark Brand Name */}
+                <div className="pointer-events-none absolute -right-4 sm:-right-6 top-8 sm:top-12 font-display text-[3.8rem] sm:text-[6.5rem] lg:text-[8.5rem] leading-none text-white/[0.035] select-none uppercase tracking-tight">
+                  {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
                 </div>
 
-                <div className="icon-product relative flex min-h-full flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_45%,rgba(212,175,55,0.13),transparent_34%),linear-gradient(145deg,#100d08_0%,#070706_70%)] p-10">
-                  <div className="pointer-events-none absolute -right-5 top-12 font-display text-[8.5rem] leading-none text-white/[0.025]">
-                    {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
-                  </div>
-                  <div className="relative z-10 flex items-start justify-between border-b border-white/10 pb-5">
-                    <div>
-                      <p className="font-body text-[8px] uppercase tracking-[0.22em] text-white/35">
-                        {translate("DWG catalogue edition", currentLang)}
-                      </p>
-                      <p className="mt-2 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-[#e8c264]">
-                        {translate(product?.brand || match.reference.split(' ').slice(0, 2).join(' '), currentLang)}
-                      </p>
-                    </div>
-                    <span className="rounded-full border border-[#e8c264]/25 px-3 py-1.5 font-body text-[8px] uppercase tracking-[0.16em] text-[#e8c264]">
-                      {translate("In stock", currentLang)}
-                    </span>
-                  </div>
-
-                  <div className="relative flex flex-1 items-center justify-center py-8">
-                    <div className="absolute h-[21rem] w-[21rem] rounded-full border border-[#e8c264]/15" />
-                    <div className="absolute h-[17rem] w-[17rem] rounded-full border border-[#e8c264]/10" />
-                    {match.watchImage || product?.image ? (
-                      <WatchImage
-                        src={match.watchImage || product?.image || ''}
-                        alt={match.reference}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                        className="icon-watch relative z-10 max-h-[28rem] max-w-[82%] object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.75)]"
-                      />
-                    ) : (
-                      <div className="h-52 w-52 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
-                    )}
-                  </div>
-
-                  <div className="relative z-10 border-t border-white/10 pt-6">
-                    <p className="font-body text-[8px] uppercase tracking-[0.2em] text-white/35">
-                      {translate("The matching watch", currentLang)}
+                {/* Top Info Row */}
+                <div className="relative z-10 flex items-start justify-between border-b border-white/10 pb-3 sm:pb-5">
+                  <div>
+                    <p className="font-body text-[7.5px] sm:text-[8px] uppercase tracking-[0.22em] text-white/35">
+                      {translate("DWG catalogue edition", currentLang)}
                     </p>
-                    <h3 className="mt-2 max-w-xl font-display text-3xl leading-tight text-white">
-                      {translate(match.reference, currentLang)}
-                    </h3>
-                    <div className="mt-6 flex flex-row items-end justify-between border-t border-white/8 pt-5">
-                      <div>
-                        <p className="font-body text-[8px] uppercase tracking-[0.18em] text-white/35">
-                          {translate("Available edition", currentLang)}
-                        </p>
-                        <p className="mt-1 font-body text-xl font-semibold text-[#e8c264]">
-                          {product?.priceAED || 'View price'}
-                        </p>
-                      </div>
-                      <Link
-                        to={`/product/${match.productId}`}
-                        className="group inline-flex w-fit items-center gap-3 rounded-full bg-[#e8c264] px-5 py-3 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#f1d98e]"
-                      >
-                        <ShoppingBag size={14} />
-                        {translate("Shop this watch", currentLang)}
-                        <ArrowRight size={13} className="transition group-hover:translate-x-1" />
-                      </Link>
+                    <p className="mt-1 font-body text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-[0.18em] text-[#e8c264]">
+                      {translate(product?.brand || match.reference.split(' ').slice(0, 2).join(' '), currentLang)}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-[#e8c264]/25 px-2.5 py-1 font-body text-[7.5px] sm:text-[8px] uppercase tracking-[0.16em] text-[#e8c264] bg-[#e8c264]/5">
+                    {translate("In stock", currentLang)}
+                  </span>
+                </div>
+
+                {/* Big Center Watch Image with Concentric Gold Aura Rings */}
+                <div className="relative flex flex-1 items-center justify-center py-6 sm:py-8 my-auto">
+                  <div className="absolute h-44 w-44 sm:h-[18rem] sm:w-[18rem] lg:h-[21rem] lg:w-[21rem] rounded-full border border-[#e8c264]/15" />
+                  <div className="absolute h-32 w-32 sm:h-[14rem] sm:w-[14rem] lg:h-[17rem] lg:w-[17rem] rounded-full border border-[#e8c264]/10" />
+                  {match.watchImage || product?.image ? (
+                    <WatchImage
+                      src={match.watchImage || product?.image || ''}
+                      alt={match.reference}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      className="icon-watch relative z-10 max-h-48 sm:max-h-[22rem] lg:max-h-[28rem] max-w-[85%] object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)]"
+                    />
+                  ) : (
+                    <div className="h-32 w-32 sm:h-52 sm:w-52 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
+                  )}
+                </div>
+
+                {/* Bottom Details Row with CTA */}
+                <div className="relative z-10 border-t border-white/10 pt-4 sm:pt-6">
+                  <p className="font-body text-[7.5px] sm:text-[8px] uppercase tracking-[0.2em] text-white/35">
+                    {translate("The matching watch", currentLang)}
+                  </p>
+                  <h3 className="mt-1 font-display text-lg sm:text-2xl lg:text-3xl leading-tight text-white line-clamp-2">
+                    {translate(match.reference, currentLang)}
+                  </h3>
+                  <div className="mt-4 sm:mt-6 flex flex-row items-center justify-between border-t border-white/8 pt-3 sm:pt-5">
+                    <div>
+                      <p className="font-body text-[7.5px] sm:text-[8px] uppercase tracking-[0.18em] text-white/35">
+                        {translate("Available edition", currentLang)}
+                      </p>
+                      <p className="mt-0.5 font-body text-base sm:text-xl font-semibold text-[#e8c264]">
+                        {product?.priceAED || 'View price'}
+                      </p>
                     </div>
+                    <Link
+                      to={`/product/${match.productId}`}
+                      className="group inline-flex items-center gap-2 sm:gap-3 rounded-full bg-[#e8c264] px-4 py-2.5 sm:px-5 sm:py-3 font-body text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#f1d98e] active:scale-95 shadow-md"
+                    >
+                      <ShoppingBag size={13} />
+                      {translate("Shop this watch", currentLang)}
+                      <ArrowRight size={12} className="transition group-hover:translate-x-1" />
+                    </Link>
                   </div>
                 </div>
               </div>
