@@ -68,11 +68,8 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
     celebrity: 'Alexander Zverev',
     productId: 118,
     reference: 'Richard Mille RM 67-02 Alexander Zverev',
-    image:
-      'https://watchpaparazzi.com/img/pairings/8cb9b89f-0326-40df-84b0-86ed75542157.jpg',
-    imagePosition: 'left center',
-    imageScale: 1.55,
-    captionAlign: 'right',
+    image: '/images/collections/alexander-zverev-portrait.jpg',
+    imagePosition: 'center top',
     source: 'https://watchpaparazzi.com/spotted.php?id=8cb9b89f-0326-40df-84b0-86ed75542157',
     sourceLabel: 'Watch Paparazzi',
   },
