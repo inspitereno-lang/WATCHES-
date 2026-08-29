@@ -92,7 +92,7 @@ export default function Header({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 bg-[#070708]/98 backdrop-blur-xl border-b border-white/10 shadow-2xl sm:border-transparent sm:bg-transparent sm:shadow-none ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'sm:bg-black/95 sm:backdrop-blur-md sm:border-b sm:border-white/10 sm:shadow-2xl'
           : 'sm:bg-transparent sm:border-transparent'

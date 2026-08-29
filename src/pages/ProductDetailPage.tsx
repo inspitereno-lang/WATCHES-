@@ -375,7 +375,7 @@ export default function ProductDetailPage({
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-black pt-24 sm:pt-28 pb-20 text-white relative overflow-hidden">
+    <div ref={containerRef} className="min-h-screen bg-black pt-28 sm:pt-32 pb-20 text-white relative overflow-hidden">
       {/* Background radial highlights */}
       <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
