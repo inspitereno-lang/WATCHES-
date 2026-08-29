@@ -111,7 +111,7 @@ export default function Luminescence({
     <section
       ref={sectionRef}
       id="architecture"
-      className="relative overflow-hidden bg-black py-20 lg:py-32"
+      className="hidden lg:block relative overflow-hidden bg-black py-20 lg:py-32"
     >
       <div className="absolute left-[-16rem] top-1/3 h-[30rem] w-[30rem] rounded-full bg-[#d9a520]/10 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e8c264]/30 to-transparent" />

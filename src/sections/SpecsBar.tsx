@@ -60,7 +60,7 @@ export default function SpecsBar({ items }: { items?: Spec[] }) {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-charcoal border-t border-white/5 py-10 lg:py-12"
+      className="hidden lg:block relative bg-charcoal border-t border-white/5 py-10 lg:py-12"
     >
       <div className="w-full px-6 lg:px-12 xl:px-20">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-0">
