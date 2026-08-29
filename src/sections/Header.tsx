@@ -82,9 +82,9 @@ export default function Header({
   }
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-[9999] w-full bg-[#070708]/98 backdrop-blur-xl border-b border-white/10 shadow-2xl transition-all duration-300">
+    <header className="sticky top-0 left-0 right-0 z-[9999] w-full bg-black border-b border-white/10 shadow-2xl transition-all duration-300">
       {/* Top Row: Logo, Language, WhatsApp */}
-      <div className="w-full px-4 sm:px-6 lg:px-12">
+      <div className="w-full px-4 sm:px-6 lg:px-12 bg-black">
         <div className="flex items-center justify-between h-14 sm:h-20">
           {/* Logo */}
           <a
@@ -158,7 +158,7 @@ export default function Header({
       </div>
 
       {/* Mobile Sub-Nav Row (Direct Desktop-Style Horizontal Links, No Hamburger) */}
-      <div className="lg:hidden border-t border-white/5 bg-black/95 backdrop-blur-xl px-2 py-2">
+      <div className="lg:hidden border-t border-white/10 bg-black px-2 py-2">
         <nav className="flex items-center justify-around gap-1 overflow-x-auto scrollbar-none px-1">
           {navLinks.map((link) => {
             const active = isLinkActive(link)
