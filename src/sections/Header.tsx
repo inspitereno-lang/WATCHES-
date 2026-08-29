@@ -92,10 +92,10 @@ export default function Header({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 bg-[#070708]/98 backdrop-blur-xl border-b border-white/10 shadow-2xl sm:border-transparent sm:bg-transparent sm:shadow-none ${
         scrolled
-          ? 'bg-black/95 backdrop-blur-md border-b border-white/10 shadow-2xl'
-          : 'bg-black/90 sm:bg-transparent border-b border-white/5 sm:border-transparent backdrop-blur-sm sm:backdrop-blur-none'
+          ? 'sm:bg-black/95 sm:backdrop-blur-md sm:border-b sm:border-white/10 sm:shadow-2xl'
+          : 'sm:bg-transparent sm:border-transparent'
       }`}
     >
       {/* Top Row: Logo, Language, WhatsApp */}
