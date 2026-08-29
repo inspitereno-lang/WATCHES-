@@ -91,13 +91,7 @@ export default function Header({
   }
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'sm:bg-black/95 sm:backdrop-blur-md sm:border-b sm:border-white/10 sm:shadow-2xl'
-          : 'sm:bg-transparent sm:border-transparent'
-      }`}
-    >
+    <header className="sticky top-0 left-0 right-0 z-[9999] w-full bg-[#070708]/98 backdrop-blur-xl border-b border-white/10 shadow-2xl transition-all duration-300">
       {/* Top Row: Logo, Language, WhatsApp */}
       <div className="w-full px-4 sm:px-6 lg:px-12">
         <div className="flex items-center justify-between h-14 sm:h-20">

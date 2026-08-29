@@ -208,7 +208,7 @@ export default function WatchesPage() {
     Number(sortBy !== 'default')
 
   return (
-    <div className="bg-[#070708] min-h-screen text-white pt-28 sm:pt-32 pb-12 sm:pb-20 selection:bg-gold/30 selection:text-white">
+    <div className="bg-[#070708] min-h-screen text-white pt-8 sm:pt-16 pb-12 sm:pb-20 selection:bg-gold/30 selection:text-white">
       {/* Dynamic luxury background */}
       <div className="absolute top-0 left-0 w-full h-[500px] pointer-events-none overflow-hidden z-0">
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-gold/5 blur-[150px] rounded-full" />

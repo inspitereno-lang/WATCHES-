@@ -505,7 +505,7 @@ export default function Hero({
       <div className={`absolute top-28 hidden h-40 w-40 rounded-full border border-[#ebcb7a]/20 lg:block ${isRtl ? 'left-10' : 'right-10'}`} />
       <div className={`absolute top-40 hidden h-24 w-24 rounded-full border border-[#e8c264]/20 lg:block ${isRtl ? 'left-20' : 'right-20'}`} />
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-7 pt-28 sm:pt-8 sm:px-10 sm:py-8 lg:px-14">
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-7 pt-8 sm:px-10 sm:py-8 lg:px-14">
         <div className="w-full max-w-[42rem]">
           <p
             ref={eyebrowRef}
