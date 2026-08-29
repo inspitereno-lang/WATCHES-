@@ -197,11 +197,10 @@ export default function CelebrityWatches() {
             <article
               key={match.celebrity}
               className="icon-story overflow-hidden rounded-2xl border border-white/10 bg-[#0a0908] shadow-[0_20px_60px_rgba(0,0,0,0.5)] lg:rounded-[2rem]"
-            >
-              {/* Mobile View: Luxury 2-Tile Stacked Format (< lg) */}
-              <div className="flex flex-col lg:hidden">
+            >              {/* Mobile View: 2-Tile Side-by-Side Layout (< lg) */}
+              <div className="grid grid-cols-2 lg:hidden">
                 {/* Mobile Tile 1: Celebrity Portrait (Uncropped Face & Wrist) */}
-                <div className="relative h-56 sm:h-72 w-full overflow-hidden bg-[#111] border-b border-white/10">
+                <div className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-[#111] border-r border-white/10">
                   <img
                     src={match.image}
                     alt={`${match.celebrity} wearing ${match.reference}`}
@@ -212,95 +211,78 @@ export default function CelebrityWatches() {
                     }}
                     className="absolute inset-0 h-full w-full object-cover object-top"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent" />
                   
                   {/* Top Badges */}
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <div className="font-mono text-[9px] font-bold text-[#e8c264] bg-black/80 border border-[#e8c264]/30 px-2 py-0.5 rounded">
+                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                    <div className="font-mono text-[8px] font-bold text-[#e8c264] bg-black/80 border border-[#e8c264]/30 px-1.5 py-0.5 rounded">
                       {itemNumber}
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-full border border-emerald-300/30 bg-black/80 px-2.5 py-0.5 text-[8px] font-mono text-emerald-300 backdrop-blur-md">
-                      <Check size={9} strokeWidth={2.5} />
-                      <span>{translate("Exact reference match", currentLang)}</span>
-                    </div>
+                  </div>
+                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full border border-emerald-300/30 bg-black/80 px-1.5 py-0.5 text-[7px] font-mono text-emerald-300 backdrop-blur-md">
+                    <Check size={8} strokeWidth={2.5} />
+                    <span>Match</span>
                   </div>
 
                   {/* Celebrity Name Overlay */}
-                  <div className="absolute bottom-3 left-4 right-4 text-left">
-                    <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-[#e8c264]">
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
+                    <p className="font-mono text-[7px] uppercase tracking-[0.22em] text-[#e8c264]">
                       {translate("Seen on", currentLang)}
                     </p>
-                    <h3 className="font-display text-2xl leading-tight text-white font-semibold mt-0.5">
+                    <h3 className="font-display text-sm sm:text-base leading-tight text-white font-semibold line-clamp-1 mt-0.5">
                       {translate(match.celebrity, currentLang)}
                     </h3>
                   </div>
                 </div>
 
                 {/* Mobile Tile 2: Exact Matching Luxury Watch Card */}
-                <div className="relative flex flex-col justify-between overflow-hidden bg-[radial-gradient(circle_at_50%_45%,rgba(212,175,55,0.15),transparent_55%),linear-gradient(145deg,#120e09_0%,#070706_75%)] p-5 sm:p-7">
+                <div className="relative flex flex-col justify-between overflow-hidden bg-[radial-gradient(circle_at_50%_40%,rgba(212,175,55,0.15),transparent_60%),linear-gradient(145deg,#120e09_0%,#080807_75%)] p-2.5 sm:p-4">
                   {/* Brand Watermark in Background */}
-                  <div className="pointer-events-none absolute -right-2 top-4 font-display text-[4.2rem] leading-none text-white/[0.035] select-none">
+                  <div className="pointer-events-none absolute -right-2 top-2 font-display text-[2.8rem] sm:text-[3.5rem] leading-none text-white/[0.035] select-none">
                     {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
                   </div>
 
-                  {/* Top Header: Brand Edition & In Stock */}
-                  <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3">
-                    <div>
-                      <p className="font-body text-[8px] uppercase tracking-[0.2em] text-white/40">
-                        {translate("DWG catalogue edition", currentLang)}
-                      </p>
-                      <p className="mt-0.5 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e8c264]">
-                        {translate(product?.brand || match.reference.split(' ').slice(0, 2).join(' '), currentLang)}
-                      </p>
-                    </div>
-                    <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 font-body text-[8px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+                  {/* Top Row: Brand & In Stock */}
+                  <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-1.5">
+                    <span className="font-mono text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider text-[#e8c264] truncate">
+                      {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
+                    </span>
+                    <span className="text-[7px] uppercase font-mono tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full shrink-0">
                       {translate("In stock", currentLang)}
                     </span>
                   </div>
 
-                  {/* Watch Image with Large Gold Aura */}
-                  <div className="relative flex items-center justify-center py-6 my-2">
-                    <div className="absolute h-40 w-40 rounded-full border border-[#e8c264]/15" />
-                    <div className="absolute h-32 w-32 rounded-full border border-[#e8c264]/10" />
+                  {/* Watch Image with Larger Scale & Gold Aura */}
+                  <div className="relative flex items-center justify-center py-2 flex-1 my-auto">
+                    <div className="absolute h-24 w-24 sm:h-28 sm:w-28 rounded-full border border-[#e8c264]/15" />
+                    <div className="absolute h-18 w-18 sm:h-22 sm:w-22 rounded-full border border-[#e8c264]/10" />
                     {match.watchImage || product?.image ? (
                       <WatchImage
                         src={match.watchImage || product?.image || ''}
                         alt={match.reference}
                         loading={index === 0 ? 'eager' : 'lazy'}
-                        className="icon-watch relative z-10 max-h-48 sm:max-h-56 max-w-[85%] object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)]"
+                        className="icon-watch relative z-10 max-h-28 sm:max-h-36 max-w-[90%] object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.85)]"
                       />
                     ) : (
-                      <div className="h-36 w-36 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
+                      <div className="h-20 w-20 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
                     )}
                   </div>
 
-                  {/* Watch Title, Price & Shop CTA */}
-                  <div className="relative z-10 border-t border-white/10 pt-4 space-y-3">
-                    <div>
-                      <p className="font-body text-[8px] uppercase tracking-[0.2em] text-white/40">
-                        {translate("The matching watch", currentLang)}
+                  {/* Watch Title, Price & Shop Button */}
+                  <div className="relative z-10 space-y-1.5 pt-1.5 border-t border-white/10">
+                    <h4 className="font-display text-[9.5px] sm:text-xs leading-tight text-white line-clamp-1">
+                      {translate(match.reference, currentLang)}
+                    </h4>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className="font-mono text-[9.5px] sm:text-xs font-bold text-[#e8c264]">
+                        {product?.priceAED || 'View price'}
                       </p>
-                      <h4 className="mt-1 font-display text-lg sm:text-xl leading-tight text-white">
-                        {translate(match.reference, currentLang)}
-                      </h4>
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-white/8 pt-3">
-                      <div>
-                        <p className="font-body text-[8px] uppercase tracking-[0.18em] text-white/40">
-                          {translate("Available edition", currentLang)}
-                        </p>
-                        <p className="mt-0.5 font-body text-base font-semibold text-[#e8c264]">
-                          {product?.priceAED || 'View price'}
-                        </p>
-                      </div>
                       <Link
                         to={`/product/${match.productId}`}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#e8c264] px-4 py-2.5 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-black transition active:scale-95 hover:bg-[#f1d98e] shadow-md"
+                        className="inline-flex items-center gap-1 rounded-full bg-[#e8c264] px-2.5 py-1 font-body text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e]"
                       >
-                        <ShoppingBag size={13} />
-                        <span>{translate("Shop this watch", currentLang)}</span>
-                        <ArrowRight size={12} />
+                        <ShoppingBag size={9} />
+                        <span>{translate("Shop", currentLang)}</span>
                       </Link>
                     </div>
                   </div>
