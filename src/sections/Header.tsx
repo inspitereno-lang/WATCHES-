@@ -23,7 +23,6 @@ export default function Header({
   defaultWhatsAppNumber = '971501234567',
   defaultWhatsAppMessage = "Hi Dubai Watches Gallery! I'm visiting your website and would like to inquire about your premium collection."
 }: HeaderProps) {
-  const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('t24_lang') || 'en')
@@ -52,14 +51,6 @@ export default function Header({
     document.documentElement.classList.add('language-leaving')
     window.setTimeout(() => window.location.reload(), 160)
   }
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 30)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const scrollToSection = (sectionId: string) => {
     const el = document.getElementById(sectionId)
