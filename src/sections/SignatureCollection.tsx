@@ -491,100 +491,100 @@ export default function SignatureCollection({
           </div>
 
           {/* Dual 2-Column Side-by-Side Gender Cards */}
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 mb-3.5">
             
-            {/* Card 1: FOR HIM */}
+            {/* Card 1: FOR MEN */}
             <button
               type="button"
               onClick={() => {
                 handleAudienceClick(selectedAudience === 'Mens' ? 'ALL' : 'Mens')
                 scrollToCatalogue()
               }}
-              className={`relative group/mcard aspect-[4/3.2] rounded-2xl overflow-hidden border transition-all duration-300 active:scale-95 text-left ${
+              className={`relative group/mcard aspect-[4/3.5] min-h-[145px] sm:min-h-[170px] rounded-2xl overflow-hidden border transition-all duration-300 active:scale-95 text-left ${
                 selectedAudience === 'Mens'
-                  ? 'border-gold shadow-[0_0_18px_rgba(212,175,55,0.45)] ring-1 ring-gold'
+                  ? 'border-gold shadow-[0_0_20px_rgba(212,175,55,0.5)] ring-1 ring-gold'
                   : 'border-gold/30 bg-[#0e0e11] hover:border-gold/60'
               }`}
             >
               <img
                 src="/images/card-him.jpg"
-                alt="For Him"
-                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/mcard:scale-105"
+                alt="For Men"
+                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/mcard:scale-105 select-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/15" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10 pointer-events-none" />
               
               {/* Mars ♂ Top Badge */}
-              <div className="absolute top-2.5 left-2.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 backdrop-blur-md border border-gold/40 text-gold shadow-sm">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 48 48" fill="none">
+              <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/75 backdrop-blur-md border border-gold/50 text-gold shadow-md">
+                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5" viewBox="0 0 48 48" fill="none">
                   <circle cx="21" cy="27" r="6" className="stroke-gold" strokeWidth="3" />
                   <path d="M25.5 22.5L33 15M33 15H27M33 15V21" className="stroke-gold" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
 
               {/* Bottom Label, Model Count & Action Arrow */}
-              <div className="absolute bottom-2.5 inset-x-2.5 flex items-end justify-between">
+              <div className="absolute bottom-2.5 sm:bottom-3 inset-x-2.5 sm:inset-x-3 flex items-end justify-between gap-2">
                 <div>
-                  <p className="font-mono text-[11px] font-bold tracking-wider text-white uppercase leading-none">
+                  <p className="font-mono text-xs sm:text-sm font-bold tracking-wider text-white uppercase leading-none drop-shadow-sm">
                     {translate("FOR MEN", currentLang)}
                   </p>
-                  <p className="font-mono text-[9px] text-gold/80 font-medium mt-1">
+                  <p className="font-mono text-[10px] sm:text-xs text-gold/90 font-medium mt-1">
                     {counts.mens || 214} {translate("Models", currentLang)}
                   </p>
                 </div>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
                   selectedAudience === 'Mens'
                     ? 'bg-gold text-black shadow-md'
                     : 'bg-gold/20 backdrop-blur-sm border border-gold/40 text-gold group-hover/mcard:bg-gold group-hover/mcard:text-black'
                 }`}>
-                  <ArrowRight className="w-3 h-3" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
               </div>
             </button>
 
-            {/* Card 2: FOR LADIES */}
+            {/* Card 2: FOR WOMEN */}
             <button
               type="button"
               onClick={() => {
                 handleAudienceClick(selectedAudience === 'Womens' ? 'ALL' : 'Womens')
                 scrollToCatalogue()
               }}
-              className={`relative group/wcard aspect-[4/3.2] rounded-2xl overflow-hidden border transition-all duration-300 active:scale-95 text-left ${
+              className={`relative group/wcard aspect-[4/3.5] min-h-[145px] sm:min-h-[170px] rounded-2xl overflow-hidden border transition-all duration-300 active:scale-95 text-left ${
                 selectedAudience === 'Womens'
-                  ? 'border-gold shadow-[0_0_18px_rgba(212,175,55,0.45)] ring-1 ring-gold'
+                  ? 'border-gold shadow-[0_0_20px_rgba(212,175,55,0.5)] ring-1 ring-gold'
                   : 'border-gold/30 bg-[#0e0e11] hover:border-gold/60'
               }`}
             >
               <img
                 src="/images/card-her.jpg"
-                alt="For Ladies"
-                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/wcard:scale-105"
+                alt="For Women"
+                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/wcard:scale-105 select-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/15" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10 pointer-events-none" />
               
               {/* Venus ♀ Top Badge */}
-              <div className="absolute top-2.5 left-2.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 backdrop-blur-md border border-gold/40 text-gold shadow-sm">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 48 48" fill="none">
+              <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/75 backdrop-blur-md border border-gold/50 text-gold shadow-md">
+                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5" viewBox="0 0 48 48" fill="none">
                   <circle cx="24" cy="19" r="6" className="stroke-gold" strokeWidth="3" />
                   <path d="M24 25V35M19 30H29" className="stroke-gold" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
 
               {/* Bottom Label, Model Count & Action Arrow */}
-              <div className="absolute bottom-2.5 inset-x-2.5 flex items-end justify-between">
+              <div className="absolute bottom-2.5 sm:bottom-3 inset-x-2.5 sm:inset-x-3 flex items-end justify-between gap-2">
                 <div>
-                  <p className="font-mono text-[11px] font-bold tracking-wider text-white uppercase leading-none">
-                    {translate("FOR LADIES", currentLang)}
+                  <p className="font-mono text-xs sm:text-sm font-bold tracking-wider text-white uppercase leading-none drop-shadow-sm">
+                    {translate("FOR WOMEN", currentLang)}
                   </p>
-                  <p className="font-mono text-[9px] text-gold/80 font-medium mt-1">
+                  <p className="font-mono text-[10px] sm:text-xs text-gold/90 font-medium mt-1">
                     {counts.womens || 13} {translate("Models", currentLang)}
                   </p>
                 </div>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
                   selectedAudience === 'Womens'
                     ? 'bg-gold text-black shadow-md'
                     : 'bg-gold/20 backdrop-blur-sm border border-gold/40 text-gold group-hover/wcard:bg-gold group-hover/wcard:text-black'
                 }`}>
-                  <ArrowRight className="w-3 h-3" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
               </div>
             </button>
@@ -684,7 +684,7 @@ export default function SignatureCollection({
                 <span className={`font-mono text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
                   selectedAudience === 'Womens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/her:text-gold'
                 }`}>
-                  {translate("FOR LADIES", currentLang)}
+                  {translate("FOR WOMEN", currentLang)}
                 </span>
                 <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.womens || 13})</span>
               </button>
@@ -713,7 +713,7 @@ export default function SignatureCollection({
                 {translate("PREMIUM WATCHES", currentLang)}
               </h3>
               <h4 className="font-display text-4xl lg:text-5xl text-gold font-bold tracking-wider leading-tight mt-1">
-                {translate("FOR MEN & LADIES", currentLang)}
+                {translate("FOR MEN & WOMEN", currentLang)}
               </h4>
 
               {/* Center Octagonal Framed Counter Box */}
