@@ -394,9 +394,9 @@ export default function WatchesPage() {
             {/* Bottom Row: Watch Model Annotations & Explore Action Buttons */}
             <div className="relative z-10 flex items-end justify-between gap-4 pt-3">
               
-              {/* Bottom Left Watch Label + Explore Men's Button */}
+              {/* Bottom Left Watch Label (Desktop only) + Large Mobile Explore Men's Button */}
               <div className="text-left select-none space-y-2">
-                <div>
+                <div className="hidden sm:block">
                   <p className="font-mono text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase">
                     RICHARD MILLE
                   </p>
@@ -407,20 +407,20 @@ export default function WatchesPage() {
                 <button
                   type="button"
                   onClick={() => handleAudienceClick('Mens')}
-                  className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[11px] font-mono tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer ${
+                  className={`inline-flex items-center justify-center gap-2 px-4 sm:px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-lg text-[11px] sm:text-[11px] font-mono font-semibold tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer shadow-lg active:scale-95 ${
                     selectedAudience === 'Mens'
-                      ? 'bg-gold text-black border-gold font-bold shadow-[0_0_15px_rgba(212,175,55,0.5)]'
-                      : 'bg-black/65 text-silver hover:text-gold border-white/20 hover:border-gold shadow-md hover:shadow-[0_0_12px_rgba(212,175,55,0.3)]'
+                      ? 'bg-gold text-black border-gold shadow-[0_0_18px_rgba(212,175,55,0.6)]'
+                      : 'bg-black/75 text-white hover:text-gold border-white/25 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]'
                   }`}
                 >
                   <span>{translate("EXPLORE MEN'S", currentLang)}</span>
-                  <ChevronRight className="w-3 h-3 text-gold" />
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-gold" />
                 </button>
               </div>
 
-              {/* Bottom Right Watch Label + Explore Women's Button */}
+              {/* Bottom Right Watch Label (Desktop only) + Large Mobile Explore Women's Button */}
               <div className="text-right select-none space-y-2">
-                <div>
+                <div className="hidden sm:block">
                   <p className="font-mono text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase">
                     AUDEMARS PIGUET
                   </p>
@@ -431,14 +431,14 @@ export default function WatchesPage() {
                 <button
                   type="button"
                   onClick={() => handleAudienceClick('Womens')}
-                  className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[11px] font-mono tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer ${
+                  className={`inline-flex items-center justify-center gap-2 px-4 sm:px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-lg text-[11px] sm:text-[11px] font-mono font-semibold tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer shadow-lg active:scale-95 ${
                     selectedAudience === 'Womens'
-                      ? 'bg-gold text-black border-gold font-bold shadow-[0_0_15px_rgba(212,175,55,0.5)]'
-                      : 'bg-black/65 text-silver hover:text-gold border-white/20 hover:border-gold shadow-md hover:shadow-[0_0_12px_rgba(212,175,55,0.3)]'
+                      ? 'bg-gold text-black border-gold shadow-[0_0_18px_rgba(212,175,55,0.6)]'
+                      : 'bg-black/75 text-white hover:text-gold border-white/25 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]'
                   }`}
                 >
                   <span>{translate("EXPLORE WOMEN'S", currentLang)}</span>
-                  <ChevronRight className="w-3 h-3 text-gold" />
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-gold" />
                 </button>
               </div>
 
