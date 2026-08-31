@@ -11,7 +11,8 @@ import {
   ShieldCheck, 
   RotateCcw,
   SlidersHorizontal,
-  Loader2
+  Loader2,
+  ArrowRight
 } from 'lucide-react'
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
@@ -240,271 +241,423 @@ export default function WatchesPage() {
         <div className="absolute top-40 -left-40 w-[500px] h-[500px] bg-emerald-500/[0.02] blur-[150px] rounded-full" />
       </div>
 
-      {/* Hero section with Luxury Showcase Banner & Brand Pills */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-2 pb-4 sm:pt-4 sm:pb-8 text-center">
+      {/* Hero section with Responsive Dual Gender Cards (Mobile) & Showcase Banner (Desktop) */}
+      <section className="relative z-10 max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-2 sm:pt-4 sm:pb-8 text-center">
 
-        {/* Luxury Men & Women Dual Showcase Feature */}
-        <div className="pt-2 sm:pt-4 max-w-7xl mx-auto text-left">
-          <div className="relative rounded-2xl sm:rounded-3xl border border-gold/30 bg-[#0d0d0f] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] min-h-[420px] sm:min-h-[460px] lg:min-h-[500px] flex flex-col justify-between p-4 sm:p-7 lg:p-9 group">
+        {/* MOBILE VIEW (< md): Compact Header + Dual Side-by-Side Gender Cards */}
+        <div className="block md:hidden text-left mb-4">
+          
+          {/* Header Title & Subtitle */}
+          <div className="px-1 pt-1 pb-3 space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="h-[2px] w-5 bg-gold rounded-full" />
+              <h1 className="font-display text-2xl font-light tracking-wide text-white uppercase">
+                {translate("WATCHES", currentLang)}
+              </h1>
+            </div>
+            <p className="font-body text-[11px] text-silver/70 font-light tracking-wide pl-7">
+              {translate("Timeless craftsmanship for every moment.", currentLang)}
+            </p>
+          </div>
+
+          {/* Dual 2-Column Side-by-Side Gender Cards */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-3">
             
-            {/* Responsive Background Luxury Photo with Smooth Lighting */}
-            <picture className="absolute inset-0 w-full h-full pointer-events-none">
-              <source media="(max-width: 767px)" srcSet="/curated-men-women-banner-mobile.jpg" />
-              <source media="(min-width: 768px)" srcSet="/curated-men-women-banner-desktop.png" />
-              <img 
-                src="/curated-men-women-banner-desktop.png" 
-                alt="Premium Watches For Him & Her"
-                className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02] select-none"
-              />
-            </picture>
-            
-            {/* Subtle Vignette for Text Contrast while keeping watches luminous */}
-            <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-            <div 
-              className="absolute inset-0 pointer-events-none" 
-              style={{
-                background: 'radial-gradient(ellipse 55% 70% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 65%, transparent 100%)'
+            {/* Card 1: FOR HIM */}
+            <button
+              type="button"
+              onClick={() => {
+                handleAudienceClick(selectedAudience === 'Mens' ? 'ALL' : 'Mens')
+                scrollToCatalogue()
               }}
-            />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
-
-            {/* Top Row: Octagonal Gold Wireframe Gender Badges */}
-            <div className="relative z-10 flex items-start justify-between gap-4">
+              className={`relative group/mcard aspect-[4/3.2] rounded-2xl overflow-hidden border transition-all duration-300 active:scale-95 text-left ${
+                selectedAudience === 'Mens'
+                  ? 'border-gold shadow-[0_0_18px_rgba(212,175,55,0.45)] ring-1 ring-gold'
+                  : 'border-gold/30 bg-[#0e0e11] hover:border-gold/60'
+              }`}
+            >
+              <img
+                src="/images/card-him.jpg"
+                alt="For Him"
+                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/mcard:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/15" />
               
-              {/* FOR HIM / FOR MEN */}
-              <button
-                type="button"
-                onClick={() => handleAudienceClick(selectedAudience === 'Mens' ? 'ALL' : 'Mens')}
-                className="group/him flex flex-col items-center gap-1.5 focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 text-left"
-              >
-                <div className={`relative w-11 h-11 sm:w-13 sm:h-13 flex items-center justify-center transition-all duration-300 ${
+              {/* Mars ♂ Top Badge */}
+              <div className="absolute top-2.5 left-2.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 backdrop-blur-md border border-gold/40 text-gold shadow-sm">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 48 48" fill="none">
+                  <circle cx="21" cy="27" r="6" className="stroke-gold" strokeWidth="3" />
+                  <path d="M25.5 22.5L33 15M33 15H27M33 15V21" className="stroke-gold" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+
+              {/* Bottom Label, Model Count & Action Arrow */}
+              <div className="absolute bottom-2.5 inset-x-2.5 flex items-end justify-between">
+                <div>
+                  <p className="font-mono text-[11px] font-bold tracking-wider text-white uppercase leading-none">
+                    {translate("FOR HIM", currentLang)}
+                  </p>
+                  <p className="font-mono text-[9px] text-gold/80 font-medium mt-1">
+                    {counts.mens || 214} {translate("Models", currentLang)}
+                  </p>
+                </div>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                   selectedAudience === 'Mens'
-                    ? 'filter drop-shadow-[0_0_15px_rgba(212,175,55,0.7)]'
-                    : 'group-hover/him:filter group-hover/him:drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                    ? 'bg-gold text-black shadow-md'
+                    : 'bg-gold/20 backdrop-blur-sm border border-gold/40 text-gold group-hover/mcard:bg-gold group-hover/mcard:text-black'
                 }`}>
-                  <svg className="w-11 h-11 sm:w-13 sm:h-13" viewBox="0 0 48 48" fill="none">
-                    <polygon 
-                      points="14,4 34,4 44,14 44,34 34,44 14,44 4,34 4,14" 
-                      className={`transition-colors duration-300 ${
-                        selectedAudience === 'Mens'
-                          ? 'fill-gold/30 stroke-gold'
-                          : 'fill-black/60 stroke-gold/60 group-hover/him:stroke-gold group-hover/him:fill-black/80'
-                      }`}
-                      strokeWidth="1.5" 
-                    />
-                    {/* Male Mars Symbol ♂ */}
-                    <circle cx="21" cy="27" r="6" className={selectedAudience === 'Mens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" />
-                    <path d="M25.5 22.5L33 15M33 15H27M33 15V21" className={selectedAudience === 'Mens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <ArrowRight className="w-3 h-3" />
                 </div>
-                <span className={`font-mono text-[10px] sm:text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
-                  selectedAudience === 'Mens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/him:text-gold'
-                }`}>
-                  {translate("FOR HIM", currentLang)}
-                </span>
-                <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.mens || 214})</span>
-              </button>
+              </div>
+            </button>
 
-              {/* FOR HER / FOR WOMEN */}
-              <button
-                type="button"
-                onClick={() => handleAudienceClick(selectedAudience === 'Womens' ? 'ALL' : 'Womens')}
-                className="group/her flex flex-col items-center gap-1.5 focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 text-right"
-              >
-                <div className={`relative w-11 h-11 sm:w-13 sm:h-13 flex items-center justify-center transition-all duration-300 ${
+            {/* Card 2: FOR HER */}
+            <button
+              type="button"
+              onClick={() => {
+                handleAudienceClick(selectedAudience === 'Womens' ? 'ALL' : 'Womens')
+                scrollToCatalogue()
+              }}
+              className={`relative group/wcard aspect-[4/3.2] rounded-2xl overflow-hidden border transition-all duration-300 active:scale-95 text-left ${
+                selectedAudience === 'Womens'
+                  ? 'border-gold shadow-[0_0_18px_rgba(212,175,55,0.45)] ring-1 ring-gold'
+                  : 'border-gold/30 bg-[#0e0e11] hover:border-gold/60'
+              }`}
+            >
+              <img
+                src="/images/card-her.jpg"
+                alt="For Her"
+                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/wcard:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/15" />
+              
+              {/* Venus ♀ Top Badge */}
+              <div className="absolute top-2.5 left-2.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 backdrop-blur-md border border-gold/40 text-gold shadow-sm">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="19" r="6" className="stroke-gold" strokeWidth="3" />
+                  <path d="M24 25V35M19 30H29" className="stroke-gold" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+
+              {/* Bottom Label, Model Count & Action Arrow */}
+              <div className="absolute bottom-2.5 inset-x-2.5 flex items-end justify-between">
+                <div>
+                  <p className="font-mono text-[11px] font-bold tracking-wider text-white uppercase leading-none">
+                    {translate("FOR HER", currentLang)}
+                  </p>
+                  <p className="font-mono text-[9px] text-gold/80 font-medium mt-1">
+                    {counts.womens || 13} {translate("Models", currentLang)}
+                  </p>
+                </div>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                   selectedAudience === 'Womens'
-                    ? 'filter drop-shadow-[0_0_15px_rgba(212,175,55,0.7)]'
-                    : 'group-hover/her:filter group-hover/her:drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                    ? 'bg-gold text-black shadow-md'
+                    : 'bg-gold/20 backdrop-blur-sm border border-gold/40 text-gold group-hover/wcard:bg-gold group-hover/wcard:text-black'
                 }`}>
-                  <svg className="w-11 h-11 sm:w-13 sm:h-13" viewBox="0 0 48 48" fill="none">
-                    <polygon 
-                      points="14,4 34,4 44,14 44,34 34,44 14,44 4,34 4,14" 
-                      className={`transition-colors duration-300 ${
-                        selectedAudience === 'Womens'
-                          ? 'fill-gold/30 stroke-gold'
-                          : 'fill-black/60 stroke-gold/60 group-hover/her:stroke-gold group-hover/her:fill-black/80'
-                      }`}
-                      strokeWidth="1.5" 
-                    />
-                    {/* Female Venus Symbol ♀ */}
-                    <circle cx="24" cy="19" r="6" className={selectedAudience === 'Womens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" />
-                    <path d="M24 25V35M19 30H29" className={selectedAudience === 'Womens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <ArrowRight className="w-3 h-3" />
                 </div>
-                <span className={`font-mono text-[10px] sm:text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
-                  selectedAudience === 'Womens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/her:text-gold'
-                }`}>
-                  {translate("FOR HER", currentLang)}
-                </span>
-                <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.womens || 13})</span>
-              </button>
+              </div>
+            </button>
 
+          </div>
+
+          {/* Mobile Scrollable Brand Filter Pills */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between pb-1.5 px-0.5">
+              <div className="flex items-center gap-1.5">
+                <span className="h-[1px] w-3 bg-[#e8c264]" />
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#e8c264]">
+                  {translate("Filter by Brand", currentLang)}
+                </p>
+              </div>
+              <div className="flex items-center gap-1" dir="ltr">
+                <button
+                  type="button"
+                  onClick={scrollBrandsPrev}
+                  aria-label="Scroll brands left"
+                  className="w-5 h-5 rounded-full border border-white/15 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95"
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollBrandsNext}
+                  aria-label="Scroll brands right"
+                  className="w-5 h-5 rounded-full border border-white/15 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95"
+                >
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
 
-            {/* Center Content: Special Selection, Premium Watches For Him & Her, Model Counter */}
-            <div className="relative z-10 text-center my-auto py-4 sm:py-6 px-4">
-              
-              {/* Eyebrow Filigree */}
-              <div className="flex items-center justify-center gap-3 mb-1">
-                <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
-                <p className="font-mono text-[9px] sm:text-[11px] uppercase tracking-[0.3em] text-[#e8c264] font-semibold">
-                  {translate("SPECIAL SELECTION", currentLang)}
-                </p>
-                <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
-              </div>
-              
-              {/* Crown Icon */}
-              <div className="flex items-center justify-center mb-1.5">
-                <Crown className="w-4 h-4 text-gold/90" />
-              </div>
+            <div 
+              ref={brandScrollRef}
+              className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 scroll-smooth"
+            >
+              {brands.map((brand) => {
+                const isSelected = selectedBrand === brand;
+                return (
+                  <button
+                    key={brand}
+                    type="button"
+                    onClick={() => {
+                      setSelectedBrand(brand)
+                      setSelectedModel('')
+                      setPage(1)
+                      scrollToCatalogue()
+                    }}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-[9px] font-mono tracking-wider uppercase transition-all duration-300 border ${
+                      isSelected
+                        ? 'bg-gold border-gold text-black font-bold shadow-[0_2px_10px_rgba(212,175,55,0.3)]'
+                        : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white hover:border-gold/30'
+                    }`}
+                  >
+                    {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
 
-              {/* Headings */}
-              <h3 className="font-display text-2xl sm:text-4xl lg:text-5xl text-white font-light tracking-wide leading-tight">
-                {translate("PREMIUM WATCHES", currentLang)}
-              </h3>
-              <h4 className="font-display text-2xl sm:text-4xl lg:text-5xl text-gold font-bold tracking-wider leading-tight mt-0.5 sm:mt-1">
-                {translate("FOR HIM & HER", currentLang)}
-              </h4>
 
-              {/* Center Octagonal Framed Counter Box */}
+        {/* DESKTOP VIEW (≥ md): Full Luxury Widescreen Showcase Banner & Brand Filter */}
+        <div className="hidden md:block">
+          
+          {/* Luxury Men & Women Dual Showcase Feature */}
+          <div className="pt-2 sm:pt-4 max-w-7xl mx-auto text-left">
+            <div className="relative rounded-3xl border border-gold/30 bg-[#0d0d0f] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] min-h-[460px] lg:min-h-[500px] flex flex-col justify-between p-7 lg:p-9 group">
+              
+              {/* Responsive Background Luxury Photo with Smooth Lighting */}
+              <picture className="absolute inset-0 w-full h-full pointer-events-none">
+                <source media="(max-width: 767px)" srcSet="/curated-men-women-banner-mobile.jpg" />
+                <source media="(min-width: 768px)" srcSet="/curated-men-women-banner-desktop.png" />
+                <img 
+                  src="/curated-men-women-banner-desktop.png" 
+                  alt="Premium Watches For Him & Her"
+                  className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02] select-none"
+                />
+              </picture>
+              
+              {/* Subtle Vignette for Text Contrast while keeping watches luminous */}
+              <div className="absolute inset-0 bg-black/20 pointer-events-none" />
               <div 
-                onClick={() => handleAudienceClick('ALL')}
-                className="mt-4 relative inline-flex flex-col items-center cursor-pointer group/center transition-all duration-300 hover:scale-105"
-              >
-                <div className="relative px-6 py-2.5 sm:px-8 sm:py-3 flex flex-col items-center justify-center">
-                  <svg className="absolute inset-0 w-full h-full text-gold/60 group-hover/center:text-gold transition-colors filter drop-shadow-[0_0_12px_rgba(212,175,55,0.35)]" viewBox="0 0 120 70" preserveAspectRatio="none">
-                    <polygon points="16,2 104,2 118,18 118,52 104,68 16,68 2,52 2,18" fill="rgba(10,10,12,0.85)" stroke="currentColor" strokeWidth="1.5" />
-                  </svg>
-                  <div className="relative z-10 text-center">
-                    <span className="font-display text-2xl sm:text-3xl lg:text-4xl text-gold font-bold tracking-tight">
-                      {selectedAudience === 'Mens' ? (counts.mens || 214) : selectedAudience === 'Womens' ? (counts.womens || 13) : (counts.all || 227)}
-                    </span>
-                    <p className="font-mono text-[8px] sm:text-[9px] tracking-[0.25em] text-white/90 uppercase font-semibold mt-0.5">
-                      {translate("EXCLUSIVE MODELS", currentLang)}
+                className="absolute inset-0 pointer-events-none" 
+                style={{
+                  background: 'radial-gradient(ellipse 55% 70% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 65%, transparent 100%)'
+                }}
+              />
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+
+              {/* Top Row: Octagonal Gold Wireframe Gender Badges */}
+              <div className="relative z-10 flex items-start justify-between gap-4">
+                
+                {/* FOR HIM / FOR MEN */}
+                <button
+                  type="button"
+                  onClick={() => handleAudienceClick(selectedAudience === 'Mens' ? 'ALL' : 'Mens')}
+                  className="group/him flex flex-col items-center gap-1.5 focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 text-left"
+                >
+                  <div className={`relative w-13 h-13 flex items-center justify-center transition-all duration-300 ${
+                    selectedAudience === 'Mens'
+                      ? 'filter drop-shadow-[0_0_15px_rgba(212,175,55,0.7)]'
+                      : 'group-hover/him:filter group-hover/him:drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                  }`}>
+                    <svg className="w-13 h-13" viewBox="0 0 48 48" fill="none">
+                      <polygon 
+                        points="14,4 34,4 44,14 44,34 34,44 14,44 4,34 4,14" 
+                        className={`transition-colors duration-300 ${
+                          selectedAudience === 'Mens'
+                            ? 'fill-gold/30 stroke-gold'
+                            : 'fill-black/60 stroke-gold/60 group-hover/him:stroke-gold group-hover/him:fill-black/80'
+                        }`}
+                        strokeWidth="1.5" 
+                      />
+                      {/* Male Mars Symbol ♂ */}
+                      <circle cx="21" cy="27" r="6" className={selectedAudience === 'Mens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" />
+                      <path d="M25.5 22.5L33 15M33 15H27M33 15V21" className={selectedAudience === 'Mens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <span className={`font-mono text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
+                    selectedAudience === 'Mens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/him:text-gold'
+                  }`}>
+                    {translate("FOR HIM", currentLang)}
+                  </span>
+                  <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.mens || 214})</span>
+                </button>
+
+                {/* FOR HER / FOR WOMEN */}
+                <button
+                  type="button"
+                  onClick={() => handleAudienceClick(selectedAudience === 'Womens' ? 'ALL' : 'Womens')}
+                  className="group/her flex flex-col items-center gap-1.5 focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 text-right"
+                >
+                  <div className={`relative w-13 h-13 flex items-center justify-center transition-all duration-300 ${
+                    selectedAudience === 'Womens'
+                      ? 'filter drop-shadow-[0_0_15px_rgba(212,175,55,0.7)]'
+                      : 'group-hover/her:filter group-hover/her:drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                  }`}>
+                    <svg className="w-13 h-13" viewBox="0 0 48 48" fill="none">
+                      <polygon 
+                        points="14,4 34,4 44,14 44,34 34,44 14,44 4,34 4,14" 
+                        className={`transition-colors duration-300 ${
+                          selectedAudience === 'Womens'
+                            ? 'fill-gold/30 stroke-gold'
+                            : 'fill-black/60 stroke-gold/60 group-hover/her:stroke-gold group-hover/her:fill-black/80'
+                        }`}
+                        strokeWidth="1.5" 
+                      />
+                      {/* Female Venus Symbol ♀ */}
+                      <circle cx="24" cy="19" r="6" className={selectedAudience === 'Womens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" />
+                      <path d="M24 25V35M19 30H29" className={selectedAudience === 'Womens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <span className={`font-mono text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
+                    selectedAudience === 'Womens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/her:text-gold'
+                  }`}>
+                    {translate("FOR HER", currentLang)}
+                  </span>
+                  <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.womens || 13})</span>
+                </button>
+
+              </div>
+
+              {/* Center Content: Special Selection, Premium Watches For Him & Her, Model Counter */}
+              <div className="relative z-10 text-center my-auto py-6 px-4">
+                
+                {/* Eyebrow Filigree */}
+                <div className="flex items-center justify-center gap-3 mb-1">
+                  <span className="h-[1px] w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
+                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e8c264] font-semibold">
+                    {translate("SPECIAL SELECTION", currentLang)}
+                  </p>
+                  <span className="h-[1px] w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
+                </div>
+                
+                {/* Crown Icon */}
+                <div className="flex items-center justify-center mb-1.5">
+                  <Crown className="w-4 h-4 text-gold/90" />
+                </div>
+
+                {/* Headings */}
+                <h3 className="font-display text-4xl lg:text-5xl text-white font-light tracking-wide leading-tight">
+                  {translate("PREMIUM WATCHES", currentLang)}
+                </h3>
+                <h4 className="font-display text-4xl lg:text-5xl text-gold font-bold tracking-wider leading-tight mt-1">
+                  {translate("FOR HIM & HER", currentLang)}
+                </h4>
+
+                {/* Center Octagonal Framed Counter Box */}
+                <div 
+                  onClick={() => handleAudienceClick('ALL')}
+                  className="mt-4 relative inline-flex flex-col items-center cursor-pointer group/center transition-all duration-300 hover:scale-105"
+                >
+                  <div className="relative px-8 py-3 flex flex-col items-center justify-center">
+                    <svg className="absolute inset-0 w-full h-full text-gold/60 group-hover/center:text-gold transition-colors filter drop-shadow-[0_0_12px_rgba(212,175,55,0.35)]" viewBox="0 0 120 70" preserveAspectRatio="none">
+                      <polygon points="16,2 104,2 118,18 118,52 104,68 16,68 2,52 2,18" fill="rgba(10,10,12,0.85)" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                    <div className="relative z-10 text-center">
+                      <span className="font-display text-3xl lg:text-4xl text-gold font-bold tracking-tight">
+                        {selectedAudience === 'Mens' ? (counts.mens || 214) : selectedAudience === 'Womens' ? (counts.womens || 13) : (counts.all || 227)}
+                      </span>
+                      <p className="font-mono text-[9px] tracking-[0.25em] text-white/90 uppercase font-semibold mt-0.5">
+                        {translate("EXCLUSIVE MODELS", currentLang)}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-body text-[11px] text-silver/75 font-light tracking-wider mt-2.5 italic text-center max-w-xs leading-tight">
+                    {translate("Timeless craftsmanship. Iconic design. Infinite prestige.", currentLang)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom Row: Watch Model Annotations & Explore Action Buttons */}
+              <div className="relative z-10 flex items-end justify-between gap-4 pt-3">
+                
+                {/* Bottom Left Watch Label + Large Explore Men's Button */}
+                <div className="text-left select-none space-y-2">
+                  <div>
+                    <p className="font-mono text-xs font-bold text-white tracking-widest uppercase">
+                      RICHARD MILLE
+                    </p>
+                    <p className="font-mono text-[10px] text-silver/60 tracking-wider uppercase">
+                      RM 011
                     </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAudienceClick('Mens')}
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-lg text-[11px] font-mono font-semibold tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer shadow-lg active:scale-95 ${
+                      selectedAudience === 'Mens'
+                        ? 'bg-gold text-black border-gold shadow-[0_0_18px_rgba(212,175,55,0.6)]'
+                        : 'bg-black/75 text-white hover:text-gold border-white/25 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]'
+                    }`}
+                  >
+                    <span>{translate("EXPLORE MEN'S", currentLang)}</span>
+                    <ChevronRight className="w-3 h-3 text-gold" />
+                  </button>
                 </div>
-                <p className="font-body text-[10px] sm:text-[11px] text-silver/75 font-light tracking-wider mt-2.5 italic text-center max-w-xs leading-tight">
-                  {translate("Timeless craftsmanship. Iconic design. Infinite prestige.", currentLang)}
-                </p>
-              </div>
-            </div>
 
-            {/* Bottom Row: Watch Model Annotations & Explore Action Buttons */}
-            <div className="relative z-10 flex items-end justify-between gap-4 pt-3">
-              
-              {/* Bottom Left Watch Label (Desktop only) + Large Mobile Explore Men's Button */}
-              <div className="text-left select-none space-y-2">
-                <div className="hidden sm:block">
-                  <p className="font-mono text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase">
-                    RICHARD MILLE
-                  </p>
-                  <p className="font-mono text-[8px] sm:text-[10px] text-silver/60 tracking-wider uppercase">
-                    RM 011
-                  </p>
+                {/* Bottom Right Watch Label + Large Explore Women's Button */}
+                <div className="text-right select-none space-y-2">
+                  <div>
+                    <p className="font-mono text-xs font-bold text-white tracking-widest uppercase">
+                      AUDEMARS PIGUET
+                    </p>
+                    <p className="font-mono text-[10px] text-gold/80 tracking-wider uppercase">
+                      ROYAL OAK DIAMOND
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAudienceClick('Womens')}
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-lg text-[11px] font-mono font-semibold tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer shadow-lg active:scale-95 ${
+                      selectedAudience === 'Womens'
+                        ? 'bg-gold text-black border-gold shadow-[0_0_18px_rgba(212,175,55,0.6)]'
+                        : 'bg-black/75 text-white hover:text-gold border-white/25 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]'
+                    }`}
+                  >
+                    <span>{translate("EXPLORE WOMEN'S", currentLang)}</span>
+                    <ChevronRight className="w-3 h-3 text-gold" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleAudienceClick('Mens')}
-                  className={`inline-flex items-center justify-center gap-2 px-4 sm:px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-lg text-[11px] sm:text-[11px] font-mono font-semibold tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer shadow-lg active:scale-95 ${
-                    selectedAudience === 'Mens'
-                      ? 'bg-gold text-black border-gold shadow-[0_0_18px_rgba(212,175,55,0.6)]'
-                      : 'bg-black/75 text-white hover:text-gold border-white/25 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]'
-                  }`}
-                >
-                  <span>{translate("EXPLORE MEN'S", currentLang)}</span>
-                  <ChevronRight className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-gold" />
-                </button>
-              </div>
 
-              {/* Bottom Right Watch Label (Desktop only) + Large Mobile Explore Women's Button */}
-              <div className="text-right select-none space-y-2">
-                <div className="hidden sm:block">
-                  <p className="font-mono text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase">
-                    AUDEMARS PIGUET
-                  </p>
-                  <p className="font-mono text-[8px] sm:text-[10px] text-gold/80 tracking-wider uppercase">
-                    ROYAL OAK DIAMOND
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleAudienceClick('Womens')}
-                  className={`inline-flex items-center justify-center gap-2 px-4 sm:px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-lg text-[11px] sm:text-[11px] font-mono font-semibold tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer shadow-lg active:scale-95 ${
-                    selectedAudience === 'Womens'
-                      ? 'bg-gold text-black border-gold shadow-[0_0_18px_rgba(212,175,55,0.6)]'
-                      : 'bg-black/75 text-white hover:text-gold border-white/25 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]'
-                  }`}
-                >
-                  <span>{translate("EXPLORE WOMEN'S", currentLang)}</span>
-                  <ChevronRight className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-gold" />
-                </button>
               </div>
 
             </div>
+          </div>
 
+          {/* Desktop Brand Visual Pills Row */}
+          <div className="pt-6 sm:pt-8 max-w-5xl mx-auto">
+            <div 
+              className="flex items-center md:flex-wrap md:justify-center gap-2 overflow-x-auto scrollbar-none pb-1 scroll-smooth"
+            >
+              {brands.map((brand) => {
+                const isSelected = selectedBrand === brand;
+                return (
+                  <button
+                    key={brand}
+                    type="button"
+                    onClick={() => {
+                      setSelectedBrand(brand)
+                      setSelectedModel('')
+                      setPage(1)
+                    }}
+                    className={`shrink-0 px-4 py-2 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all duration-300 border ${
+                      isSelected
+                        ? 'bg-gold border-gold text-black font-semibold shadow-[0_2px_12px_rgba(212,175,55,0.3)]'
+                        : 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-white hover:border-gold/30'
+                    }`}
+                  >
+                    {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Brand visual pills row - Exact Desktop-matched Design */}
-        <div className="pt-6 sm:pt-8 max-w-5xl mx-auto">
-          {/* Mobile Scroll Header with Arrows */}
-          <div className="flex md:hidden items-center justify-between pb-2 px-1">
-            <div className="flex items-center gap-2">
-              <span className="h-[1px] w-4 bg-[#e8c264]" />
-              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#e8c264]">
-                {translate("Filter by Brand", currentLang)}
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5" dir="ltr">
-              <button
-                type="button"
-                onClick={scrollBrandsPrev}
-                aria-label="Scroll brands left"
-                className="w-6 h-6 rounded-full border border-white/10 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95 shadow-sm"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={scrollBrandsNext}
-                aria-label="Scroll brands right"
-                className="w-6 h-6 rounded-full border border-white/10 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95 shadow-sm"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Brand Pills */}
-          <div 
-            ref={brandScrollRef}
-            className="flex items-center md:flex-wrap md:justify-center gap-2 overflow-x-auto scrollbar-none pb-1 scroll-smooth"
-          >
-            {brands.map((brand) => {
-              const isSelected = selectedBrand === brand;
-              return (
-                <button
-                  key={brand}
-                  type="button"
-                  onClick={() => {
-                    setSelectedBrand(brand)
-                    setSelectedModel('')
-                    setPage(1)
-                  }}
-                  className={`shrink-0 px-4 py-2 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all duration-300 border ${
-                    isSelected
-                      ? 'bg-gold border-gold text-black font-semibold shadow-[0_2px_12px_rgba(212,175,55,0.3)]'
-                      : 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-white hover:border-gold/30'
-                  }`}
-                >
-                  {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
-                </button>
-              )
-            })}
-          </div>
-        </div>
       </section>
 
 
