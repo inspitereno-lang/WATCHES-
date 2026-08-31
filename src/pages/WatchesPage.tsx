@@ -295,7 +295,7 @@ export default function WatchesPage() {
               <div className="absolute bottom-2.5 inset-x-2.5 flex items-end justify-between">
                 <div>
                   <p className="font-mono text-[11px] font-bold tracking-wider text-white uppercase leading-none">
-                    {translate("FOR HIM", currentLang)}
+                    {translate("FOR MEN", currentLang)}
                   </p>
                   <p className="font-mono text-[9px] text-gold/80 font-medium mt-1">
                     {counts.mens || 214} {translate("Models", currentLang)}
@@ -311,7 +311,7 @@ export default function WatchesPage() {
               </div>
             </button>
 
-            {/* Card 2: FOR HER */}
+            {/* Card 2: FOR LADIES */}
             <button
               type="button"
               onClick={() => {
@@ -326,7 +326,7 @@ export default function WatchesPage() {
             >
               <img
                 src="/images/card-her.jpg"
-                alt="For Her"
+                alt="For Ladies"
                 className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/wcard:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/15" />
@@ -343,7 +343,7 @@ export default function WatchesPage() {
               <div className="absolute bottom-2.5 inset-x-2.5 flex items-end justify-between">
                 <div>
                   <p className="font-mono text-[11px] font-bold tracking-wider text-white uppercase leading-none">
-                    {translate("FOR HER", currentLang)}
+                    {translate("FOR LADIES", currentLang)}
                   </p>
                   <p className="font-mono text-[9px] text-gold/80 font-medium mt-1">
                     {counts.womens || 13} {translate("Models", currentLang)}
@@ -482,12 +482,12 @@ export default function WatchesPage() {
                   <span className={`font-mono text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
                     selectedAudience === 'Mens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/him:text-gold'
                   }`}>
-                    {translate("FOR HIM", currentLang)}
+                    {translate("FOR MEN", currentLang)}
                   </span>
                   <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.mens || 214})</span>
                 </button>
 
-                {/* FOR HER / FOR WOMEN */}
+                {/* FOR LADIES / FOR WOMEN */}
                 <button
                   type="button"
                   onClick={() => handleAudienceClick(selectedAudience === 'Womens' ? 'ALL' : 'Womens')}
@@ -516,7 +516,7 @@ export default function WatchesPage() {
                   <span className={`font-mono text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
                     selectedAudience === 'Womens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/her:text-gold'
                   }`}>
-                    {translate("FOR HER", currentLang)}
+                    {translate("FOR LADIES", currentLang)}
                   </span>
                   <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.womens || 13})</span>
                 </button>
@@ -545,7 +545,7 @@ export default function WatchesPage() {
                   {translate("PREMIUM WATCHES", currentLang)}
                 </h3>
                 <h4 className="font-display text-4xl lg:text-5xl text-gold font-bold tracking-wider leading-tight mt-1">
-                  {translate("FOR HIM & HER", currentLang)}
+                  {translate("FOR MEN & LADIES", currentLang)}
                 </h4>
 
                 {/* Center Octagonal Framed Counter Box */}
