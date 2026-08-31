@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Search, Compass, Loader2, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Compass, Loader2, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Crown } from 'lucide-react'
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
 
@@ -86,15 +86,33 @@ interface SignatureCollectionProps {
 }
 
 export default function SignatureCollection({
-  catalogueEyebrow = 'CURATED WATCH DIRECTORY',
-  catalogueHeading1 = 'THE SIGNATURE',
-  catalogueHeading2 = 'CATALOGUE',
-  catalogueDescription = 'Refined timepieces selected for balanced weight, smooth movement, and daily-wear precision.',
+  catalogueEyebrow: _catalogueEyebrow,
+  catalogueHeading1: _catalogueHeading1,
+  catalogueHeading2: _catalogueHeading2,
+  catalogueDescription: _catalogueDescription,
   activeAudienceFilter,
   onAudienceFilterChange,
 }: SignatureCollectionProps) {
   const sectionRef = useRef<HTMLElement>(null)
+  const catalogueRef = useRef<HTMLDivElement>(null)
   const brandScrollRef = useRef<HTMLDivElement>(null)
+
+  const scrollToCatalogue = () => {
+    if (catalogueRef.current) {
+      const yOffset = -85
+      const y = catalogueRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    }
+  }
+
+  const handleAudienceClick = (aud: AudienceFilter) => {
+    setSelectedAudience(aud)
+    setPage(1)
+    setTimeout(() => {
+      scrollToCatalogue()
+    }, 40)
+  }
+
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedBrand, setSelectedBrand] = useState('ALL BRANDS')
   const [selectedAudienceState, setSelectedAudienceState] = useState<AudienceFilter>('ALL')
@@ -117,10 +135,7 @@ export default function SignatureCollection({
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
-  const eyebrow = translate(catalogueEyebrow, currentLang)
-  const heading1 = translate(catalogueHeading1, currentLang)
-  const heading2 = translate(catalogueHeading2, currentLang)
-  const description = translate(catalogueDescription, currentLang)
+
 
   // Dynamic categories
   const [brands, setBrands] = useState<string[]>(['ALL BRANDS', ...PRIMARY_BRANDS, ...OTHER_BRANDS])
@@ -234,24 +249,24 @@ export default function SignatureCollection({
     if (!section) return
 
     const ctx = gsap.context(() => {
-      const label = section.querySelector('.sig-label')
-      const heading = section.querySelector('.sig-heading')
-      const sub = section.querySelector('.sig-sub')
-
-      gsap.set([label, heading, sub], { opacity: 0, y: 35 })
-
-      gsap.to([label, heading, sub], {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 80%',
-          toggleActions: 'play none none none',
-        },
-      })
+      const banner = section.querySelector('.signature-showcase-banner')
+      if (banner) {
+        gsap.fromTo(
+          banner,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+            },
+          }
+        )
+      }
     }, section)
 
     return () => ctx.revert()
@@ -433,7 +448,7 @@ export default function SignatureCollection({
     <section
       ref={sectionRef}
       id="store"
-      className="relative bg-dark border-t border-b border-white/5 py-8 sm:py-20 lg:py-32 overflow-hidden"
+      className="relative bg-dark border-t border-b border-white/5 pt-3 pb-12 sm:pt-6 sm:pb-20 lg:pt-8 lg:pb-28 overflow-hidden"
     >
       {/* Subtle luxury dark radial glow */}
       <div className="absolute inset-0 pointer-events-none">
@@ -459,23 +474,215 @@ export default function SignatureCollection({
 
       <div className="relative z-10 w-full px-3.5 sm:px-6 lg:px-12 xl:px-20">
         
-        {/* Section Header */}
-        <div className="text-center mb-6 sm:mb-12 lg:mb-20">
-          <p className="sig-label font-body text-[10px] sm:text-xs tracking-[0.25em] sm:tracking-[0.3em] text-gold mb-2 sm:mb-4 uppercase">
-            {eyebrow}
-          </p>
-          <h2 className="sig-heading font-display text-3xl sm:text-5xl lg:text-6xl text-white leading-[0.95] font-light">
-            {heading1}
-            <br />
-            <span className="text-gold font-bold">{heading2}</span>
-          </h2>
-          <p className="sig-sub font-body text-[11px] sm:text-xs text-silver mt-3 sm:mt-6 tracking-wider sm:tracking-widest max-w-lg mx-auto leading-relaxed">
-            {description}
-          </p>
+        {/* Luxury Men & Women Dual Showcase Feature */}
+        <div className="signature-showcase-banner mb-6 sm:mb-10 max-w-7xl mx-auto">
+          <div className="relative rounded-2xl sm:rounded-3xl border border-gold/30 bg-[#0d0d0f] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] min-h-[420px] sm:min-h-[460px] lg:min-h-[500px] flex flex-col justify-between p-4 sm:p-7 lg:p-9 group">
+            
+            {/* Responsive Background Luxury Photo with Smooth Lighting */}
+            <picture className="absolute inset-0 w-full h-full pointer-events-none">
+              <source media="(max-width: 767px)" srcSet="/curated-men-women-banner-mobile.jpg" />
+              <source media="(min-width: 768px)" srcSet="/curated-men-women-banner-desktop.png" />
+              <img 
+                src="/curated-men-women-banner-desktop.png" 
+                alt="Premium Watches For Him & Her"
+                className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02] select-none"
+              />
+            </picture>
+            
+            {/* Subtle Vignette for Text Contrast while keeping watches luminous */}
+            <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+            <div 
+              className="absolute inset-0 pointer-events-none" 
+              style={{
+                background: 'radial-gradient(ellipse 55% 70% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 65%, transparent 100%)'
+              }}
+            />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+
+            {/* Top Row: Octagonal Gold Wireframe Gender Badges */}
+            <div className="relative z-10 flex items-start justify-between gap-4">
+              
+              {/* FOR HIM / FOR MEN */}
+              <button
+                type="button"
+                onClick={() => handleAudienceClick(selectedAudience === 'Mens' ? 'ALL' : 'Mens')}
+                className="group/him flex flex-col items-center gap-1.5 focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 text-left"
+              >
+                <div className={`relative w-11 h-11 sm:w-13 sm:h-13 flex items-center justify-center transition-all duration-300 ${
+                  selectedAudience === 'Mens'
+                    ? 'filter drop-shadow-[0_0_15px_rgba(212,175,55,0.7)]'
+                    : 'group-hover/him:filter group-hover/him:drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                }`}>
+                  <svg className="w-11 h-11 sm:w-13 sm:h-13" viewBox="0 0 48 48" fill="none">
+                    <polygon 
+                      points="14,4 34,4 44,14 44,34 34,44 14,44 4,34 4,14" 
+                      className={`transition-colors duration-300 ${
+                        selectedAudience === 'Mens'
+                          ? 'fill-gold/30 stroke-gold'
+                          : 'fill-black/60 stroke-gold/60 group-hover/him:stroke-gold group-hover/him:fill-black/80'
+                      }`}
+                      strokeWidth="1.5" 
+                    />
+                    {/* Male Mars Symbol ♂ */}
+                    <circle cx="21" cy="27" r="6" className={selectedAudience === 'Mens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" />
+                    <path d="M25.5 22.5L33 15M33 15H27M33 15V21" className={selectedAudience === 'Mens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span className={`font-mono text-[10px] sm:text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
+                  selectedAudience === 'Mens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/him:text-gold'
+                }`}>
+                  {translate("FOR HIM", currentLang)}
+                </span>
+                <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.mens || 214})</span>
+              </button>
+
+              {/* FOR HER / FOR WOMEN */}
+              <button
+                type="button"
+                onClick={() => handleAudienceClick(selectedAudience === 'Womens' ? 'ALL' : 'Womens')}
+                className="group/her flex flex-col items-center gap-1.5 focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 text-right"
+              >
+                <div className={`relative w-11 h-11 sm:w-13 sm:h-13 flex items-center justify-center transition-all duration-300 ${
+                  selectedAudience === 'Womens'
+                    ? 'filter drop-shadow-[0_0_15px_rgba(212,175,55,0.7)]'
+                    : 'group-hover/her:filter group-hover/her:drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                }`}>
+                  <svg className="w-11 h-11 sm:w-13 sm:h-13" viewBox="0 0 48 48" fill="none">
+                    <polygon 
+                      points="14,4 34,4 44,14 44,34 34,44 14,44 4,34 4,14" 
+                      className={`transition-colors duration-300 ${
+                        selectedAudience === 'Womens'
+                          ? 'fill-gold/30 stroke-gold'
+                          : 'fill-black/60 stroke-gold/60 group-hover/her:stroke-gold group-hover/her:fill-black/80'
+                      }`}
+                      strokeWidth="1.5" 
+                    />
+                    {/* Female Venus Symbol ♀ */}
+                    <circle cx="24" cy="19" r="6" className={selectedAudience === 'Womens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" />
+                    <path d="M24 25V35M19 30H29" className={selectedAudience === 'Womens' ? 'stroke-black' : 'stroke-gold'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span className={`font-mono text-[10px] sm:text-xs tracking-[0.2em] uppercase font-bold transition-colors ${
+                  selectedAudience === 'Womens' ? 'text-gold drop-shadow-md' : 'text-gold/90 group-hover/her:text-gold'
+                }`}>
+                  {translate("FOR HER", currentLang)}
+                </span>
+                <span className="text-[9px] font-mono text-silver/60 -mt-1">({counts.womens || 13})</span>
+              </button>
+
+            </div>
+
+            {/* Center Content: Special Selection, Premium Watches For Him & Her, Model Counter */}
+            <div className="relative z-10 text-center my-auto py-4 sm:py-6 px-4">
+              
+              {/* Eyebrow Filigree */}
+              <div className="flex items-center justify-center gap-3 mb-1">
+                <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
+                <p className="font-mono text-[9px] sm:text-[11px] uppercase tracking-[0.3em] text-[#e8c264] font-semibold">
+                  {translate("SPECIAL SELECTION", currentLang)}
+                </p>
+                <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
+              </div>
+              
+              {/* Crown Icon */}
+              <div className="flex items-center justify-center mb-1.5">
+                <Crown className="w-4 h-4 text-gold/90" />
+              </div>
+
+              {/* Headings */}
+              <h3 className="font-display text-2xl sm:text-4xl lg:text-5xl text-white font-light tracking-wide leading-tight">
+                {translate("PREMIUM WATCHES", currentLang)}
+              </h3>
+              <h4 className="font-display text-2xl sm:text-4xl lg:text-5xl text-gold font-bold tracking-wider leading-tight mt-0.5 sm:mt-1">
+                {translate("FOR HIM & HER", currentLang)}
+              </h4>
+
+              {/* Center Octagonal Framed Counter Box */}
+              <div 
+                onClick={() => handleAudienceClick('ALL')}
+                className="mt-4 relative inline-flex flex-col items-center cursor-pointer group/center transition-all duration-300 hover:scale-105"
+              >
+                <div className="relative px-6 py-2.5 sm:px-8 sm:py-3 flex flex-col items-center justify-center">
+                  <svg className="absolute inset-0 w-full h-full text-gold/60 group-hover/center:text-gold transition-colors filter drop-shadow-[0_0_12px_rgba(212,175,55,0.35)]" viewBox="0 0 120 70" preserveAspectRatio="none">
+                    <polygon points="16,2 104,2 118,18 118,52 104,68 16,68 2,52 2,18" fill="rgba(10,10,12,0.85)" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
+                  <div className="relative z-10 text-center">
+                    <span className="font-display text-2xl sm:text-3xl lg:text-4xl text-gold font-bold tracking-tight">
+                      {selectedAudience === 'Mens' ? (counts.mens || 214) : selectedAudience === 'Womens' ? (counts.womens || 13) : (counts.all || 227)}
+                    </span>
+                    <p className="font-mono text-[8px] sm:text-[9px] tracking-[0.25em] text-white/90 uppercase font-semibold mt-0.5">
+                      {translate("EXCLUSIVE MODELS", currentLang)}
+                    </p>
+                  </div>
+                </div>
+                <p className="font-body text-[10px] sm:text-[11px] text-silver/75 font-light tracking-wider mt-2.5 italic text-center max-w-xs leading-tight">
+                  {translate("Timeless craftsmanship. Iconic design. Infinite prestige.", currentLang)}
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom Row: Watch Model Annotations & Explore Action Buttons */}
+            <div className="relative z-10 flex items-end justify-between gap-4 pt-3">
+              
+              {/* Bottom Left Watch Label + Explore Men's Button */}
+              <div className="text-left select-none space-y-2">
+                <div>
+                  <p className="font-mono text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase">
+                    RICHARD MILLE
+                  </p>
+                  <p className="font-mono text-[8px] sm:text-[10px] text-silver/60 tracking-wider uppercase">
+                    RM 011
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleAudienceClick('Mens')}
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[11px] font-mono tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer ${
+                    selectedAudience === 'Mens'
+                      ? 'bg-gold text-black border-gold font-bold shadow-[0_0_15px_rgba(212,175,55,0.5)]'
+                      : 'bg-black/65 text-silver hover:text-gold border-white/20 hover:border-gold shadow-md hover:shadow-[0_0_12px_rgba(212,175,55,0.3)]'
+                  }`}
+                >
+                  <span>{translate("EXPLORE MEN'S", currentLang)}</span>
+                  <ChevronRight className="w-3 h-3 text-gold" />
+                </button>
+              </div>
+
+              {/* Bottom Right Watch Label + Explore Women's Button */}
+              <div className="text-right select-none space-y-2">
+                <div>
+                  <p className="font-mono text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase">
+                    AUDEMARS PIGUET
+                  </p>
+                  <p className="font-mono text-[8px] sm:text-[10px] text-gold/80 tracking-wider uppercase">
+                    ROYAL OAK DIAMOND
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleAudienceClick('Womens')}
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[11px] font-mono tracking-wider uppercase transition-all duration-300 border backdrop-blur-md cursor-pointer ${
+                    selectedAudience === 'Womens'
+                      ? 'bg-gold text-black border-gold font-bold shadow-[0_0_15px_rgba(212,175,55,0.5)]'
+                      : 'bg-black/65 text-silver hover:text-gold border-white/20 hover:border-gold shadow-md hover:shadow-[0_0_12px_rgba(212,175,55,0.3)]'
+                  }`}
+                >
+                  <span>{translate("EXPLORE WOMEN'S", currentLang)}</span>
+                  <ChevronRight className="w-3 h-3 text-gold" />
+                </button>
+              </div>
+
+            </div>
+
+          </div>
         </div>
 
-        {/* Mobile Inline Filter Controls - Fast, 1-View Desktop Experience */}
-        <div className="lg:hidden mb-6 space-y-2.5">
+        {/* Anchor and Container for catalogue browsing */}
+        <div ref={catalogueRef} id="catalogue-browse" className="w-full scroll-mt-20">
+
+          {/* Mobile Inline Filter Controls - Fast, 1-View Desktop Experience */}
+          <div className="lg:hidden mb-6 space-y-2.5">
           {/* Search Input */}
           <div className="relative">
             <input
@@ -749,6 +956,8 @@ export default function SignatureCollection({
               </div>
             )}
           </div>
+
+        </div>
 
         </div>
 
