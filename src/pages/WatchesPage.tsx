@@ -52,9 +52,7 @@ const PRIMARY_BRANDS = [
   'Panerai',
   'IWC',
   'Breitling',
-  'Roger Dubuis',
-  'Chopard',
-  'TAG Heuer'
+  'Roger Dubuis'
 ]
 
 const BRAND_MODELS: Record<string, string[]> = {

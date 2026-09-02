@@ -12,6 +12,7 @@ import Homepage from './models/Homepage.js';
 import User from './models/User.js';
 import BlogPost from './models/BlogPost.js';
 import Accessory from './models/Accessory.js';
+import CatalogueSettings, { DEFAULT_MASTER_BRANDS } from './models/CatalogueSettings.js';
 import { DEFAULT_BLOG_POSTS } from './data/blogPosts.js';
 import auth from './middleware/auth.js';
 
@@ -21,6 +22,35 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const ARCHITECTURE_IMAGE_URL = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp';
 const HERITAGE_IMAGE_URL = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg';
+
+const normalizeBrandKey = (value = '') => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const getCatalogueSettings = () => CatalogueSettings.findOneAndUpdate(
+  { key: 'master-brands' },
+  {
+    $setOnInsert: {
+      key: 'master-brands',
+      brands: DEFAULT_MASTER_BRANDS,
+    },
+  },
+  { new: true, upsert: true, setDefaultsOnInsert: true }
+);
+
+const getMasterBrandsWithCounts = async (settings) => {
+  const productCounts = await Product.aggregate([
+    { $group: { _id: '$brand', count: { $sum: 1 } } },
+  ]);
+  const countMap = new Map(
+    productCounts.map((item) => [normalizeBrandKey(item._id || ''), item.count])
+  );
+
+  return settings.brands.map((brand) => ({
+    name: brand.name,
+    models: [...brand.models],
+    isActive: brand.isActive !== false,
+    productCount: countMap.get(normalizeBrandKey(brand.name)) || 0,
+  }));
+};
 
 // Configure Cloudinary
 cloudinary.config({
@@ -876,105 +906,18 @@ app.post('/api/translate/batch', async (req, res) => {
 // 1.8 Fetch Category Filters List (Brands, Audiences, and Brand-to-Model mappings)
 app.get('/api/categories', async (req, res) => {
   try {
-    const BRAND_ORDER = [
-      'Richard Mille',
-      'Audemars Piguet',
-      'Patek Philippe',
-      'Rolex',
-      'Hublot',
-      'Vacheron Constantin',
-      'Omega',
-      'Cartier',
-      'Panerai',
-      'IWC',
-      'Breitling',
-      'Roger Dubuis',
-      'Chopard',
-      'TAG Heuer'
-    ];
-
-    const defaultBrands = [...BRAND_ORDER];
-
-    const defaultBrandModels = {
-      'Richard Mille': ['RM 11-03', 'RM 35-02', 'RM 67-02', 'RM 21-02', 'RM 55'],
-      'Audemars Piguet': ['Royal Oak', 'Royal Oak Offshore', 'Concept'],
-      'Patek Philippe': ['Nautilus', 'Aquanaut', 'Complications', 'Twenty-4', 'Gondolo', 'Calatrava'],
-      'Rolex': ['Daytona', 'Submariner', 'Datejust', 'GMT-Master', 'Day-Date', 'Yacht-Master', 'Sea-Dweller', 'Sky-Dweller', 'Milgauss', 'Cellini'],
-      'Hublot': ['Big Bang', 'Classic Fusion', 'Spirit of Big Bang'],
-      'Vacheron Constantin': ['Patrimony', 'Overseas', 'Historiques', 'Traditionnelle'],
-      'Omega': ['Speedmaster', 'Seamaster', 'Constellation', 'De Ville'],
-      'Cartier': ['Santos', 'Tank', 'Baignoire', 'Panthère', 'Ballon Bleu'],
-      'Panerai': ['Luminor', 'Radiomir', 'Submersible'],
-      'IWC': ['Portugieser', 'Pilot', 'Portofino', 'Ingenieur'],
-      'Breitling': ['Navitimer', 'Chronomat', 'Superocean', 'Premier'],
-      'Roger Dubuis': ['Excalibur', 'Knights of the Round Table', 'Velvet']
-    };
-
-    // Query database for all products
-    const includeHidden = req.query.includeHidden === 'true';
-    const filter = includeHidden ? {} : { isVisible: true };
-    const products = await Product.find(filter, 'brand model');
-
-    // Build sets for merging
-    const brandsSet = new Set(defaultBrands);
-    const brandModels = {};
-
-    // Initialize brandModels with defaultBrandModels
-    for (const brand in defaultBrandModels) {
-      brandModels[brand] = new Set(defaultBrandModels[brand]);
-    }
-
-    // Merge database items
-    products.forEach(p => {
-      if (p.brand) {
-        const brandTrimmed = p.brand.trim();
-        if (brandTrimmed) {
-          brandsSet.add(brandTrimmed);
-          
-          if (!brandModels[brandTrimmed]) {
-            brandModels[brandTrimmed] = new Set();
-          }
-          if (p.model) {
-            const modelTrimmed = p.model.trim();
-            if (modelTrimmed) {
-              brandModels[brandTrimmed].add(modelTrimmed);
-            }
-          }
-        }
-      }
-    });
-
-    // Convert to sorted lists using BRAND_ORDER sequence
-    const normalizeBrand = (b) => b.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const brandOrderMap = new Map();
-    BRAND_ORDER.forEach((b, idx) => {
-      brandOrderMap.set(normalizeBrand(b), idx);
-    });
-
-    const getBrandRank = (b) => {
-      const norm = normalizeBrand(b);
-      return brandOrderMap.has(norm) ? brandOrderMap.get(norm) : 999;
-    };
-
-    const brandsList = Array.from(brandsSet).sort((a, b) => {
-      const rankA = getBrandRank(a);
-      const rankB = getBrandRank(b);
-      if (rankA !== rankB) return rankA - rankB;
-      return a.localeCompare(b);
-    });
-
-    const formattedBrandModels = {};
-    for (const brand in brandModels) {
-      formattedBrandModels[brand] = Array.from(brandModels[brand]).sort((a, b) => a.localeCompare(b));
-    }
-
-    const brands = ['ALL BRANDS', ...brandsList];
+    const settings = await getCatalogueSettings();
+    const activeBrands = settings.brands.filter((brand) => brand.isActive !== false);
+    const brands = ['ALL BRANDS', ...activeBrands.map((brand) => brand.name)];
+    const brandModels = Object.fromEntries(
+      activeBrands.map((brand) => [brand.name, [...brand.models]])
+    );
     const audiences = ['ALL', 'Mens', 'Womens'];
 
     return res.status(200).json({
       brands,
       audiences,
-      brandModels: formattedBrandModels
+      brandModels
     });
   } catch (err) {
     console.error('Failed to fetch categories:', err);
@@ -1029,22 +972,8 @@ app.get('/api/products', async (req, res) => {
     const itemLimit = parseInt(limit);
     const skip = (currentPage - 1) * itemLimit;
 
-    const BRAND_ORDER = [
-      'Richard Mille',
-      'Audemars Piguet',
-      'Patek Philippe',
-      'Rolex',
-      'Hublot',
-      'Vacheron Constantin',
-      'Omega',
-      'Cartier',
-      'Panerai',
-      'IWC',
-      'Breitling',
-      'Roger Dubuis',
-      'Chopard',
-      'TAG Heuer'
-    ];
+    const catalogueSettings = await getCatalogueSettings();
+    const BRAND_ORDER = catalogueSettings.brands.map((brand) => brand.name);
 
     const brandBranches = BRAND_ORDER.map((bName, idx) => ({
       case: { $eq: ['$brand', bName] },
@@ -1655,6 +1584,80 @@ app.get('/api/admin/products', auth, async (req, res) => {
   } catch (err) {
     console.error('GET /api/admin/products error:', err);
     return res.status(500).json({ error: 'Server error loading admin catalogue.' });
+  }
+});
+
+// Master brand and model-filter configuration
+app.get('/api/admin/brands', auth, async (req, res) => {
+  try {
+    const settings = await getCatalogueSettings();
+    const brands = await getMasterBrandsWithCounts(settings);
+    return res.status(200).json({ brands });
+  } catch (err) {
+    console.error('GET /api/admin/brands error:', err);
+    return res.status(500).json({ error: 'Server error loading master brands.' });
+  }
+});
+
+app.put('/api/admin/brands', auth, async (req, res) => {
+  try {
+    if (!Array.isArray(req.body.brands) || req.body.brands.length === 0) {
+      return res.status(400).json({ error: 'At least one master brand is required.' });
+    }
+
+    const seenBrands = new Set();
+    const brands = [];
+
+    for (const input of req.body.brands) {
+      const name = typeof input.name === 'string'
+        ? input.name.trim().replace(/\s+/g, ' ')
+        : '';
+      const normalizedName = normalizeBrandKey(name);
+
+      if (!name || name.toUpperCase() === 'ALL BRANDS') {
+        return res.status(400).json({ error: 'Every master brand must have a valid name.' });
+      }
+      if (seenBrands.has(normalizedName)) {
+        return res.status(400).json({ error: `Duplicate master brand: ${name}.` });
+      }
+      seenBrands.add(normalizedName);
+
+      const seenModels = new Set();
+      const models = [];
+      for (const rawModel of Array.isArray(input.models) ? input.models : []) {
+        const model = typeof rawModel === 'string'
+          ? rawModel.trim().replace(/\s+/g, ' ')
+          : '';
+        const normalizedModel = model.toLowerCase();
+        if (model && !seenModels.has(normalizedModel)) {
+          seenModels.add(normalizedModel);
+          models.push(model);
+        }
+      }
+
+      brands.push({
+        name,
+        models,
+        isActive: input.isActive !== false,
+      });
+    }
+
+    if (!brands.some((brand) => brand.isActive)) {
+      return res.status(400).json({ error: 'Keep at least one master brand visible.' });
+    }
+
+    const settings = await getCatalogueSettings();
+    settings.brands = brands;
+    await settings.save();
+
+    const responseBrands = await getMasterBrandsWithCounts(settings);
+    return res.status(200).json({
+      message: 'Master brands and model filters updated successfully.',
+      brands: responseBrands,
+    });
+  } catch (err) {
+    console.error('PUT /api/admin/brands error:', err);
+    return res.status(500).json({ error: 'Server error saving master brands.' });
   }
 });
 

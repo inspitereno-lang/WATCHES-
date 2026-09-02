@@ -18,7 +18,10 @@ import {
   Copy,
   Sparkles,
   Upload,
-  Box
+  Box,
+  Tags,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react'
 import { toast } from '../components/ui/sonner'
 
@@ -54,12 +57,19 @@ interface Watch {
   warranty?: string
 }
 
+interface MasterBrand {
+  name: string
+  models: string[]
+  isActive: boolean
+  productCount?: number
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [token, setToken] = useState<string | null>(null)
   
   // Tab states
-  const [activeTab, setActiveTab] = useState<'products' | 'homepage' | 'accessories'>('products')
+  const [activeTab, setActiveTab] = useState<'products' | 'brands' | 'homepage' | 'accessories'>('products')
   const [activeSubTab, setActiveSubTab] = useState<'hero' | 'arrivals' | 'heritage' | 'atelier' | 'catalogue' | 'testimonials' | 'footer'>('hero')
 
   // Accessories State
@@ -198,6 +208,13 @@ export default function AdminDashboard() {
   const [availableBrandModels, setAvailableBrandModels] = useState<Record<string, string[]>>({})
   const [galleryUploadLoading, setGalleryUploadLoading] = useState(false)
 
+  // Master brand and storefront model-filter states
+  const [masterBrands, setMasterBrands] = useState<MasterBrand[]>([])
+  const [masterBrandsLoading, setMasterBrandsLoading] = useState(false)
+  const [masterBrandsSaving, setMasterBrandsSaving] = useState(false)
+  const [newMasterBrandName, setNewMasterBrandName] = useState('')
+  const [modelDrafts, setModelDrafts] = useState<Record<string, string>>({})
+
   // Auth Guard check & force LTR for dashboard layout
   useEffect(() => {
     document.documentElement.dir = 'ltr'
@@ -223,12 +240,18 @@ export default function AdminDashboard() {
     }
   }, [isModalOpen, deleteConfirmId])
 
-  // Fetch Homepage copy & Catalogue data
+  // Fetch shared CMS configuration after authentication
   useEffect(() => {
     if (!token) return
     fetchHomepageData()
-    fetchProducts()
     fetchCategories()
+    fetchMasterBrands()
+  }, [token])
+
+  // Fetch the current catalogue page when its controls change
+  useEffect(() => {
+    if (!token) return
+    fetchProducts()
   }, [token, page, searchTerm])
 
   const fetchHomepageData = async () => {
@@ -283,7 +306,7 @@ export default function AdminDashboard() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/categories?includeHidden=true')
+      const res = await fetch('/api/categories')
       if (res.ok) {
         const data = await res.json()
         if (data.brands) {
@@ -295,6 +318,117 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Error fetching categories:', err)
+    }
+  }
+
+  const fetchMasterBrands = async () => {
+    if (!token) return
+    setMasterBrandsLoading(true)
+    try {
+      const res = await fetch('/api/admin/brands', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to load master brands.')
+      setMasterBrands(data.brands || [])
+    } catch (err: unknown) {
+      toast.error('Master Brands Unavailable', {
+        description: err instanceof Error ? err.message : 'Failed to load master brands.'
+      })
+    } finally {
+      setMasterBrandsLoading(false)
+    }
+  }
+
+  const handleAddMasterBrand = () => {
+    const name = newMasterBrandName.trim().replace(/\s+/g, ' ')
+    if (!name) return
+    const normalized = name.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (masterBrands.some((brand) => brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') === normalized)) {
+      toast.warning('Brand Already Exists', { description: `${name} is already in Master Brands.` })
+      return
+    }
+    setMasterBrands((current) => [
+      ...current,
+      { name, models: [], isActive: true, productCount: 0 }
+    ])
+    setNewMasterBrandName('')
+  }
+
+  const handleAddMasterModel = (brandIndex: number) => {
+    const brand = masterBrands[brandIndex]
+    if (!brand) return
+    const model = (modelDrafts[brand.name] || '').trim().replace(/\s+/g, ' ')
+    if (!model) return
+    if (brand.models.some((item) => item.toLowerCase() === model.toLowerCase())) {
+      toast.warning('Model Already Exists', { description: `${model} is already listed for ${brand.name}.` })
+      return
+    }
+    setMasterBrands((current) => current.map((item, index) => (
+      index === brandIndex ? { ...item, models: [...item.models, model] } : item
+    )))
+    setModelDrafts((current) => ({ ...current, [brand.name]: '' }))
+  }
+
+  const handleRemoveMasterModel = (brandIndex: number, modelIndex: number) => {
+    setMasterBrands((current) => current.map((brand, index) => (
+      index === brandIndex
+        ? { ...brand, models: brand.models.filter((_, itemIndex) => itemIndex !== modelIndex) }
+        : brand
+    )))
+  }
+
+  const handleMoveMasterBrand = (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= masterBrands.length) return
+    setMasterBrands((current) => {
+      const next = [...current]
+      ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+      return next
+    })
+  }
+
+  const handleRemoveMasterBrand = (index: number) => {
+    const brand = masterBrands[index]
+    if (!brand || masterBrands.length === 1) return
+    setMasterBrands((current) => current.filter((_, itemIndex) => itemIndex !== index))
+    setModelDrafts((current) => {
+      const next = { ...current }
+      delete next[brand.name]
+      return next
+    })
+    toast.info('Brand Removed From Draft', {
+      description: `${brand.name} will leave the storefront filters after you save. Watch records are unchanged.`
+    })
+  }
+
+  const handleSaveMasterBrands = async () => {
+    setMasterBrandsSaving(true)
+    const toastId = toast.loading('Saving master brands and model filters...')
+    try {
+      const res = await fetch('/api/admin/brands', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ brands: masterBrands })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to save master brands.')
+      setMasterBrands(data.brands || [])
+      await fetchCategories()
+      toast.success('Master Brands Updated', {
+        id: toastId,
+        description: 'Storefront brand and model filters now use this saved master list.'
+      })
+    } catch (err: unknown) {
+      toast.error('Save Failed', {
+        id: toastId,
+        description: err instanceof Error ? err.message : 'Failed to save master brands.'
+      })
+    } finally {
+      setMasterBrandsSaving(false)
     }
   }
 
@@ -857,6 +991,18 @@ export default function AdminDashboard() {
             </button>
 
             <button
+              onClick={() => setActiveTab('brands')}
+              className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
+                activeTab === 'brands'
+                  ? 'bg-gold text-black font-bold shadow-md shadow-gold/20'
+                  : 'bg-white/[0.02] border border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <Tags className="w-4 h-4 shrink-0" />
+              MASTER BRANDS
+            </button>
+
+            <button
               onClick={() => setActiveTab('accessories')}
               className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
                 activeTab === 'accessories'
@@ -1074,6 +1220,182 @@ export default function AdminDashboard() {
                 <div className="h-64 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-center px-4">
                   <Sliders className="w-8 h-8 text-gold opacity-50 mb-3" />
                   <p className="text-xs text-gray-500 font-mono uppercase">No watches registered matching search query.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: MASTER BRAND AND MODEL FILTER MANAGEMENT */}
+          {activeTab === 'brands' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-light text-white">Master Brands</h2>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5">
+                    CONTROL STOREFRONT BRAND ORDER AND MODEL FILTERS
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveMasterBrands}
+                  disabled={masterBrandsSaving || masterBrandsLoading || masterBrands.length === 0}
+                  className="px-5 py-3 bg-gold hover:bg-gold-light disabled:opacity-50 disabled:pointer-events-none text-black text-xs font-mono font-bold tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-gold/10 flex items-center gap-2 cursor-pointer shrink-0"
+                >
+                  {masterBrandsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  SAVE MASTER BRANDS
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-gold/20 bg-gold/[0.04] px-4 py-3 text-[11px] leading-relaxed text-gray-400 font-mono">
+                Active brands appear in the storefront “Filter by Brand” list in the order shown below. Their model tags appear under “Filter by Model”. Removing a brand here never deletes its watch records.
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/5 bg-black/20 p-3">
+                <input
+                  type="text"
+                  value={newMasterBrandName}
+                  onChange={(event) => setNewMasterBrandName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      handleAddMasterBrand()
+                    }
+                  }}
+                  placeholder="Add a brand, e.g. Breguet"
+                  className="flex-1 px-4 py-2.5 text-xs rounded-lg bg-white/[0.03] border border-white/10 hover:border-gold/30 focus:border-gold focus:outline-none font-mono text-white"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddMasterBrand}
+                  className="px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-gold/40 hover:text-gold text-xs font-mono font-bold transition-all flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-3.5 h-3.5" /> ADD BRAND
+                </button>
+              </div>
+
+              {masterBrandsLoading ? (
+                <div className="h-64 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-gold animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {masterBrands.map((brand, brandIndex) => (
+                    <div
+                      key={brand.name}
+                      className={`rounded-2xl border p-4 sm:p-5 transition-all ${
+                        brand.isActive
+                          ? 'border-white/10 bg-white/[0.02]'
+                          : 'border-white/5 bg-black/20 opacity-60'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="w-7 h-7 rounded-lg bg-gold/10 border border-gold/20 text-gold flex items-center justify-center text-[10px] font-mono font-bold shrink-0">
+                            {brandIndex + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <h3 className="text-sm text-white font-semibold truncate">{brand.name}</h3>
+                            <p className="text-[10px] text-gray-500 font-mono mt-0.5">
+                              {brand.productCount || 0} WATCH RECORD{brand.productCount === 1 ? '' : 'S'} • {brand.models.length} MODEL FILTER{brand.models.length === 1 ? '' : 'S'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setMasterBrands((current) => current.map((item, index) => (
+                              index === brandIndex ? { ...item, isActive: !item.isActive } : item
+                            )))}
+                            className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1.5 ${
+                              brand.isActive
+                                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                                : 'border-white/10 bg-white/5 text-gray-500'
+                            }`}
+                          >
+                            {brand.isActive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                            {brand.isActive ? 'ACTIVE' : 'HIDDEN'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveMasterBrand(brandIndex, -1)}
+                            disabled={brandIndex === 0}
+                            aria-label={`Move ${brand.name} up`}
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-gold hover:border-gold/30 disabled:opacity-25 disabled:pointer-events-none transition-all"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveMasterBrand(brandIndex, 1)}
+                            disabled={brandIndex === masterBrands.length - 1}
+                            aria-label={`Move ${brand.name} down`}
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-gold hover:border-gold/30 disabled:opacity-25 disabled:pointer-events-none transition-all"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMasterBrand(brandIndex)}
+                            disabled={masterBrands.length === 1}
+                            aria-label={`Remove ${brand.name} from master brands`}
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-500/30 disabled:opacity-25 disabled:pointer-events-none transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="pt-3">
+                        <label className="text-[10px] text-gold font-mono uppercase tracking-wider">Filter by Model</label>
+                        <div className="flex flex-wrap gap-1.5 mt-2 min-h-7">
+                          {brand.models.length > 0 ? brand.models.map((model, modelIndex) => (
+                            <span
+                              key={`${brand.name}-${model}`}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/10 bg-black/30 text-[10px] text-gray-300 font-mono"
+                            >
+                              {model}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMasterModel(brandIndex, modelIndex)}
+                                aria-label={`Remove ${model} model filter`}
+                                className="text-gray-600 hover:text-red-400 transition-colors"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          )) : (
+                            <span className="text-[10px] text-gray-600 font-mono italic">No model filters added yet.</span>
+                          )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 mt-3 max-w-xl">
+                          <input
+                            type="text"
+                            value={modelDrafts[brand.name] || ''}
+                            onChange={(event) => setModelDrafts((current) => ({
+                              ...current,
+                              [brand.name]: event.target.value
+                            }))}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter') {
+                                event.preventDefault()
+                                handleAddMasterModel(brandIndex)
+                              }
+                            }}
+                            placeholder={`Add a ${brand.name} model filter`}
+                            className="flex-1 px-3 py-2 text-[11px] rounded-lg bg-white/[0.02] border border-white/10 focus:border-gold focus:outline-none font-mono text-white"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleAddMasterModel(brandIndex)}
+                            className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:border-gold/30 hover:text-gold text-[10px] font-mono font-bold transition-all"
+                          >
+                            + ADD MODEL
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

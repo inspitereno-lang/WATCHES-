@@ -8,9 +8,11 @@ describe('T24 Watches CMS API Endpoints', () => {
     // Seed the isolated test database with the test admin and homepage defaults
     const User = mongoose.model('User');
     const Homepage = mongoose.model('Homepage');
+    const CatalogueSettings = mongoose.model('CatalogueSettings');
 
     await User.deleteMany({});
     await Homepage.deleteMany({});
+    await CatalogueSettings.deleteMany({});
 
     const bcrypt = await import('bcryptjs');
     const salt = await bcrypt.default.genSalt(10);
@@ -31,7 +33,7 @@ describe('T24 Watches CMS API Endpoints', () => {
 
   // 0.8 GET /api/categories (Public)
   describe('GET /api/categories', () => {
-    it('should fetch the hardcoded list of brands, audiences, and models', async () => {
+    it('should fetch the master list of brands, audiences, and models', async () => {
       const res = await request(app)
         .get('/api/categories')
         .expect(200);
@@ -41,6 +43,8 @@ describe('T24 Watches CMS API Endpoints', () => {
       expect(res.body).toHaveProperty('brandModels');
       expect(Array.isArray(res.body.brands)).toBe(true);
       expect(res.body.brands).toContain('Rolex');
+      expect(res.body.brands).not.toContain('Chopard');
+      expect(res.body.brands).not.toContain('TAG Heuer');
       expect(res.body.brandModels).toHaveProperty('Rolex');
     });
   });
@@ -90,6 +94,39 @@ describe('T24 Watches CMS API Endpoints', () => {
 
       expect(res.body).toHaveProperty('token');
       token = res.body.token;
+    });
+  });
+
+  describe('Master Brands & Model Filters', () => {
+    it('should reject unauthorized master-brand access', async () => {
+      await request(app)
+        .get('/api/admin/brands')
+        .expect(401);
+    });
+
+    it('should persist admin-managed brand order and model filters', async () => {
+      const current = await request(app)
+        .get('/api/admin/brands')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const brands = current.body.brands.map(({ productCount, ...brand }) => brand);
+      const rolex = brands.find((brand) => brand.name === 'Rolex');
+      rolex.models = [...rolex.models, 'Oyster Perpetual'];
+
+      await request(app)
+        .put('/api/admin/brands')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ brands })
+        .expect(200);
+
+      const categories = await request(app)
+        .get('/api/categories')
+        .expect(200);
+
+      expect(categories.body.brandModels.Rolex).toContain('Oyster Perpetual');
+      expect(categories.body.brands).not.toContain('Chopard');
+      expect(categories.body.brands).not.toContain('TAG Heuer');
     });
   });
 
