@@ -24,8 +24,17 @@ import {
   ChevronDown
 } from 'lucide-react'
 import { toast } from '../components/ui/sonner'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 
 // Define static lists
+
+const NO_MODEL_SELECTED = '__no-model-selected__'
 
 interface Watch {
   id: number
@@ -177,7 +186,7 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<Watch | null>(null)
   const [productForm, setProductForm] = useState<Omit<Watch, 'id'>>({
     name: '',
-    brand: 'Rolex',
+    brand: '',
     audience: 'Mens',
     factory: '',
     priceUSD: '',
@@ -330,7 +339,13 @@ export default function AdminDashboard() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to load master brands.')
-      setMasterBrands(data.brands || [])
+      const brands: MasterBrand[] = data.brands || []
+      setMasterBrands(brands)
+      setProductForm((current) => {
+        if (current.brand) return current
+        const defaultBrand = brands.find((brand) => brand.isActive)?.name || brands[0]?.name || ''
+        return defaultBrand ? { ...current, brand: defaultBrand } : current
+      })
     } catch (err: unknown) {
       toast.error('Master Brands Unavailable', {
         description: err instanceof Error ? err.message : 'Failed to load master brands.'
@@ -739,9 +754,13 @@ export default function AdminDashboard() {
         warranty: product.warranty || '2-Year Service Warranty'
       })
     } else {
+      const defaultBrand = masterBrands.find((brand) => brand.isActive)?.name
+        || masterBrands[0]?.name
+        || availableBrands[0]
+        || ''
       setProductForm({
         name: '',
-        brand: 'Rolex',
+        brand: defaultBrand,
         audience: 'Mens',
         factory: '',
         priceUSD: '$1,490.00',
@@ -938,6 +957,33 @@ export default function AdminDashboard() {
   }
 
   const watchToDelete = products.find((p) => p.id === deleteConfirmId)
+  const normalizedProductBrand = productForm.brand.trim().toLowerCase()
+  const backendBrandOptions: MasterBrand[] = masterBrands.length > 0
+    ? masterBrands
+    : availableBrands.map((name) => ({
+        name,
+        models: availableBrandModels[name] || [],
+        isActive: true,
+      }))
+  const productBrandOptions = productForm.brand.trim()
+    && !backendBrandOptions.some((brand) => brand.name.toLowerCase() === normalizedProductBrand)
+    ? [
+        {
+          name: productForm.brand.trim(),
+          models: availableBrandModels[productForm.brand.trim()] || [],
+          isActive: false,
+        },
+        ...backendBrandOptions,
+      ]
+    : backendBrandOptions
+  const selectedMasterBrand = productBrandOptions.find(
+    (brand) => brand.name.toLowerCase() === normalizedProductBrand
+  )
+  const backendModelOptions = selectedMasterBrand?.models || []
+  const productModelOptions = productForm.model?.trim()
+    && !backendModelOptions.some((model) => model.toLowerCase() === productForm.model?.trim().toLowerCase())
+    ? [productForm.model.trim(), ...backendModelOptions]
+    : backendModelOptions
 
   return (
     <div
@@ -2774,20 +2820,37 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Brand</label>
-                    <input
-                      type="text"
+                    <Select
                       required
-                      list="admin-brands-list"
-                      placeholder="e.g. Rolex / Patek Philippe"
-                      value={productForm.brand}
-                      onChange={(e) => setProductForm(prev => ({ ...prev, brand: e.target.value }))}
-                      className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
-                    />
-                    <datalist id="admin-brands-list">
-                      {availableBrands.map((b) => (
-                        <option key={b} value={b} />
-                      ))}
-                    </datalist>
+                      value={productForm.brand || undefined}
+                      onValueChange={(brand) => setProductForm((current) => ({
+                        ...current,
+                        brand,
+                        model: current.brand === brand ? current.model : '',
+                      }))}
+                      disabled={masterBrandsLoading || productBrandOptions.length === 0}
+                    >
+                      <SelectTrigger
+                        aria-label="Brand"
+                        className="h-auto w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border-white/10 hover:border-gold/40 focus:border-gold focus:ring-0 transition-all duration-300 font-mono text-white"
+                      >
+                        <SelectValue placeholder={masterBrandsLoading ? 'Loading brands...' : 'Select brand'} />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
+                        {productBrandOptions.map((brand) => (
+                          <SelectItem
+                            key={brand.name}
+                            value={brand.name}
+                            className="cursor-pointer py-2.5 focus:bg-gold/15 focus:text-gold"
+                          >
+                            {brand.name}{brand.isActive ? '' : ' (hidden)'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[9px] text-gray-600 font-mono">
+                      Loaded from Master Brands
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Category</label>
@@ -2812,6 +2875,49 @@ export default function AdminDashboard() {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Sub-brand / Model</label>
+                    <Select
+                      value={productForm.model?.trim() || NO_MODEL_SELECTED}
+                      onValueChange={(model) => setProductForm((current) => ({
+                        ...current,
+                        model: model === NO_MODEL_SELECTED ? '' : model,
+                      }))}
+                      disabled={!productForm.brand || productModelOptions.length === 0}
+                    >
+                      <SelectTrigger
+                        aria-label="Sub-brand or model"
+                        className="h-auto w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border-white/10 hover:border-gold/40 focus:border-gold focus:ring-0 transition-all duration-300 font-mono text-white"
+                      >
+                        <SelectValue placeholder="Select sub-brand / model" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
+                        <SelectItem
+                          value={NO_MODEL_SELECTED}
+                          className="cursor-pointer py-2.5 text-gray-400 focus:bg-white/5 focus:text-white"
+                        >
+                          No sub-brand / model selected
+                        </SelectItem>
+                        {productModelOptions.map((model) => (
+                          <SelectItem
+                            key={model}
+                            value={model}
+                            className="cursor-pointer py-2.5 focus:bg-gold/15 focus:text-gold"
+                          >
+                            {model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[9px] text-gray-600 font-mono">
+                      {productForm.brand
+                        ? productModelOptions.length > 0
+                          ? `Showing models configured under ${productForm.brand}`
+                          : `No models configured under ${productForm.brand}`
+                        : 'Select a brand first'}
+                    </p>
                   </div>
                 </div>
 
@@ -3167,23 +3273,6 @@ export default function AdminDashboard() {
                     placeholder="e.g. 50m waterproof vacuum tested"
                     className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
                   />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Model / Series</label>
-                  <input
-                    type="text"
-                    list="admin-models-list"
-                    value={productForm.model || ''}
-                    onChange={(e) => setProductForm(prev => ({ ...prev, model: e.target.value }))}
-                    placeholder="e.g. Daytona 116500LN"
-                    className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
-                  />
-                  <datalist id="admin-models-list">
-                    {(availableBrandModels[productForm.brand.trim()] || []).map((m) => (
-                      <option key={m} value={m} />
-                    ))}
-                  </datalist>
                 </div>
 
                 <div className="space-y-1">
