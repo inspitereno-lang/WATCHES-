@@ -3,6 +3,8 @@ export function DhlLogo({ className = 'h-5 sm:h-6 w-auto' }: { className?: strin
     <img
       src="/images/couriers/dhl.svg"
       alt="DHL Express"
+      width={176}
+      height={39}
       className={`${className} object-contain rounded-[3px]`}
       loading="lazy"
     />
@@ -15,6 +17,8 @@ export function FedexLogo({ className = 'h-4 sm:h-5 w-auto' }: { className?: str
       <img
         src="/images/couriers/fedex.svg"
         alt="FedEx Express"
+        width={75}
+        height={34}
         className={`${className} object-contain`}
         loading="lazy"
       />
@@ -28,6 +32,8 @@ export function UpsLogo({ className = 'h-6 sm:h-7 w-auto' }: { className?: strin
       <img
         src="/images/couriers/ups.svg"
         alt="UPS Worldwide"
+        width={52}
+        height={62}
         className={`${className} object-contain drop-shadow-sm`}
         loading="lazy"
       />

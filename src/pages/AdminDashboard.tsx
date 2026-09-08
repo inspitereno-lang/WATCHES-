@@ -224,6 +224,14 @@ export default function AdminDashboard() {
   const [newMasterBrandName, setNewMasterBrandName] = useState('')
   const [modelDrafts, setModelDrafts] = useState<Record<string, string>>({})
 
+  // New Arrivals management & catalogue picker states
+  const [arrivalSearch, setArrivalSearch] = useState('')
+  const [arrivalBrandFilter, setArrivalBrandFilter] = useState('ALL')
+  const [arrivalCatalogProducts, setArrivalCatalogProducts] = useState<Watch[]>([])
+  const [arrivalCatalogLoading, setArrivalCatalogLoading] = useState(false)
+  const [addToArrivalsOnCreate, setAddToArrivalsOnCreate] = useState(false)
+  const [newArrivalCustomBadge, setNewArrivalCustomBadge] = useState('NEW ARRIVAL')
+
   // Auth Guard check & force LTR for dashboard layout
   useEffect(() => {
     document.documentElement.dir = 'ltr'
@@ -263,6 +271,39 @@ export default function AdminDashboard() {
     fetchProducts()
   }, [token, page, searchTerm])
 
+  // Fetch products for New Arrivals picker when activeSubTab is arrivals
+  useEffect(() => {
+    if (!token) return
+    if (activeTab === 'homepage' && activeSubTab === 'arrivals') {
+      const timer = setTimeout(() => {
+        fetchArrivalCatalog()
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [activeTab, activeSubTab, arrivalSearch, arrivalBrandFilter, token])
+
+  const fetchArrivalCatalog = async () => {
+    if (!token) return
+    setArrivalCatalogLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (arrivalSearch) params.set('search', arrivalSearch)
+      if (arrivalBrandFilter && arrivalBrandFilter !== 'ALL') params.set('brand', arrivalBrandFilter)
+      params.set('limit', '60')
+      const res = await fetch(`/api/admin/products?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setArrivalCatalogProducts(data.products || [])
+      }
+    } catch (err) {
+      console.error('Error fetching arrival catalog:', err)
+    } finally {
+      setArrivalCatalogLoading(false)
+    }
+  }
+
   const fetchHomepageData = async () => {
     try {
       const res = await fetch('/api/homepage')
@@ -270,6 +311,11 @@ export default function AdminDashboard() {
         const data = await res.json()
         setHomepageForm({
           ...data,
+          newArrivalsEyebrow: data.newArrivalsEyebrow || 'Spotlight',
+          newArrivalsTitle: data.newArrivalsTitle || 'NEW ARRIVALS',
+          craftsmanshipTitle: data.craftsmanshipTitle || 'CRAFTSMANSHIP',
+          newArrivalsDescription: data.newArrivalsDescription || 'Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.',
+          newArrivals: data.newArrivals || [],
           heroStats: data.heroStats?.length ? data.heroStats : [
             { value: '904L', label: 'Oystersteel finish' },
             { value: '1:1', label: 'Fine detailing' },
@@ -683,6 +729,108 @@ export default function AdminDashboard() {
     }
   }
 
+  // New Arrivals management actions
+  const addWatchToArrivals = (watch: Watch, position: 'top' | 'end' = 'end') => {
+    const currentList = Array.isArray(homepageForm.newArrivals) ? [...homepageForm.newArrivals] : []
+    if (currentList.some((item: any) => item.id === watch.id)) {
+      toast.error('Already Added', { description: `"${watch.name}" is already in New Arrivals.` })
+      return
+    }
+    const newItem = {
+      id: watch.id,
+      name: watch.name,
+      brand: watch.brand,
+      type: watch.movement || '1:1 Super Clone Edition',
+      image: watch.image,
+      priceUSD: watch.priceUSD,
+      priceAED: watch.priceAED,
+      label: 'NEW ARRIVAL',
+      order: position === 'top' ? 0 : currentList.length
+    }
+    const updated = position === 'top' ? [newItem, ...currentList] : [...currentList, newItem]
+    setHomepageForm((prev: any) => ({
+      ...prev,
+      newArrivals: updated.map((item, idx) => ({ ...item, order: idx }))
+    }))
+    toast.success('Added to New Arrivals', {
+      description: `"${watch.name}" placed in showcase as #${position === 'top' ? 1 : updated.length}.`
+    })
+  }
+
+  const removeWatchFromArrivals = (watchId: number) => {
+    const currentList = Array.isArray(homepageForm.newArrivals) ? [...homepageForm.newArrivals] : []
+    const updated = currentList.filter((item: any) => item.id !== watchId).map((item, idx) => ({ ...item, order: idx }))
+    setHomepageForm((prev: any) => ({
+      ...prev,
+      newArrivals: updated
+    }))
+    toast.info('Removed from New Arrivals')
+  }
+
+  const moveArrival = (index: number, direction: 'up' | 'down') => {
+    const currentList = Array.isArray(homepageForm.newArrivals) ? [...homepageForm.newArrivals] : []
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= currentList.length) return
+    const [moved] = currentList.splice(index, 1)
+    currentList.splice(targetIndex, 0, moved)
+    setHomepageForm((prev: any) => ({
+      ...prev,
+      newArrivals: currentList.map((item, idx) => ({ ...item, order: idx }))
+    }))
+  }
+
+  const updateArrivalBadge = (index: number, newBadge: string) => {
+    const currentList = Array.isArray(homepageForm.newArrivals) ? [...homepageForm.newArrivals] : []
+    if (currentList[index]) {
+      currentList[index] = { ...currentList[index], label: newBadge }
+      setHomepageForm((prev: any) => ({
+        ...prev,
+        newArrivals: currentList
+      }))
+    }
+  }
+
+  const autoPopulateLatestArrivals = async () => {
+    try {
+      const res = await fetch('/api/admin/products?limit=12', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const populated = (data.products || []).map((p: Watch, idx: number) => ({
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          type: p.movement || '1:1 Super Clone Edition',
+          image: p.image,
+          priceUSD: p.priceUSD,
+          priceAED: p.priceAED,
+          label: 'NEW ARRIVAL',
+          order: idx
+        }))
+        setHomepageForm((prev: any) => ({
+          ...prev,
+          newArrivals: populated
+        }))
+        toast.success('Auto-Populated', {
+          description: `Loaded ${populated.length} latest products into New Arrivals order.`
+        })
+      }
+    } catch (err: any) {
+      toast.error('Failed to load products', { description: err.message })
+    }
+  }
+
+  const clearAllArrivals = () => {
+    if (window.confirm('Are you sure you want to clear all New Arrivals?')) {
+      setHomepageForm((prev: any) => ({
+        ...prev,
+        newArrivals: []
+      }))
+      toast.info('New Arrivals cleared')
+    }
+  }
+
   // Save Homepage details
   const handleHomepageSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -719,6 +867,10 @@ export default function AdminDashboard() {
   const openProductModal = (product: Watch | null = null) => {
     setEditingProduct(product)
     if (product) {
+      const inArrivals = (homepageForm.newArrivals || []).find((item: any) => item.id === product.id)
+      setAddToArrivalsOnCreate(!!inArrivals)
+      setNewArrivalCustomBadge(inArrivals?.label || 'NEW ARRIVAL')
+
       // Normalize legacy Gents/Ladies to Mens/Womens if needed
       let normalizedAudience: 'Mens' | 'Womens' = 'Mens';
       if ((product.audience as string) === 'Ladies' || (product.audience as string) === 'Womens') {
@@ -754,6 +906,8 @@ export default function AdminDashboard() {
         warranty: product.warranty || '2-Year Service Warranty'
       })
     } else {
+      setAddToArrivalsOnCreate(false)
+      setNewArrivalCustomBadge('NEW ARRIVAL')
       const defaultBrand = masterBrands.find((brand) => brand.isActive)?.name
         || masterBrands[0]?.name
         || availableBrands[0]
@@ -789,6 +943,7 @@ export default function AdminDashboard() {
         warranty: '2-Year Service Warranty'
       })
     }
+    setNewFeature('')
     setIsModalOpen(true)
   }
 
@@ -824,7 +979,7 @@ export default function AdminDashboard() {
     })
   }
 
-  // Save product (Create or Edit)
+  // Handle Product Create / Update submission
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!productForm.image && (!productForm.images || productForm.images.length === 0)) {
@@ -844,17 +999,59 @@ export default function AdminDashboard() {
         : '/api/products'
       const method = editingProduct ? 'PUT' : 'POST'
 
+      const payload = {
+        ...productForm,
+        addToNewArrivals: addToArrivalsOnCreate,
+        newArrivalLabel: newArrivalCustomBadge || 'NEW ARRIVAL'
+      }
+
       const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(productForm)
+        body: JSON.stringify(payload)
       })
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to save product')
+
+      if (editingProduct) {
+        if (addToArrivalsOnCreate) {
+          const exists = homepageForm.newArrivals?.some((item: any) => item.id === editingProduct.id)
+          if (!exists) {
+            setHomepageForm((prev: any) => ({
+              ...prev,
+              newArrivals: [
+                {
+                  id: editingProduct.id,
+                  name: productForm.name,
+                  brand: productForm.brand,
+                  image: productForm.image,
+                  priceUSD: productForm.priceUSD,
+                  priceAED: productForm.priceAED,
+                  label: newArrivalCustomBadge || 'NEW ARRIVAL',
+                  order: 0
+                },
+                ...(prev.newArrivals || [])
+              ]
+            }))
+          } else {
+            setHomepageForm((prev: any) => ({
+              ...prev,
+              newArrivals: (prev.newArrivals || []).map((item: any) =>
+                item.id === editingProduct.id ? { ...item, label: newArrivalCustomBadge || item.label } : item
+              )
+            }))
+          }
+        } else {
+          setHomepageForm((prev: any) => ({
+            ...prev,
+            newArrivals: (prev.newArrivals || []).filter((item: any) => item.id !== editingProduct.id)
+          }))
+        }
+      }
 
       toast.success(
         editingProduct ? 'Watch Updated' : 'Watch Published',
@@ -868,6 +1065,7 @@ export default function AdminDashboard() {
       setIsModalOpen(false)
       fetchProducts()
       fetchCategories()
+      fetchHomepageData()
     } catch (err: any) {
       toast.error('Save Failed', {
         id: toastId,
@@ -1831,257 +2029,394 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* 2. New Arrivals Grid */}
+                {/* 2. New Arrivals Order & Showcase Manager */}
                 {activeSubTab === 'arrivals' && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="space-y-2">
-                        <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider block mb-1">New Arrivals Title</label>
-                        <input
-                          type="text"
-                          required
-                          value={homepageForm.newArrivalsTitle || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, newArrivalsTitle: e.target.value }))}
-                          className="w-full px-4 py-2.5 text-xs rounded-xl bg-white/[0.02] border border-white/5 focus:border-gold focus:outline-none font-mono text-white"
-                        />
+                  <div className="space-y-8">
+                    {/* Section 1: Spotlight Banner Copy */}
+                    <div className="p-5 rounded-2xl bg-white/[0.015] border border-white/10 space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-gold" />
+                          <h3 className="text-xs text-gold font-mono uppercase font-bold tracking-wider">
+                            Homepage Spotlight &amp; Header Copy
+                          </h3>
+                        </div>
+                        <span className="text-[10px] font-mono text-gray-500 uppercase">
+                          Appears on Left Card Banner
+                        </span>
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider block mb-1">Craftsmanship Title</label>
-                        <input
-                          type="text"
-                          required
-                          value={homepageForm.craftsmanshipTitle || ''}
-                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, craftsmanshipTitle: e.target.value }))}
-                          className="w-full px-4 py-2.5 text-xs rounded-xl bg-white/[0.02] border border-white/5 focus:border-gold focus:outline-none font-mono text-white"
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-gray-400 font-mono uppercase tracking-wider block font-bold">
+                            Eyebrow Tag
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Spotlight"
+                            value={homepageForm.newArrivalsEyebrow || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, newArrivalsEyebrow: e.target.value }))}
+                            className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white/[0.02] border border-white/10 focus:border-gold focus:outline-none font-mono text-white transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-gray-400 font-mono uppercase tracking-wider block font-bold">
+                            New Arrivals Title
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="NEW ARRIVALS"
+                            value={homepageForm.newArrivalsTitle || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, newArrivalsTitle: e.target.value }))}
+                            className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white/[0.02] border border-white/10 focus:border-gold focus:outline-none font-mono text-white transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-gray-400 font-mono uppercase tracking-wider block font-bold">
+                            Craftsmanship Title
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="CRAFTSMANSHIP"
+                            value={homepageForm.craftsmanshipTitle || ''}
+                            onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, craftsmanshipTitle: e.target.value }))}
+                            className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white/[0.02] border border-white/10 focus:border-gold focus:outline-none font-mono text-white transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-gray-400 font-mono uppercase tracking-wider block font-bold">
+                          Spotlight Story Description
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="Explore our latest curated timepieces..."
+                          value={homepageForm.newArrivalsDescription || ''}
+                          onChange={(e) => setHomepageForm((prev: any) => ({ ...prev, newArrivalsDescription: e.target.value }))}
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white/[0.02] border border-white/10 focus:border-gold focus:outline-none font-mono text-white transition-all"
                         />
                       </div>
                     </div>
 
-                    {/* New Arrivals list items */}
-                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
-                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">New Arrival Showcases (2 items)</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {homepageForm.newArrivals && homepageForm.newArrivals.map((item: any, idx: number) => (
-                          <div key={idx} className="space-y-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                            <div className="flex justify-between items-center">
-                              <span className="text-[10px] text-gray-500">ARRIVAL CARD {idx + 1}</span>
-                              <span className="text-[10px] text-gold font-semibold uppercase">{item.label}</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <input
-                                type="number"
-                                placeholder="Target Product ID"
-                                value={item.id}
-                                onChange={(e) => {
-                                  const list = [...homepageForm.newArrivals]
-                                  list[idx].id = parseInt(e.target.value) || 0
-                                  setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                }}
-                                className="px-3 py-1.5 text-xs rounded bg-white/[0.02] border border-white/5"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Card Badge (e.g. BEST SELLER)"
-                                value={item.label}
-                                onChange={(e) => {
-                                  const list = [...homepageForm.newArrivals]
-                                  list[idx].label = e.target.value
-                                  setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                }}
-                                className="px-3 py-1.5 text-xs rounded bg-white/[0.02] border border-white/5"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Watch Model Title"
-                                value={item.name}
-                                onChange={(e) => {
-                                  const list = [...homepageForm.newArrivals]
-                                  list[idx].name = e.target.value
-                                  setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                }}
-                                className="col-span-2 px-3 py-1.5 text-xs rounded bg-white/[0.02] border border-white/5"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Sub-label Spec (e.g. Swiss Edition)"
-                                value={item.type}
-                                onChange={(e) => {
-                                  const list = [...homepageForm.newArrivals]
-                                  list[idx].type = e.target.value
-                                  setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                }}
-                                className="col-span-2 px-3 py-1.5 text-xs rounded bg-white/[0.02] border border-white/5"
-                              />
-                            </div>
-                            
-                            <div className="space-y-1">
-                              <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">WATCH PICTURE URL</label>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  value={item.image}
-                                  onChange={(e) => {
-                                    const list = [...homepageForm.newArrivals]
-                                    list[idx].image = e.target.value
-                                    setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                  }}
-                                  className="flex-1 px-3 py-1 text-xs rounded bg-white/[0.02] border border-white/5"
-                                />
-                                  <label className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] rounded cursor-pointer select-none transition-all flex items-center gap-1">
-                                    {uploadLoadingField === `newArrivals_${idx}` ? (
-                                      <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
-                                    ) : (
-                                      <Upload className="w-3.5 h-3.5" />
-                                    )}
-                                    <span>{uploadLoadingField === `newArrivals_${idx}` ? '...' : 'UPLOAD'}</span>
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      className="hidden"
-                                      onChange={async (e) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                          setUploadLoadingField(`newArrivals_${idx}`)
-                                          const toastId = toast.loading(`Uploading Arrival Card ${idx + 1} image...`)
-                                          const file = e.target.files[0]
-                                          const formData = new FormData()
-                                          formData.append('image', file)
-                                          try {
-                                            const res = await fetch('/api/admin/upload', {
-                                              method: 'POST',
-                                              headers: { 'Authorization': `Bearer ${token}` },
-                                              body: formData
-                                            })
-                                            const upRes = await res.json()
-                                            if (res.ok) {
-                                              const list = [...homepageForm.newArrivals]
-                                              list[idx].image = upRes.url
-                                              setHomepageForm((prev: any) => ({ ...prev, newArrivals: list }))
-                                              toast.success('Arrival Photo Uploaded', {
-                                                id: toastId,
-                                                description: `Arrival Card ${idx + 1} photo updated.`
-                                              })
-                                            } else {
-                                              throw new Error(upRes.error || 'Upload failed')
-                                            }
-                                          } catch (err: any) {
-                                            toast.error('Upload Failed', {
-                                              id: toastId,
-                                              description: err.message || 'Image upload failed.'
-                                            })
-                                          } finally {
-                                            setUploadLoadingField(null)
-                                          }
-                                        }
-                                      }}
+                    {/* Section 2: Active New Arrivals Showcase Sequence */}
+                    <div className="p-5 rounded-2xl bg-white/[0.015] border border-white/10 space-y-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Sliders className="w-4 h-4 text-gold" />
+                            <h3 className="text-xs text-gold font-mono uppercase font-bold tracking-wider">
+                              Active New Arrivals Order ({(homepageForm.newArrivals || []).length} Timepieces)
+                            </h3>
+                          </div>
+                          <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+                            Arrange the exact order in which timepieces appear in the carousel. Use Move Up / Move Down or adjust badge labels.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={autoPopulateLatestArrivals}
+                            className="px-3 py-1.5 text-[10px] font-mono font-bold bg-white/5 hover:bg-gold hover:text-black border border-white/10 hover:border-gold rounded-lg transition-all flex items-center gap-1.5 text-white cursor-pointer"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                            AUTO-POPULATE LATEST
+                          </button>
+                          {(homepageForm.newArrivals || []).length > 0 && (
+                            <button
+                              type="button"
+                              onClick={clearAllArrivals}
+                              className="px-3 py-1.5 text-[10px] font-mono text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/30 border border-red-500/20 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              CLEAR ALL
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={handleHomepageSubmit}
+                            disabled={homepageLoading}
+                            className="px-4 py-1.5 text-[10px] font-mono font-bold bg-gold hover:bg-gold-light text-black rounded-lg transition-all shadow-md shadow-gold/20 flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {homepageLoading ? <Loader2 className="w-3 h-3 animate-spin text-black" /> : <Check className="w-3 h-3" />}
+                            SAVE ORDER
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* List of Ordered Cards */}
+                      {(!homepageForm.newArrivals || homepageForm.newArrivals.length === 0) ? (
+                        <div className="p-10 border border-dashed border-white/10 rounded-xl text-center space-y-2">
+                          <p className="text-xs text-gray-400 font-mono">No timepieces currently in the New Arrivals showcase.</p>
+                          <p className="text-[10px] text-gray-600 font-mono">Use the product picker below to search your catalogue and click &quot;+ Add to Showcase&quot;, or click &quot;AUTO-POPULATE LATEST&quot; above.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {homepageForm.newArrivals.map((item: any, idx: number) => (
+                            <div
+                              key={`${item.id}-${idx}`}
+                              className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/10 hover:border-gold/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+                            >
+                              {/* Left: Position & Watch Preview */}
+                              <div className="flex items-center gap-3.5 min-w-0">
+                                <div className="w-9 h-9 rounded-lg bg-black/80 border border-gold/40 flex items-center justify-center shrink-0">
+                                  <span className="font-mono text-xs font-bold text-gold">
+                                    #{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                                  </span>
+                                </div>
+
+                                <div className="w-12 h-12 rounded-lg bg-[#070709] border border-white/10 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                                  {item.image ? (
+                                    <img
+                                      src={item.image}
+                                      alt={item.name}
+                                      className="max-h-full max-w-full object-contain"
                                     />
-                                  </label>
+                                  ) : (
+                                    <ImageIcon className="w-5 h-5 text-gray-600" />
+                                  )}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-gold">
+                                      {item.brand || 'LUXURY'}
+                                    </span>
+                                    <span className="text-[9px] font-mono text-gray-500">
+                                      ID: {item.id}
+                                    </span>
+                                  </div>
+                                  <h4 className="text-xs text-white font-medium truncate max-w-[280px] sm:max-w-[400px]">
+                                    {item.name}
+                                  </h4>
+                                  <div className="flex items-center gap-2 text-[10px] font-mono text-silver/80 mt-0.5">
+                                    <span>{item.priceAED || 'Price on request'}</span>
+                                    {item.priceUSD && <span className="text-gray-500">({item.priceUSD})</span>}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Right: Badge selector and Order Controls */}
+                              <div className="flex flex-wrap items-center gap-3 shrink-0 self-end md:self-center">
+                                {/* Quick Badge Selector */}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] font-mono uppercase text-gray-500 hidden sm:inline">
+                                    Badge:
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={item.label || ''}
+                                    placeholder="NEW ARRIVAL"
+                                    onChange={(e) => updateArrivalBadge(idx, e.target.value)}
+                                    className="w-28 sm:w-32 px-2.5 py-1 text-[10px] rounded-lg bg-black/60 border border-white/10 focus:border-gold focus:outline-none font-mono text-gold text-center uppercase"
+                                  />
+                                  <div className="hidden lg:flex items-center gap-1">
+                                    {['BEST SELLER', 'CRAFTSMANSHIP', 'LIMITED'].map((badge) => (
+                                      <button
+                                        key={badge}
+                                        type="button"
+                                        onClick={() => updateArrivalBadge(idx, badge)}
+                                        className={`px-1.5 py-0.5 text-[8px] font-mono rounded border transition-all cursor-pointer ${
+                                          item.label === badge
+                                            ? 'bg-gold/20 border-gold text-gold font-bold'
+                                            : 'bg-white/[0.02] border-white/10 text-gray-400 hover:text-white'
+                                        }`}
+                                      >
+                                        {badge}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Move Up / Down Buttons */}
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    disabled={idx === 0}
+                                    onClick={() => moveArrival(idx, 'up')}
+                                    title="Move Up in Order"
+                                    className="w-7 h-7 rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/10 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                                  >
+                                    <ChevronUp className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={idx === (homepageForm.newArrivals || []).length - 1}
+                                    onClick={() => moveArrival(idx, 'down')}
+                                    title="Move Down in Order"
+                                    className="w-7 h-7 rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/10 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                                  >
+                                    <ChevronDown className="w-4 h-4" />
+                                  </button>
+                                </div>
+
+                                {/* Remove Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => removeWatchFromArrivals(item.id)}
+                                  title="Remove from New Arrivals"
+                                  className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/30 text-red-400 hover:text-white border border-red-500/20 flex items-center justify-center transition-all cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
-                    {/* Craftsmanship list items */}
-                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-4">
-                      <h4 className="text-[10px] text-gold font-mono uppercase font-bold tracking-wider">Craftsmanship Showcase Cards (2 items)</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {homepageForm.craftsmanshipImages && homepageForm.craftsmanshipImages.map((item: any, idx: number) => (
-                          <div key={idx} className="space-y-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                            <span className="text-[10px] text-gray-500">CRAFTSMANSHIP CARD {idx + 1}</span>
-                            <div className="grid grid-cols-2 gap-3">
-                              <input
-                                type="number"
-                                placeholder="Target Product ID"
-                                value={item.id}
-                                onChange={(e) => {
-                                  const list = [...homepageForm.craftsmanshipImages]
-                                  list[idx].id = parseInt(e.target.value) || 0
-                                  setHomepageForm((prev: any) => ({ ...prev, craftsmanshipImages: list }))
-                                }}
-                                className="px-3 py-1.5 text-xs rounded bg-white/[0.02] border border-white/5"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Alternative text description"
-                                value={item.alt}
-                                onChange={(e) => {
-                                  const list = [...homepageForm.craftsmanshipImages]
-                                  list[idx].alt = e.target.value
-                                  setHomepageForm((prev: any) => ({ ...prev, craftsmanshipImages: list }))
-                                }}
-                                className="px-3 py-1.5 text-xs rounded bg-white/[0.02] border border-white/5"
-                              />
-                            </div>
-                            
-                            <div className="space-y-1">
-                              <label className="text-xs text-gray-300 font-mono uppercase tracking-wider block font-bold mb-1">WATCH PICTURE URL</label>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  value={item.image}
-                                  onChange={(e) => {
-                                    const list = [...homepageForm.craftsmanshipImages]
-                                    list[idx].image = e.target.value
-                                    setHomepageForm((prev: any) => ({ ...prev, craftsmanshipImages: list }))
-                                  }}
-                                  className="flex-1 px-3 py-1 text-xs rounded bg-white/[0.02] border border-white/5"
-                                />
-                                <label className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] rounded cursor-pointer select-none transition-all flex items-center gap-1">
-                                  {uploadLoadingField === `craftsmanship_${idx}` ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
-                                  ) : (
-                                    <Upload className="w-3.5 h-3.5" />
-                                  )}
-                                  <span>{uploadLoadingField === `craftsmanship_${idx}` ? '...' : 'UPLOAD'}</span>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={async (e) => {
-                                      if (e.target.files && e.target.files[0]) {
-                                        setUploadLoadingField(`craftsmanship_${idx}`)
-                                        const toastId = toast.loading(`Uploading Craftsmanship Card ${idx + 1} image...`)
-                                        const file = e.target.files[0]
-                                        const formData = new FormData()
-                                        formData.append('image', file)
-                                        try {
-                                          const res = await fetch('/api/admin/upload', {
-                                            method: 'POST',
-                                            headers: { 'Authorization': `Bearer ${token}` },
-                                            body: formData
-                                          })
-                                          const upRes = await res.json()
-                                          if (res.ok) {
-                                            const list = [...homepageForm.craftsmanshipImages]
-                                            list[idx].image = upRes.url
-                                            setHomepageForm((prev: any) => ({ ...prev, craftsmanshipImages: list }))
-                                            toast.success('Craftsmanship Photo Uploaded', {
-                                              id: toastId,
-                                              description: `Craftsmanship Card ${idx + 1} photo updated.`
-                                            })
-                                          } else {
-                                            throw new Error(upRes.error || 'Upload failed')
-                                          }
-                                        } catch (err: any) {
-                                          toast.error('Upload Failed', {
-                                            id: toastId,
-                                            description: err.message || 'Image upload failed.'
-                                          })
-                                        } finally {
-                                          setUploadLoadingField(null)
-                                        }
-                                      }
-                                    }}
-                                  />
-                                </label>
-
-                              </div>
-                            </div>
+                    {/* Section 3: Product Catalog Picker */}
+                    <div className="p-5 rounded-2xl bg-white/[0.015] border border-white/10 space-y-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Database className="w-4 h-4 text-gold" />
+                            <h3 className="text-xs text-gold font-mono uppercase font-bold tracking-wider">
+                              Select Watches from Catalogue
+                            </h3>
                           </div>
-                        ))}
+                          <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+                            Click &quot;+ Add to Showcase&quot; to insert any watch into your New Arrivals order.
+                          </p>
+                        </div>
+
+                        {/* Search & Brand Filter */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="relative min-w-[200px]">
+                            <Search className="w-3.5 h-3.5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="text"
+                              placeholder="Search by watch or reference..."
+                              value={arrivalSearch}
+                              onChange={(e) => setArrivalSearch(e.target.value)}
+                              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-black/60 border border-white/10 focus:border-gold focus:outline-none font-mono text-white placeholder:text-gray-600 transition-all"
+                            />
+                            {arrivalSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setArrivalSearch('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+
+                          <select
+                            value={arrivalBrandFilter}
+                            onChange={(e) => setArrivalBrandFilter(e.target.value)}
+                            className="px-3 py-1.5 text-xs rounded-xl bg-black/60 border border-white/10 text-white font-mono focus:border-gold focus:outline-none transition-all"
+                          >
+                            <option value="ALL">All Brands</option>
+                            {availableBrands.map((b) => (
+                              <option key={b} value={b}>
+                                {b}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
+
+                      {/* Products Grid */}
+                      {arrivalCatalogLoading ? (
+                        <div className="py-12 flex flex-col items-center justify-center gap-2 text-gray-500">
+                          <Loader2 className="w-6 h-6 animate-spin text-gold" />
+                          <span className="text-xs font-mono">Loading inventory...</span>
+                        </div>
+                      ) : arrivalCatalogProducts.length === 0 ? (
+                        <div className="p-8 border border-dashed border-white/10 rounded-xl text-center">
+                          <p className="text-xs text-gray-400 font-mono">No watches found matching your search.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[520px] overflow-y-auto pr-1">
+                          {arrivalCatalogProducts.map((p) => {
+                            const inArrivalsIndex = (homepageForm.newArrivals || []).findIndex((item: any) => item.id === p.id)
+                            const isAdded = inArrivalsIndex !== -1
+
+                            return (
+                              <div
+                                key={p.id}
+                                className={`p-3 rounded-xl border transition-all flex flex-col justify-between ${
+                                  isAdded
+                                    ? 'bg-gold/[0.04] border-gold/30 shadow-sm shadow-gold/10'
+                                    : 'bg-white/[0.015] border-white/5 hover:border-white/20'
+                                }`}
+                              >
+                                <div className="flex gap-3 items-start">
+                                  <div className="w-14 h-14 rounded-lg bg-[#070709] border border-white/10 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                                    {p.image ? (
+                                      <img
+                                        src={p.image}
+                                        alt={p.name}
+                                        className="max-h-full max-w-full object-contain"
+                                      />
+                                    ) : (
+                                      <ImageIcon className="w-5 h-5 text-gray-600" />
+                                    )}
+                                  </div>
+
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span className="text-[9px] font-mono font-bold uppercase text-gold truncate">
+                                        {p.brand}
+                                      </span>
+                                      <span className="text-[8px] font-mono text-gray-500">
+                                        #{p.id}
+                                      </span>
+                                    </div>
+                                    <h4 className="text-[11px] text-white font-medium line-clamp-2 leading-snug mt-0.5">
+                                      {p.name}
+                                    </h4>
+                                    <div className="text-[10px] font-mono text-silver/80 mt-1">
+                                      {p.priceAED}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between gap-2">
+                                  {isAdded ? (
+                                    <>
+                                      <span className="text-[9px] font-mono font-bold text-gold bg-gold/10 border border-gold/30 px-2 py-0.5 rounded">
+                                        SHOWCASE #{inArrivalsIndex + 1}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeWatchFromArrivals(p.id)}
+                                        className="text-[9px] font-mono text-red-400 hover:text-white px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/30 border border-red-500/20 transition-all cursor-pointer"
+                                      >
+                                        Remove
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <div className="flex items-center gap-1 w-full">
+                                      <button
+                                        type="button"
+                                        onClick={() => addWatchToArrivals(p, 'end')}
+                                        className="flex-1 py-1 px-2 text-[10px] font-mono font-bold rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/10 hover:border-gold transition-all flex items-center justify-center gap-1 text-white cursor-pointer"
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                        + Add to End
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => addWatchToArrivals(p, 'top')}
+                                        title="Add at the very top as #01"
+                                        className="py-1 px-2 text-[10px] font-mono rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/10 transition-all text-gray-300 cursor-pointer"
+                                      >
+                                        Top #1
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -3368,6 +3703,31 @@ export default function AdminDashboard() {
                   <p className="text-[9px] leading-4 text-gray-500">
                     Hidden watches remain in the admin catalogue but disappear from public pages.
                   </p>
+                </div>
+
+                <div className="space-y-1 flex flex-col justify-end">
+                  <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">New Arrivals Showcase</label>
+                  <label className="flex items-center gap-3.5 px-3 py-2 bg-white/[0.02] border border-white/5 rounded-lg cursor-pointer select-none hover:border-gold/20">
+                    <input
+                      type="checkbox"
+                      checked={addToArrivalsOnCreate}
+                      onChange={(e) => setAddToArrivalsOnCreate(e.target.checked)}
+                      className="accent-gold w-4 h-4 text-gold"
+                    />
+                    <span className="text-[10px] text-gold font-mono font-semibold">FEATURE IN NEW ARRIVALS CAROUSEL</span>
+                  </label>
+                  {addToArrivalsOnCreate && (
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-[9px] font-mono text-gray-400 uppercase">Badge:</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. NEW ARRIVAL or BEST SELLER"
+                        value={newArrivalCustomBadge}
+                        onChange={(e) => setNewArrivalCustomBadge(e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-black/60 border border-gold/30 text-white font-mono focus:outline-none uppercase"
+                      />
+                    </div>
+                  )}
                 </div>
 
               </div>

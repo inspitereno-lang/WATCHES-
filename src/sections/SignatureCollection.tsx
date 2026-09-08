@@ -601,6 +601,10 @@ export default function SignatureCollection({
               <img 
                 src="/curated-men-women-banner-desktop.png" 
                 alt="Premium Watches For Him & Her"
+                width={1024}
+                height={454}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02] select-none"
               />
             </picture>

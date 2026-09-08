@@ -139,6 +139,10 @@ export default function MaisonAeterna({
               <img
                 src={heritageImage}
                 alt={captionText}
+                width={1200}
+                height={800}
+                loading="lazy"
+                decoding="async"
                 className="h-auto max-h-[430px] w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />

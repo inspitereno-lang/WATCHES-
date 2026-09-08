@@ -94,8 +94,13 @@ export default function Header({
             className="group flex h-full items-center"
           >
             <img
-              src="/dubai-watches-gallery-logo.png"
+              src="/dubai-watches-gallery-logo.webp"
               alt="Dubai Watches Gallery"
+              width={840}
+              height={472}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               className="h-9 sm:h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
             />
           </a>

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+
+Sitemap: https://aeterna-geneve-ten.vercel.app/sitemap.xml

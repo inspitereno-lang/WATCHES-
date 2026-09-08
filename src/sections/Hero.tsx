@@ -75,143 +75,31 @@ export default function Hero({
   const desktopVideoRef1 = useRef<HTMLVideoElement | null>(null)
   const mobileVideoRef = useRef<HTMLVideoElement | null>(null)
   const [activeDesktopIdx, setActiveDesktopIdx] = useState(0)
-  const [desktopVideoStarted, setDesktopVideoStarted] = useState(false)
   const [mobileVideoStarted, setMobileVideoStarted] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 640px)').matches)
 
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
-  // Ref callback for desktop video 0
-  const setDesktopVideoRef0 = (el: HTMLVideoElement | null) => {
-    desktopVideoRef0.current = el
-    if (el) {
-      el.muted = true
-      // @ts-ignore
-      el.defaultMuted = true
-      el.setAttribute('muted', '')
-      el.setAttribute('playsinline', '')
-      el.setAttribute('webkit-playsinline', '')
-      setTimeout(() => { el.play().catch(() => {}) }, 50)
-      setTimeout(() => { el.play().catch(() => {}) }, 300)
-    }
-  }
-
-  // Ref callback for desktop video 1
-  const setDesktopVideoRef1 = (el: HTMLVideoElement | null) => {
-    desktopVideoRef1.current = el
-    if (el) {
-      el.muted = true
-      // @ts-ignore
-      el.defaultMuted = true
-      el.setAttribute('muted', '')
-      el.setAttribute('playsinline', '')
-      el.setAttribute('webkit-playsinline', '')
-    }
-  }
-
-  // Ref callback for mobile video
-  const setMobileVideoRef = (el: HTMLVideoElement | null) => {
-    mobileVideoRef.current = el
-    if (el) {
-      el.muted = true
-      // @ts-ignore
-      el.defaultMuted = true
-      el.setAttribute('muted', '')
-      el.setAttribute('playsinline', '')
-      el.setAttribute('webkit-playsinline', '')
-      setTimeout(() => { el.play().catch(() => {}) }, 50)
-      setTimeout(() => { el.play().catch(() => {}) }, 300)
-      setTimeout(() => { el.play().catch(() => {}) }, 1000)
-    }
-  }
-
-  // Persistent retry: keep trying to play until active video is playing
   useEffect(() => {
-    const interval = setInterval(() => {
-      const desk0 = desktopVideoRef0.current
-      const mob = mobileVideoRef.current
-      let allPlaying = true
-
-      if (desk0 && desk0.paused && activeDesktopIdx === 0) {
-        desk0.muted = true
-        desk0.play().catch(() => {})
-        allPlaying = false
-      }
-      if (mob && mob.paused) {
-        mob.muted = true
-        mob.play().catch(() => {})
-        allPlaying = false
-      }
-
-      if (allPlaying) clearInterval(interval)
-    }, 500)
-
-    const timeout = setTimeout(() => clearInterval(interval), 10000)
-
-    return () => {
-      clearInterval(interval)
-      clearTimeout(timeout)
-    }
-  }, [activeDesktopIdx])
-
-  // Unlock on ANY user gesture (not once — keep listening until videos play)
-  useEffect(() => {
-    let unlocked = false
-    const unlockOnGesture = () => {
-      if (unlocked) return
-      const desk0 = desktopVideoRef0.current
-      const desk1 = desktopVideoRef1.current
-      const mob = mobileVideoRef.current
-      let bothPlaying = true
-
-      if (activeDesktopIdx === 0 && desk0 && desk0.paused) {
-        desk0.muted = true
-        desk0.play().catch(() => {})
-        bothPlaying = false
-      } else if (activeDesktopIdx === 1 && desk1 && desk1.paused) {
-        desk1.muted = true
-        desk1.play().catch(() => {})
-        bothPlaying = false
-      }
-      if (mob && mob.paused) {
-        mob.muted = true
-        mob.play().then(() => setMobileVideoStarted(true)).catch(() => {})
-        bothPlaying = false
-      }
-
-      if (bothPlaying) {
-        unlocked = true
-        window.removeEventListener('touchstart', unlockOnGesture)
-        window.removeEventListener('touchend', unlockOnGesture)
-        window.removeEventListener('touchmove', unlockOnGesture)
-        window.removeEventListener('pointerdown', unlockOnGesture)
-        window.removeEventListener('click', unlockOnGesture)
-        window.removeEventListener('scroll', unlockOnGesture)
-        window.removeEventListener('mousemove', unlockOnGesture)
-        window.removeEventListener('keydown', unlockOnGesture)
-      }
-    }
-
-    window.addEventListener('touchstart', unlockOnGesture, { passive: true })
-    window.addEventListener('touchend', unlockOnGesture, { passive: true })
-    window.addEventListener('touchmove', unlockOnGesture, { passive: true })
-    window.addEventListener('pointerdown', unlockOnGesture, { passive: true })
-    window.addEventListener('click', unlockOnGesture, { passive: true })
-    window.addEventListener('scroll', unlockOnGesture, { passive: true })
-    window.addEventListener('mousemove', unlockOnGesture, { passive: true })
-    window.addEventListener('keydown', unlockOnGesture, { passive: true })
-
-    return () => {
-      window.removeEventListener('touchstart', unlockOnGesture)
-      window.removeEventListener('touchend', unlockOnGesture)
-      window.removeEventListener('touchmove', unlockOnGesture)
-      window.removeEventListener('pointerdown', unlockOnGesture)
-      window.removeEventListener('click', unlockOnGesture)
-      window.removeEventListener('scroll', unlockOnGesture)
-      window.removeEventListener('mousemove', unlockOnGesture)
-      window.removeEventListener('keydown', unlockOnGesture)
-    }
+    const mediaQuery = window.matchMedia('(min-width: 640px)')
+    const handleBreakpointChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches)
+    mediaQuery.addEventListener('change', handleBreakpointChange)
+    return () => mediaQuery.removeEventListener('change', handleBreakpointChange)
   }, [])
+
+  useEffect(() => {
+    const activeVideo = isDesktop
+      ? (activeDesktopIdx === 0 ? desktopVideoRef0.current : desktopVideoRef1.current)
+      : mobileVideoRef.current
+
+    if (!activeVideo) return
+    activeVideo.muted = true
+    activeVideo.defaultMuted = true
+    activeVideo.play().catch(() => {
+      // The optimized poster remains visible when a browser blocks autoplay.
+    })
+  }, [activeDesktopIdx, isDesktop])
 
   const heroData = {
     title: translate(heroTitle, currentLang),
@@ -350,29 +238,23 @@ export default function Hero({
         className="absolute inset-0 -z-20 overflow-hidden pointer-events-none"
       >
         {/* Desktop / Tablet Video Player with Dual-Buffer Seamless Cross-Fade */}
-        <div
-          className="hidden sm:block absolute inset-0 pointer-events-none bg-cover bg-center transition-opacity duration-700"
-          style={{
-            backgroundImage: desktopVideoStarted ? 'none' : `url(${DEFAULT_DESKTOP_POSTER})`,
-          }}
-        >
+        {isDesktop ? (
+        <div className="absolute inset-0 pointer-events-none bg-cover bg-center transition-opacity duration-700">
           {/* Video 0: Transition Watch */}
           <video
-            ref={setDesktopVideoRef0}
+            ref={desktopVideoRef0}
             autoPlay
             muted
             playsInline
             controls={false}
             disablePictureInPicture
             disableRemotePlayback
-            preload="auto"
+            preload="metadata"
+            poster={DEFAULT_DESKTOP_POSTER}
             onCanPlay={(e) => {
               const v = e.currentTarget
               v.muted = true
               if (activeDesktopIdx === 0) v.play().catch(() => {})
-            }}
-            onPlaying={() => {
-              if (activeDesktopIdx === 0) setDesktopVideoStarted(true)
             }}
             onEnded={() => {
               const v1 = desktopVideoRef1.current
@@ -405,13 +287,14 @@ export default function Hero({
 
           {/* Video 1: Orbiting Watch (Preloaded & Ready) */}
           <video
-            ref={setDesktopVideoRef1}
+            ref={desktopVideoRef1}
             muted
             playsInline
             controls={false}
             disablePictureInPicture
             disableRemotePlayback
-            preload="auto"
+            preload="none"
+            poster={DEFAULT_DESKTOP_POSTER}
             onCanPlay={(e) => {
               const v = e.currentTarget
               v.muted = true
@@ -446,16 +329,12 @@ export default function Hero({
             } w-[65%] z-20 pointer-events-none`}
           />
         </div>
-
-        {/* Mobile Portrait 9:16 Video Player with Zero Native Play Button Overlays */}
+        ) : (
         <div
-          className="block sm:hidden absolute inset-0 pointer-events-none bg-cover bg-center"
-          style={{
-            backgroundImage: `url(${DEFAULT_MOBILE_POSTER})`,
-          }}
+          className="absolute inset-0 pointer-events-none bg-cover bg-center"
         >
           <video
-            ref={setMobileVideoRef}
+            ref={mobileVideoRef}
             autoPlay
             loop
             muted
@@ -463,7 +342,8 @@ export default function Hero({
             controls={false}
             disablePictureInPicture
             disableRemotePlayback
-            preload="auto"
+            preload="metadata"
+            poster={DEFAULT_MOBILE_POSTER}
             onCanPlay={(e) => {
               const v = e.currentTarget
               v.muted = true
@@ -497,6 +377,7 @@ export default function Hero({
           <div className="absolute bottom-0 inset-x-0 h-44 bg-gradient-to-t from-[#050403]/90 via-[#050403]/40 to-transparent pointer-events-none" />
           <div className="absolute inset-0 bg-black/20 pointer-events-none" />
         </div>
+        )}
 
         <div className="absolute inset-0 bg-[#d9a520]/[0.02] mix-blend-screen pointer-events-none" />
       </div>

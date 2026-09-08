@@ -139,8 +139,11 @@ export default function Luminescence({
               <img
                 src={lumeImage}
                 alt="Watch architecture case and movement study"
+                width={1200}
+                height={900}
                 className="h-auto max-h-[560px] w-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>

@@ -123,6 +123,10 @@ export default function Footer({
         <img
           src={contactBannerSrc}
           alt="Dubai The Watch - Contact Us"
+          width={1024}
+          height={568}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02] select-none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/40 to-transparent pointer-events-none" />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { MessageCircle, ShieldCheck, ArrowRight } from 'lucide-react'
 import { translate } from '../utils/translate'
 import { getSelectedRep, getWhatsAppUrl, type SalesRep } from '../utils/whatsapp'
+import Seo from '../components/Seo'
 
 interface Accessory {
   id: number
@@ -111,6 +112,12 @@ export default function AccessoriesPage({
 
   return (
     <div className="min-h-screen bg-[#070605] pt-28 pb-24 text-white relative isolate overflow-hidden">
+      <Seo
+        title={isRtl ? 'إكسسوارات الساعات في دبي | معرض دبي للساعات' : 'Watch Accessories in Dubai | Dubai Watches Gallery'}
+        description={isRtl ? 'اكتشف إكسسوارات الساعات في دبي لدى معرض دبي للساعات، واستكشف إكسسوارات فاخرة مصممة لتكمل ساعتك وتحميها.' : 'Discover watch accessories in Dubai at Dubai Watches Gallery. Explore premium accessories designed to complement and protect your timepiece.'}
+        canonicalPath="/accessories"
+        image="/images/card-her.jpg"
+      />
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[#d4af37]/5 blur-[140px] pointer-events-none -z-10" />
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { optimizeCloudinaryImage } from '../lib/cloudinary';
 
 interface WatchImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -15,12 +16,20 @@ export const WatchImage: React.FC<WatchImageProps> = ({
   alt,
   className = '',
   style,
+  width = 900,
+  height = 900,
+  loading = 'lazy',
+  decoding = 'async',
   ...props
 }) => {
   return (
     <img
-      src={src}
+      src={optimizeCloudinaryImage(src, typeof width === 'number' ? width : 900)}
       alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding={decoding}
       className={className}
       style={style}
       {...props}

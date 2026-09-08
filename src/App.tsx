@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -13,23 +13,25 @@ import Testimonials from './sections/Testimonials'
 import MaisonAeterna from './sections/MaisonAeterna'
 import DeliveryPromise from './sections/DeliveryPromise'
 import Footer from './sections/Footer'
-import ProductDetailPage from './pages/ProductDetailPage'
-import WatchesPage from './pages/WatchesPage'
-import CollectionsPage from './pages/CollectionsPage'
-import AccessoriesPage from './pages/AccessoriesPage'
-import BlogPage from './pages/BlogPage'
-import BlogArticlePage from './pages/BlogArticlePage'
-import AdminLogin from './pages/AdminLogin'
-import AdminDashboard from './pages/AdminDashboard'
 import ScrollToTop from './components/ScrollToTop'
 import ArabicLocalizer from './components/ArabicLocalizer'
 import { Toaster } from './components/ui/sonner'
 import { EngagementPopup } from './components/EngagementPopup'
+import Seo from './components/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const ARCHITECTURE_IMAGE_URL = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1783924974/t24_watches_defaults/watch-architecture.webp'
 const HERITAGE_IMAGE_URL = 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1781171811/t24_watches_defaults/igkoymjeabkrvpmjcx3o.jpg'
+
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
+const WatchesPage = lazy(() => import('./pages/WatchesPage'))
+const CollectionsPage = lazy(() => import('./pages/CollectionsPage'))
+const AccessoriesPage = lazy(() => import('./pages/AccessoriesPage'))
+const BlogPage = lazy(() => import('./pages/BlogPage'))
+const BlogArticlePage = lazy(() => import('./pages/BlogArticlePage'))
+const AdminLogin = lazy(() => import('./pages/AdminLogin'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 
 export default function App() {
   const { pathname } = useLocation()
@@ -114,11 +116,18 @@ export default function App() {
         salesReps={homepageData?.salesReps}
         footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
       />
+      <Suspense fallback={<div className="min-h-screen bg-black" aria-label="Loading page" />}>
       <Routes>
         <Route 
           path="/" 
           element={
             <>
+              <Seo
+                title="Luxury Watches in Dubai | Dubai Watches Gallery"
+                description="Explore Dubai Watches Gallery for a curated selection of luxury and premium watches in Dubai. Discover our collections and find the right watch for your style."
+                canonicalPath="/"
+                image="/watch-grid-1.jpg"
+              />
               <Header 
                 salesReps={homepageData?.salesReps}
                 defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
@@ -142,8 +151,10 @@ export default function App() {
                   heroStats={homepageData?.heroStats}
                 />
                 <NewArrivals 
+                  eyebrow={homepageData?.newArrivalsEyebrow}
                   newArrivalsTitle={homepageData?.newArrivalsTitle}
                   craftsmanshipTitle={homepageData?.craftsmanshipTitle}
+                  description={homepageData?.newArrivalsDescription}
                   newArrivals={homepageData?.newArrivals}
                   craftsmanshipImages={homepageData?.craftsmanshipImages}
                 />
@@ -339,6 +350,7 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
+      </Suspense>
     </div>
   )
 }

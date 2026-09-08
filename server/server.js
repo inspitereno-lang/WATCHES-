@@ -63,12 +63,32 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 4 * 1024 * 1024 },
+  fileFilter: (_req, file, callback) => {
+    callback(null, file.mimetype.startsWith('image/'));
+  },
 });
 
 // Middlewares
-app.use(cors());
-app.use(express.json());
+const configuredOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (
+      !origin ||
+      configuredOrigins.includes(origin) ||
+      /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin) ||
+      /^http:\/\/localhost:\d+$/i.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin is not allowed by CORS.'));
+  },
+}));
+app.use(express.json({ limit: '2mb' }));
 
 const normalizeHomepageSettings = (settings) => {
   if (
@@ -122,17 +142,67 @@ const normalizeHomepageSettings = (settings) => {
   return settings;
 };
 
-// Connect to MongoDB Atlas (use separate test DB during test runs)
-let dbUri = process.env.MONGO_URI;
-if (process.env.NODE_ENV === 'test' && dbUri) {
-  dbUri = dbUri.replace('/t24watches', '/t24watches_test');
-}
-mongoose.connect(dbUri)
-  .then(() => {
-    console.log(`Connected to MongoDB successfully (${process.env.NODE_ENV === 'test' ? 'TEST' : 'PRODUCTION'} DB).`);
-    autoTranslateExistingProducts();
-  })
-  .catch(err => console.error('MongoDB connection error:', err));
+// Keep one MongoDB connection per warm Vercel function instance. Test runs are
+// forced onto an isolated database even when the source URI omits a DB name.
+const withDatabaseName = (uri, databaseName) => {
+  const queryIndex = uri.indexOf('?');
+  const beforeQuery = queryIndex >= 0 ? uri.slice(0, queryIndex) : uri;
+  const query = queryIndex >= 0 ? uri.slice(queryIndex) : '';
+  const schemeIndex = beforeQuery.indexOf('://');
+  const pathIndex = beforeQuery.indexOf('/', schemeIndex + 3);
+  const authority = pathIndex >= 0 ? beforeQuery.slice(0, pathIndex) : beforeQuery;
+  return `${authority}/${databaseName}${query}`;
+};
+
+const sourceDbUri = process.env.MONGO_URI;
+const dbUri = sourceDbUri && process.env.NODE_ENV === 'test'
+  ? withDatabaseName(sourceDbUri, 't24watches_test')
+  : sourceDbUri;
+
+export const connectToDatabase = async () => {
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  if (!dbUri) throw new Error('MONGO_URI is not configured.');
+
+  if (!globalThis.__t24MongoConnectionPromise) {
+    globalThis.__t24MongoConnectionPromise = mongoose.connect(dbUri, {
+      serverSelectionTimeoutMS: 10000,
+    }).catch((error) => {
+      globalThis.__t24MongoConnectionPromise = undefined;
+      throw error;
+    });
+  }
+
+  await globalThis.__t24MongoConnectionPromise;
+  return mongoose.connection;
+};
+
+app.get('/api/health', async (_req, res) => {
+  const missing = ['MONGO_URI', 'JWT_SECRET', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']
+    .filter((key) => !process.env[key]);
+
+  try {
+    await connectToDatabase();
+    return res.status(missing.length ? 503 : 200).json({
+      status: missing.length ? 'misconfigured' : 'ok',
+      database: 'connected',
+      cloudinary: missing.some((key) => key.startsWith('CLOUDINARY_')) ? 'missing configuration' : 'configured',
+      missing,
+    });
+  } catch (error) {
+    console.error('Health check database error:', error);
+    return res.status(503).json({ status: 'unavailable', database: 'disconnected', missing });
+  }
+});
+
+app.use('/api', async (_req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    return res.status(503).json({ error: 'Database service is temporarily unavailable.' });
+  }
+});
 
 // =========================================================================
 // CUSTOMER APIS (PUBLIC)
@@ -196,52 +266,64 @@ app.get('/api/homepage', async (req, res) => {
     }
     let data = settings;
 
-    // Fetch latest 12 in-stock products to dynamically populate/fill New Arrivals
-    const latestProducts = await Product.find({
-      inStock: true,
-      isVisible: { $ne: false },
-    })
-      .sort({ id: -1 })
-      .limit(12);
-
-    const dynamicArrivals = latestProducts.map(p => ({
-      id: p.id,
-      name: p.name,
-      type: p.movement || '1:1 Super Clone Edition',
-      image: p.image,
-      label: p.brand.toUpperCase(),
-      priceUSD: p.priceUSD,
-      priceAED: p.priceAED
-    }));
-
     let plainSettings = settings.toObject ? settings.toObject() : settings;
-    const configuredArrivalIds = (plainSettings.newArrivals || [])
+    const configuredItems = plainSettings.newArrivals || [];
+    const configuredIds = configuredItems
       .map((item) => item.id)
       .filter((id) => Number.isFinite(id));
-    const visibleConfiguredProducts = configuredArrivalIds.length
+
+    const productsFromDb = configuredIds.length > 0
       ? await Product.find({
-          id: { $in: configuredArrivalIds },
+          id: { $in: configuredIds },
           isVisible: { $ne: false },
-        }).select('id')
+        })
       : [];
-    const visibleConfiguredIds = new Set(
-      visibleConfiguredProducts.map((product) => product.id)
-    );
-    plainSettings.newArrivals = (plainSettings.newArrivals || []).filter((item) =>
-      visibleConfiguredIds.has(item.id)
-    );
-    if (!plainSettings.newArrivals || plainSettings.newArrivals.length <= 2) {
-      plainSettings.newArrivals = dynamicArrivals;
-    } else {
-      const customIds = new Set(plainSettings.newArrivals.map(item => item.id));
-      const filledArrivals = [...plainSettings.newArrivals];
-      for (const dynamicItem of dynamicArrivals) {
-        if (filledArrivals.length >= 12) break;
-        if (!customIds.has(dynamicItem.id)) {
-          filledArrivals.push(dynamicItem);
-        }
+
+    const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
+
+    // Reconstruct newArrivals in the exact order configured by the admin
+    const resolvedArrivals = [];
+    for (const item of configuredItems) {
+      const p = productMap.get(item.id);
+      if (p) {
+        resolvedArrivals.push({
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          type: p.movement || '1:1 Super Clone Edition',
+          image: p.image,
+          priceUSD: p.priceUSD,
+          priceAED: p.priceAED,
+          label: item.label || 'NEW ARRIVAL',
+          inStock: p.inStock,
+          order: item.order !== undefined ? item.order : resolvedArrivals.length,
+        });
       }
-      plainSettings.newArrivals = filledArrivals;
+    }
+
+    // If no custom arrivals configured or none are visible, fallback to latest in-stock products
+    if (resolvedArrivals.length === 0) {
+      const fallbackProducts = await Product.find({
+        inStock: true,
+        isVisible: { $ne: false },
+      })
+        .sort({ id: -1 })
+        .limit(12);
+
+      plainSettings.newArrivals = fallbackProducts.map((p, idx) => ({
+        id: p.id,
+        name: p.name,
+        brand: p.brand,
+        type: p.movement || '1:1 Super Clone Edition',
+        image: p.image,
+        label: 'NEW ARRIVAL',
+        priceUSD: p.priceUSD,
+        priceAED: p.priceAED,
+        inStock: p.inStock,
+        order: idx,
+      }));
+    } else {
+      plainSettings.newArrivals = resolvedArrivals;
     }
 
     data = plainSettings;
@@ -760,7 +842,7 @@ async function translateHomepage(homepage, to = 'ar') {
   
   const stringFields = [
     'heroTitle', 'heroSubtitleLabel', 'heroSubtitleDesc', 'heroBodyDescription', 'heroCtaLabel',
-    'newArrivalsTitle', 'craftsmanshipTitle',
+    'newArrivalsEyebrow', 'newArrivalsTitle', 'craftsmanshipTitle', 'newArrivalsDescription',
     'architectureHeading1', 'architectureHeading2', 'architectureSubhead', 'architectureDesc',
     'catalogueEyebrow', 'catalogueHeading1', 'catalogueHeading2', 'catalogueDescription',
     'heritageHeading1', 'heritageHeading2', 'heritageDesc1', 'heritageDesc2', 'heritageDesc3',
@@ -1516,6 +1598,10 @@ app.delete('/api/accessories/:id', auth, async (req, res) => {
 // 1. Admin login credentials verify
 app.post('/api/admin/login', async (req, res) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(503).json({ error: 'Server authentication is not configured.' });
+    }
+
     const { username, password } = req.body;
     if (!username || !password) {
       return res.status(400).json({ error: 'Please enter all fields.' });
@@ -1533,7 +1619,7 @@ app.post('/api/admin/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id, username: user.username },
-      process.env.JWT_SECRET || 't24watches_dubai_luxury_secret_signature_jwt_hash_key_182937',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
@@ -1553,19 +1639,27 @@ app.post('/api/admin/login', async (req, res) => {
 
 app.get('/api/admin/products', auth, async (req, res) => {
   try {
-    const { search = '', page = 1, limit = 10 } = req.query;
-    const query = search
-      ? {
-          $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { brand: { $regex: search, $options: 'i' } },
-            { factory: { $regex: search, $options: 'i' } },
-            { model: { $regex: search, $options: 'i' } },
-          ],
-        }
-      : {};
+    const { search = '', page = 1, limit = 10, brand = '' } = req.query;
+    const conditions = [];
+
+    if (search) {
+      conditions.push({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { brand: { $regex: search, $options: 'i' } },
+          { factory: { $regex: search, $options: 'i' } },
+          { model: { $regex: search, $options: 'i' } },
+        ],
+      });
+    }
+
+    if (brand && brand !== 'ALL' && brand !== 'ALL BRANDS') {
+      conditions.push({ brand: { $regex: `^${brand}$`, $options: 'i' } });
+    }
+
+    const query = conditions.length > 1 ? { $and: conditions } : conditions[0] || {};
     const currentPage = Math.max(parseInt(page), 1);
-    const itemLimit = Math.min(Math.max(parseInt(limit), 1), 100);
+    const itemLimit = Math.min(Math.max(parseInt(limit), 1), 200);
     const skip = (currentPage - 1) * itemLimit;
 
     const [totalItems, products] = await Promise.all([
@@ -1766,6 +1860,10 @@ app.put('/api/admin/homepage', auth, async (req, res) => {
 // 3. Image upload to Cloudinary CDN
 app.post('/api/admin/upload', auth, upload.single('image'), async (req, res) => {
   try {
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return res.status(503).json({ error: 'Cloudinary is not configured on the server.' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload an image file.' });
     }
@@ -1898,6 +1996,34 @@ app.post('/api/products', auth, async (req, res) => {
 
     await populateProductArabicFields(newProduct);
     await newProduct.save();
+
+    if (req.body.addToNewArrivals) {
+      try {
+        let homeSettings = await Homepage.findOne();
+        if (!homeSettings) {
+          homeSettings = new Homepage({});
+        }
+        const existingArrivals = Array.isArray(homeSettings.newArrivals) ? homeSettings.newArrivals : [];
+        homeSettings.newArrivals = [
+          {
+            id: nextId,
+            label: req.body.newArrivalLabel || 'NEW ARRIVAL',
+            name: newProduct.name,
+            brand: newProduct.brand,
+            type: newProduct.movement || '1:1 Super Clone Edition',
+            image: newProduct.image,
+            priceUSD: newProduct.priceUSD,
+            priceAED: newProduct.priceAED,
+            order: 0,
+          },
+          ...existingArrivals.filter((item) => item.id !== nextId),
+        ];
+        await homeSettings.save();
+      } catch (homeErr) {
+        console.error('Error adding new product to newArrivals:', homeErr);
+      }
+    }
+
     return res.status(201).json({ message: 'Watch added successfully to catalogue.', product: newProduct });
   } catch (err) {
     console.error('POST /api/products error:', err);
@@ -2056,8 +2182,23 @@ app.get('/api/proxy-image', async (req, res) => {
   }
 });
 
+app.use('/api', (_req, res) => {
+  return res.status(404).json({ error: 'API route not found.' });
+});
+
+app.use((error, _req, res, next) => {
+  if (res.headersSent) return next(error);
+  console.error('Unhandled API error:', error);
+
+  if (error?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'Image exceeds the 4 MB upload limit.' });
+  }
+
+  return res.status(500).json({ error: 'Unexpected server error.' });
+});
+
 // Start listening
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`T24 Watches Express Server running on port ${PORT}`);
   });
