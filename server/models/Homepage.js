@@ -12,10 +12,14 @@ const heroStatSchema = new mongoose.Schema({
 
 const newArrivalSchema = new mongoose.Schema({
   id: { type: Number, required: true },
-  name: { type: String, required: true },
-  type: { type: String, required: true },
-  image: { type: String, required: true },
-  label: { type: String, required: true }
+  label: { type: String, default: 'NEW ARRIVAL' },
+  name: { type: String, default: '' },
+  brand: { type: String, default: '' },
+  type: { type: String, default: '' },
+  image: { type: String, default: '' },
+  priceUSD: { type: String, default: '' },
+  priceAED: { type: String, default: '' },
+  order: { type: Number, default: 0 }
 });
 
 const craftImageSchema = new mongoose.Schema({
@@ -142,8 +146,13 @@ const homepageSchema = new mongoose.Schema(
     },
 
     // NEW ARRIVALS
+    newArrivalsEyebrow: { type: String, default: 'Spotlight' },
     newArrivalsTitle: { type: String, default: 'NEW ARRIVALS' },
     craftsmanshipTitle: { type: String, default: 'CRAFTSMANSHIP' },
+    newArrivalsDescription: {
+      type: String,
+      default: 'Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.'
+    },
     newArrivals: {
       type: [newArrivalSchema],
       default: [

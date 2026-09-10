@@ -151,8 +151,10 @@ export default function App() {
                   heroStats={homepageData?.heroStats}
                 />
                 <NewArrivals 
+                  eyebrow={homepageData?.newArrivalsEyebrow}
                   newArrivalsTitle={homepageData?.newArrivalsTitle}
                   craftsmanshipTitle={homepageData?.craftsmanshipTitle}
+                  description={homepageData?.newArrivalsDescription}
                   newArrivals={homepageData?.newArrivals}
                   craftsmanshipImages={homepageData?.craftsmanshipImages}
                 />

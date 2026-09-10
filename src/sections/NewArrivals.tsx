@@ -7,9 +7,10 @@ import { translate } from '../utils/translate'
 interface NewArrivalItem {
   id: number
   name: string
-  type: string
+  brand?: string
+  type?: string
   image: string
-  label: string
+  label?: string
   priceUSD?: string
   priceAED?: string
 }
@@ -21,98 +22,33 @@ interface CraftsmanshipImageItem {
 }
 
 interface NewArrivalsProps {
+  eyebrow?: string
   newArrivalsTitle?: string
   craftsmanshipTitle?: string
+  description?: string
   newArrivals?: NewArrivalItem[]
   craftsmanshipImages?: CraftsmanshipImageItem[]
 }
 
-const defaultArrivals: NewArrivalItem[] = [
-  {
-    id: 123,
-    name: 'Rolex Cosmograph Daytona 40mm – PANDA',
-    type: '1:1 Swiss Super Clone Edition',
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372639/t24_watches_clean/vmdeatpytq76vufbbmhh.png',
-    label: 'BEST SELLER',
-  },
-  {
-    id: 119,
-    name: 'Richard Mille RM 055 Bubba Watson Asia Carbon NTPT',
-    type: '1:1 Swiss Super Clone Edition',
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372624/t24_watches_clean/ffoturqlsqn7c3aiwgif.png',
-    label: 'NEW ARRIVAL',
-  },
-  {
-    id: 114,
-    name: 'Rolex Datejust 126281RBR Two-Tone Oyster Grey Dial 36mm 2023',
-    type: '1:1 Super Clone Edition',
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372603/t24_watches_clean/jctyki5eoi9smo4s67ri.png',
-    label: 'EXQUISITE',
-  },
-  {
-    id: 103,
-    name: 'Richard Mille RM 67-01 Rose Gold Skeleton Dial Extra Flat',
-    type: '1:1 Flyback Chrono Super Clone',
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372551/t24_watches_clean/ze5js60llxs3rgiukog3.png',
-    label: 'CRAFTSMANSHIP',
-  },
-]
-
-const defaultCraftsmanship: CraftsmanshipImageItem[] = [
-  { 
-    id: 138, 
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372700/t24_watches_clean/fnrdjyeusvk64pfj2doh.png', 
-    alt: 'Audemars Piguet Royal Oak Double Balance Wheel Skeleton' 
-  },
-  { 
-    id: 102, 
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372545/t24_watches_clean/h8fxgwcqbbzof42ixa6y.png', 
-    alt: 'Richard Mille RM 67-02 Mutaz Essa Barshim Qatar' 
-  },
-  { 
-    id: 119, 
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372624/t24_watches_clean/ffoturqlsqn7c3aiwgif.png', 
-    alt: 'Richard Mille RM 055 Bubba Watson' 
-  },
-  { 
-    id: 114, 
-    image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1784372603/t24_watches_clean/jctyki5eoi9smo4s67ri.png', 
-    alt: 'Rolex Datejust 126281RBR Two-Tone' 
-  },
-]
-
 export default function NewArrivals({
+  eyebrow = 'Spotlight',
   newArrivalsTitle = 'NEW ARRIVALS',
   craftsmanshipTitle = 'CRAFTSMANSHIP',
-  newArrivals: apiNewArrivals = [],
-  craftsmanshipImages: apiCraftsmanship = [],
+  description = 'Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.',
+  newArrivals = [],
 }: NewArrivalsProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const currentLang = localStorage.getItem('t24_lang') || 'en'
 
-  // Merge API and fallbacks so there are always up to 24 items (12 arrivals, 12 craftsmanship)
-  const mergedArrivals = [...apiNewArrivals, ...defaultArrivals.filter(d => !apiNewArrivals.some(a => a.id === d.id))].slice(0, 12)
-  const mergedCraftsmanship = [...apiCraftsmanship, ...defaultCraftsmanship.filter(d => !apiCraftsmanship.some(c => c.id === d.id))].slice(0, 12)
-
-  // Construct standard items list for carousel slider
-  const slides = [
-    ...mergedArrivals.map(item => ({
-      id: item.id,
-      brand: item.label || 'Rolex',
-      reference: item.name,
-      priceUSD: item.priceUSD || (item.name.includes('Pikachu') ? '$1,250' : item.name.includes('Patek') ? '$1,850' : item.name.includes('Mille') ? '$2,450' : '$1,450'),
-      priceAED: item.priceAED || (item.name.includes('Pikachu') ? 'AED 4,590' : item.name.includes('Patek') ? 'AED 6,795' : item.name.includes('Mille') ? 'AED 8,995' : 'AED 5,325'),
-      image: item.image,
-    })),
-    ...mergedCraftsmanship.map(item => ({
-      id: item.id,
-      brand: item.alt ? (item.alt.includes('Mille') ? 'Richard Mille' : item.alt.includes('Audemars') ? 'Audemars Piguet' : 'Rolex') : 'Rolex',
-      reference: item.alt || 'Luxury Watch',
-      priceUSD: item.alt && item.alt.includes('Mille') ? '$2,450' : '$1,650',
-      priceAED: item.alt && item.alt.includes('Mille') ? 'AED 8,995' : 'AED 6,060',
-      image: item.image,
-    }))
-  ]
+  // Construct standard items list for carousel slider directly from dynamic backend data
+  const slides = (newArrivals || []).map((item) => ({
+    id: item.id,
+    brand: item.label || item.brand || 'NEW ARRIVAL',
+    reference: item.name,
+    priceUSD: item.priceUSD || '',
+    priceAED: item.priceAED || '',
+    image: item.image,
+  }))
 
   const scrollNext = () => {
     const container = containerRef.current
@@ -149,7 +85,7 @@ export default function NewArrivals({
 
           <div className="relative z-20 space-y-4">
             <span className="font-mono text-[9px] tracking-[0.35em] text-[#e8c264] bg-[#e8c264]/10 border border-[#e8c264]/20 px-2.5 py-1 rounded-full uppercase">
-              {translate('Spotlight', currentLang)}
+              {translate(eyebrow, currentLang)}
             </span>
             <h3 className="font-display text-2xl xl:text-3xl font-light tracking-tight text-white leading-tight mt-2">
               {translate(newArrivalsTitle, currentLang)}
@@ -160,7 +96,7 @@ export default function NewArrivals({
 
           <div className="relative z-20 pt-8 border-t border-white/5 mt-auto">
             <p className="font-body text-xs text-silver tracking-widest leading-relaxed">
-              {translate("Explore our latest curated timepieces, featuring ultra-precise movements, custom engineering, and original weight specifications.", currentLang)}
+              {translate(description, currentLang)}
             </p>
           </div>
         </div>

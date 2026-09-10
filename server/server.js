@@ -266,52 +266,64 @@ app.get('/api/homepage', async (req, res) => {
     }
     let data = settings;
 
-    // Fetch latest 12 in-stock products to dynamically populate/fill New Arrivals
-    const latestProducts = await Product.find({
-      inStock: true,
-      isVisible: { $ne: false },
-    })
-      .sort({ id: -1 })
-      .limit(12);
-
-    const dynamicArrivals = latestProducts.map(p => ({
-      id: p.id,
-      name: p.name,
-      type: p.movement || '1:1 Super Clone Edition',
-      image: p.image,
-      label: p.brand.toUpperCase(),
-      priceUSD: p.priceUSD,
-      priceAED: p.priceAED
-    }));
-
     let plainSettings = settings.toObject ? settings.toObject() : settings;
-    const configuredArrivalIds = (plainSettings.newArrivals || [])
+    const configuredItems = plainSettings.newArrivals || [];
+    const configuredIds = configuredItems
       .map((item) => item.id)
       .filter((id) => Number.isFinite(id));
-    const visibleConfiguredProducts = configuredArrivalIds.length
+
+    const productsFromDb = configuredIds.length > 0
       ? await Product.find({
-          id: { $in: configuredArrivalIds },
+          id: { $in: configuredIds },
           isVisible: { $ne: false },
-        }).select('id')
+        })
       : [];
-    const visibleConfiguredIds = new Set(
-      visibleConfiguredProducts.map((product) => product.id)
-    );
-    plainSettings.newArrivals = (plainSettings.newArrivals || []).filter((item) =>
-      visibleConfiguredIds.has(item.id)
-    );
-    if (!plainSettings.newArrivals || plainSettings.newArrivals.length <= 2) {
-      plainSettings.newArrivals = dynamicArrivals;
-    } else {
-      const customIds = new Set(plainSettings.newArrivals.map(item => item.id));
-      const filledArrivals = [...plainSettings.newArrivals];
-      for (const dynamicItem of dynamicArrivals) {
-        if (filledArrivals.length >= 12) break;
-        if (!customIds.has(dynamicItem.id)) {
-          filledArrivals.push(dynamicItem);
-        }
+
+    const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
+
+    // Reconstruct newArrivals in the exact order configured by the admin
+    const resolvedArrivals = [];
+    for (const item of configuredItems) {
+      const p = productMap.get(item.id);
+      if (p) {
+        resolvedArrivals.push({
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          type: p.movement || '1:1 Super Clone Edition',
+          image: p.image,
+          priceUSD: p.priceUSD,
+          priceAED: p.priceAED,
+          label: item.label || 'NEW ARRIVAL',
+          inStock: p.inStock,
+          order: item.order !== undefined ? item.order : resolvedArrivals.length,
+        });
       }
-      plainSettings.newArrivals = filledArrivals;
+    }
+
+    // If no custom arrivals configured or none are visible, fallback to latest in-stock products
+    if (resolvedArrivals.length === 0) {
+      const fallbackProducts = await Product.find({
+        inStock: true,
+        isVisible: { $ne: false },
+      })
+        .sort({ id: -1 })
+        .limit(12);
+
+      plainSettings.newArrivals = fallbackProducts.map((p, idx) => ({
+        id: p.id,
+        name: p.name,
+        brand: p.brand,
+        type: p.movement || '1:1 Super Clone Edition',
+        image: p.image,
+        label: 'NEW ARRIVAL',
+        priceUSD: p.priceUSD,
+        priceAED: p.priceAED,
+        inStock: p.inStock,
+        order: idx,
+      }));
+    } else {
+      plainSettings.newArrivals = resolvedArrivals;
     }
 
     data = plainSettings;
@@ -830,7 +842,7 @@ async function translateHomepage(homepage, to = 'ar') {
   
   const stringFields = [
     'heroTitle', 'heroSubtitleLabel', 'heroSubtitleDesc', 'heroBodyDescription', 'heroCtaLabel',
-    'newArrivalsTitle', 'craftsmanshipTitle',
+    'newArrivalsEyebrow', 'newArrivalsTitle', 'craftsmanshipTitle', 'newArrivalsDescription',
     'architectureHeading1', 'architectureHeading2', 'architectureSubhead', 'architectureDesc',
     'catalogueEyebrow', 'catalogueHeading1', 'catalogueHeading2', 'catalogueDescription',
     'heritageHeading1', 'heritageHeading2', 'heritageDesc1', 'heritageDesc2', 'heritageDesc3',
@@ -1627,19 +1639,27 @@ app.post('/api/admin/login', async (req, res) => {
 
 app.get('/api/admin/products', auth, async (req, res) => {
   try {
-    const { search = '', page = 1, limit = 10 } = req.query;
-    const query = search
-      ? {
-          $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { brand: { $regex: search, $options: 'i' } },
-            { factory: { $regex: search, $options: 'i' } },
-            { model: { $regex: search, $options: 'i' } },
-          ],
-        }
-      : {};
+    const { search = '', page = 1, limit = 10, brand = '' } = req.query;
+    const conditions = [];
+
+    if (search) {
+      conditions.push({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { brand: { $regex: search, $options: 'i' } },
+          { factory: { $regex: search, $options: 'i' } },
+          { model: { $regex: search, $options: 'i' } },
+        ],
+      });
+    }
+
+    if (brand && brand !== 'ALL' && brand !== 'ALL BRANDS') {
+      conditions.push({ brand: { $regex: `^${brand}$`, $options: 'i' } });
+    }
+
+    const query = conditions.length > 1 ? { $and: conditions } : conditions[0] || {};
     const currentPage = Math.max(parseInt(page), 1);
-    const itemLimit = Math.min(Math.max(parseInt(limit), 1), 100);
+    const itemLimit = Math.min(Math.max(parseInt(limit), 1), 200);
     const skip = (currentPage - 1) * itemLimit;
 
     const [totalItems, products] = await Promise.all([
@@ -1976,6 +1996,34 @@ app.post('/api/products', auth, async (req, res) => {
 
     await populateProductArabicFields(newProduct);
     await newProduct.save();
+
+    if (req.body.addToNewArrivals) {
+      try {
+        let homeSettings = await Homepage.findOne();
+        if (!homeSettings) {
+          homeSettings = new Homepage({});
+        }
+        const existingArrivals = Array.isArray(homeSettings.newArrivals) ? homeSettings.newArrivals : [];
+        homeSettings.newArrivals = [
+          {
+            id: nextId,
+            label: req.body.newArrivalLabel || 'NEW ARRIVAL',
+            name: newProduct.name,
+            brand: newProduct.brand,
+            type: newProduct.movement || '1:1 Super Clone Edition',
+            image: newProduct.image,
+            priceUSD: newProduct.priceUSD,
+            priceAED: newProduct.priceAED,
+            order: 0,
+          },
+          ...existingArrivals.filter((item) => item.id !== nextId),
+        ];
+        await homeSettings.save();
+      } catch (homeErr) {
+        console.error('Error adding new product to newArrivals:', homeErr);
+      }
+    }
+
     return res.status(201).json({ message: 'Watch added successfully to catalogue.', product: newProduct });
   } catch (err) {
     console.error('POST /api/products error:', err);
