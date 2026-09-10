@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -6,10 +7,22 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config({ path: path.join(__dirname, '.env.local') });
+
+const requiredCloudinaryVariables = [
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET',
+];
+const missingCloudinaryVariables = requiredCloudinaryVariables.filter((key) => !process.env[key]);
+if (missingCloudinaryVariables.length) {
+  throw new Error(`Missing Cloudinary configuration: ${missingCloudinaryVariables.join(', ')}`);
+}
+
 cloudinary.config({
-  cloud_name: 'dwqxzzqpn',
-  api_key: '166385748614328',
-  api_secret: 'Cnc2G4jSlw-XDDvTlu72r1izalQ',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 async function uploadVideo(filePath, publicId) {

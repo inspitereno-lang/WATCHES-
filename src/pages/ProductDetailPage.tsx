@@ -427,6 +427,8 @@ export default function ProductDetailPage({
               <WatchImage
                 src={activeImage || watch.image}
                 alt={watch.name}
+                loading="eager"
+                fetchPriority="high"
                 className="max-h-[88%] max-w-[88%] object-contain transition-transform duration-500 ease-out pointer-events-none"
                 style={{ transform: isHoveringImage ? 'scale(1.04)' : 'scale(1)' }}
               />

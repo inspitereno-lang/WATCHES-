@@ -117,6 +117,10 @@ export default function Nocturne({
               <img
                 src={nocturneImage}
                 alt={`${nocturneHeading1} ${nocturneHeading2} Custom Build`}
+                width={1000}
+                height={1000}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto object-cover max-h-[500px]"
               />
               {/* Gradient overlay */}

@@ -10,15 +10,8 @@ export default function CollectionsPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <Seo
-        title={isArabic ? 'مجموعات الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Replica Watch Collections Dubai | Dubai Watches Gallery'}
-        description={isArabic ? 'تسوّق مجموعات مختارة من رولكس وريتشارد ميل وباتيك فيليب وأوديمار بيجيه في دبي مع توصيل آمن.' : 'Shop curated Rolex, Richard Mille, Patek Philippe and Audemars Piguet replica watch collections in Dubai with exact-reference guides and secure delivery.'}
-        keywords={[
-          'replica watches Dubai',
-          'super clone watches Dubai',
-          'Rolex replica Dubai',
-          'Richard Mille replica Dubai',
-          'Patek Philippe replica watches',
-        ]}
+        title={isArabic ? 'مجموعات الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Watch Collections in Dubai | Dubai Watches Gallery'}
+        description={isArabic ? 'تسوّق مجموعات مختارة من رولكس وريتشارد ميل وباتيك فيليب وأوديمار بيجيه في دبي مع توصيل آمن.' : 'Explore luxury watch collections in Dubai at Dubai Watches Gallery. Browse our curated selection of premium watches and find a collection suited to your style.'}
         canonicalPath="/collections"
         image="/hero-brands/patek-philippe-nautilus.png"
       />

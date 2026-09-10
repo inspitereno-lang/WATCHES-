@@ -63,12 +63,32 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 4 * 1024 * 1024 },
+  fileFilter: (_req, file, callback) => {
+    callback(null, file.mimetype.startsWith('image/'));
+  },
 });
 
 // Middlewares
-app.use(cors());
-app.use(express.json());
+const configuredOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (
+      !origin ||
+      configuredOrigins.includes(origin) ||
+      /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin) ||
+      /^http:\/\/localhost:\d+$/i.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin is not allowed by CORS.'));
+  },
+}));
+app.use(express.json({ limit: '2mb' }));
 
 const normalizeHomepageSettings = (settings) => {
   if (
@@ -122,17 +142,67 @@ const normalizeHomepageSettings = (settings) => {
   return settings;
 };
 
-// Connect to MongoDB Atlas (use separate test DB during test runs)
-let dbUri = process.env.MONGO_URI;
-if (process.env.NODE_ENV === 'test' && dbUri) {
-  dbUri = dbUri.replace('/t24watches', '/t24watches_test');
-}
-mongoose.connect(dbUri)
-  .then(() => {
-    console.log(`Connected to MongoDB successfully (${process.env.NODE_ENV === 'test' ? 'TEST' : 'PRODUCTION'} DB).`);
-    autoTranslateExistingProducts();
-  })
-  .catch(err => console.error('MongoDB connection error:', err));
+// Keep one MongoDB connection per warm Vercel function instance. Test runs are
+// forced onto an isolated database even when the source URI omits a DB name.
+const withDatabaseName = (uri, databaseName) => {
+  const queryIndex = uri.indexOf('?');
+  const beforeQuery = queryIndex >= 0 ? uri.slice(0, queryIndex) : uri;
+  const query = queryIndex >= 0 ? uri.slice(queryIndex) : '';
+  const schemeIndex = beforeQuery.indexOf('://');
+  const pathIndex = beforeQuery.indexOf('/', schemeIndex + 3);
+  const authority = pathIndex >= 0 ? beforeQuery.slice(0, pathIndex) : beforeQuery;
+  return `${authority}/${databaseName}${query}`;
+};
+
+const sourceDbUri = process.env.MONGO_URI;
+const dbUri = sourceDbUri && process.env.NODE_ENV === 'test'
+  ? withDatabaseName(sourceDbUri, 't24watches_test')
+  : sourceDbUri;
+
+export const connectToDatabase = async () => {
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  if (!dbUri) throw new Error('MONGO_URI is not configured.');
+
+  if (!globalThis.__t24MongoConnectionPromise) {
+    globalThis.__t24MongoConnectionPromise = mongoose.connect(dbUri, {
+      serverSelectionTimeoutMS: 10000,
+    }).catch((error) => {
+      globalThis.__t24MongoConnectionPromise = undefined;
+      throw error;
+    });
+  }
+
+  await globalThis.__t24MongoConnectionPromise;
+  return mongoose.connection;
+};
+
+app.get('/api/health', async (_req, res) => {
+  const missing = ['MONGO_URI', 'JWT_SECRET', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']
+    .filter((key) => !process.env[key]);
+
+  try {
+    await connectToDatabase();
+    return res.status(missing.length ? 503 : 200).json({
+      status: missing.length ? 'misconfigured' : 'ok',
+      database: 'connected',
+      cloudinary: missing.some((key) => key.startsWith('CLOUDINARY_')) ? 'missing configuration' : 'configured',
+      missing,
+    });
+  } catch (error) {
+    console.error('Health check database error:', error);
+    return res.status(503).json({ status: 'unavailable', database: 'disconnected', missing });
+  }
+});
+
+app.use('/api', async (_req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    return res.status(503).json({ error: 'Database service is temporarily unavailable.' });
+  }
+});
 
 // =========================================================================
 // CUSTOMER APIS (PUBLIC)
@@ -1516,6 +1586,10 @@ app.delete('/api/accessories/:id', auth, async (req, res) => {
 // 1. Admin login credentials verify
 app.post('/api/admin/login', async (req, res) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(503).json({ error: 'Server authentication is not configured.' });
+    }
+
     const { username, password } = req.body;
     if (!username || !password) {
       return res.status(400).json({ error: 'Please enter all fields.' });
@@ -1533,7 +1607,7 @@ app.post('/api/admin/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id, username: user.username },
-      process.env.JWT_SECRET || 't24watches_dubai_luxury_secret_signature_jwt_hash_key_182937',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
@@ -1766,6 +1840,10 @@ app.put('/api/admin/homepage', auth, async (req, res) => {
 // 3. Image upload to Cloudinary CDN
 app.post('/api/admin/upload', auth, upload.single('image'), async (req, res) => {
   try {
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return res.status(503).json({ error: 'Cloudinary is not configured on the server.' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload an image file.' });
     }
@@ -2056,8 +2134,23 @@ app.get('/api/proxy-image', async (req, res) => {
   }
 });
 
+app.use('/api', (_req, res) => {
+  return res.status(404).json({ error: 'API route not found.' });
+});
+
+app.use((error, _req, res, next) => {
+  if (res.headersSent) return next(error);
+  console.error('Unhandled API error:', error);
+
+  if (error?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'Image exceeds the 4 MB upload limit.' });
+  }
+
+  return res.status(500).json({ error: 'Unexpected server error.' });
+});
+
 // Start listening
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`T24 Watches Express Server running on port ${PORT}`);
   });

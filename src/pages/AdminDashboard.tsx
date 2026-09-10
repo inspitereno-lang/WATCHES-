@@ -994,20 +994,20 @@ export default function AdminDashboard() {
     >
       
       {/* Admin header */}
-      <header className="border-b border-white/5 bg-[#0e0e11] px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-white/5 bg-[#0e0e11] px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Database className="w-5 h-5 text-gold" />
-          <h1 className="text-lg tracking-tight font-light text-white">
+          <Database className="w-5 h-5 text-gold shrink-0" />
+          <h1 className="text-base sm:text-lg tracking-tight font-light text-white">
             DUBAI WATCHES GALLERY <span className="text-gold font-semibold">CMS</span>
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-3 sm:gap-4">
           <a
             href="/"
             target="_blank"
             className="text-xs text-gray-400 hover:text-white transition-colors duration-300 font-mono flex items-center gap-1.5"
           >
-            <Eye className="w-3.5 h-3.5" /> VIEW STOREFRONT
+            <Eye className="w-3.5 h-3.5" /> <span className="inline">VIEW STOREFRONT</span>
           </a>
           <button
             onClick={handleLogout}
@@ -1019,14 +1019,14 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main layout */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 flex flex-col md:flex-row gap-6 md:gap-8 min-w-0">
         
         {/* Navigation Sidebar */}
-        <aside className="w-full md:w-72 shrink-0">
-          <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible pb-3 md:pb-0 flex-nowrap md:flex-wrap scrollbar-none">
+        <aside className="w-full md:w-72 shrink-0 min-w-0">
+          <div className="flex md:flex-col gap-2 sm:gap-3 overflow-x-auto md:overflow-visible pb-2 md:pb-0 flex-nowrap md:flex-wrap scrollbar-none -mx-3 px-3 sm:mx-0 sm:px-0">
             <button
               onClick={() => setActiveTab('products')}
-              className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
+              className={`whitespace-nowrap px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-2.5 sm:gap-3 shrink-0 ${
                 activeTab === 'products'
                   ? 'bg-gold text-black font-bold shadow-md shadow-gold/20'
                   : 'bg-white/[0.02] border border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.04]'
@@ -1038,7 +1038,7 @@ export default function AdminDashboard() {
 
             <button
               onClick={() => setActiveTab('brands')}
-              className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
+              className={`whitespace-nowrap px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-2.5 sm:gap-3 shrink-0 ${
                 activeTab === 'brands'
                   ? 'bg-gold text-black font-bold shadow-md shadow-gold/20'
                   : 'bg-white/[0.02] border border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.04]'
@@ -1050,7 +1050,7 @@ export default function AdminDashboard() {
 
             <button
               onClick={() => setActiveTab('accessories')}
-              className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
+              className={`whitespace-nowrap px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-2.5 sm:gap-3 shrink-0 ${
                 activeTab === 'accessories'
                   ? 'bg-gold text-black font-bold shadow-md shadow-gold/20'
                   : 'bg-white/[0.02] border border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.04]'
@@ -1075,7 +1075,7 @@ export default function AdminDashboard() {
                   setActiveTab('homepage')
                   setActiveSubTab(sub.key as any)
                 }}
-                className={`whitespace-nowrap px-4 py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-3 shrink-0 ${
+                className={`whitespace-nowrap px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-xl text-xs font-mono tracking-wider transition-all duration-300 flex items-center gap-2.5 sm:gap-3 shrink-0 ${
                   activeTab === 'homepage' && activeSubTab === sub.key
                     ? 'bg-gold text-black font-bold shadow-md shadow-gold/20'
                     : 'bg-white/[0.02] border border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.04]'
@@ -1089,28 +1089,28 @@ export default function AdminDashboard() {
         </aside>
 
         {/* Content Area */}
-        <section className="flex-1 bg-[#0e0e11] border border-white/5 rounded-2xl p-6 xl:p-8 relative min-h-[500px]">
+        <section className="flex-1 bg-[#0e0e11] border border-white/5 rounded-2xl p-4 sm:p-6 xl:p-8 relative min-h-[500px] min-w-0">
           
           {/* TAB 1: PRODUCT CATALOGUE MANAGEMENT */}
           {activeTab === 'products' && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div>
-                  <h2 className="text-2xl font-light text-white">Catalogue Inventory</h2>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">
+                  <h2 className="text-xl sm:text-2xl font-light text-white">Catalogue Inventory</h2>
+                  <p className="text-[11px] sm:text-xs text-gray-500 font-mono mt-0.5">
                     MANAGE WATCH DATA AND PRICES IN THE MONGODB BACKEND
                   </p>
                 </div>
                 <button
                   onClick={() => openProductModal(null)}
-                  className="px-6 py-3.5 bg-gold hover:bg-gold-light text-black text-sm font-mono font-bold tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-gold/10 flex items-center gap-2 cursor-pointer w-fit"
+                  className="w-full sm:w-fit px-5 sm:px-6 py-3 sm:py-3.5 bg-gold hover:bg-gold-light text-black text-xs sm:text-sm font-mono font-bold tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-gold/10 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" /> ADD WATCH MODEL
                 </button>
               </div>
 
               {/* Search filter bar */}
-              <div className="relative max-w-md">
+              <div className="relative w-full max-w-md">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <input
                   type="text"
@@ -1124,137 +1124,142 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              {/* Data Table */}
+              {/* Data Table & Mobile Cards */}
               {productsLoading ? (
                 <div className="h-64 flex items-center justify-center">
                   <Loader2 className="w-8 h-8 text-gold animate-spin" />
                 </div>
               ) : products.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-sm font-mono text-gray-300">
-                    <thead>
-                      <tr className="border-b border-white/5 text-xs text-gray-400 uppercase tracking-wider font-bold">
-                        <th className="pb-3 pl-4">Watch Preview</th>
-                        <th className="pb-3">Model Name</th>
-                        <th className="pb-3">Brand</th>
-                        <th className="pb-3">Category</th>
-                        <th className="pb-3">Edition</th>
-                        <th className="pb-3">Price USD</th>
-                        <th className="pb-3">Price AED</th>
-                        <th className="pb-3">Stock</th>
-                        <th className="pb-3">Storefront</th>
-                        <th className="pb-3 text-right pr-4">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {products.map((item) => (
-                        <tr
-                          key={item.id}
-                          className={`hover:bg-white/[0.01] transition-all duration-200 ${
-                            item.isVisible === false ? 'opacity-55' : ''
-                          }`}
-                        >
-                          <td className="py-4 pl-4">
-                            <a 
-                              href={item.image} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="group/thumb relative block w-12 h-12 rounded bg-black border border-white/5 p-1 flex items-center justify-center cursor-zoom-in"
-                              title="Click to view full size"
-                            >
-                              <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover/thumb:scale-110" />
-                              <div className="hidden group-hover/thumb:block absolute left-24 top-0 z-[100] w-48 h-48 p-2 bg-[#0e0e11] border border-white/10 rounded-xl shadow-2xl pointer-events-none">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
-                              </div>
-                            </a>
-                          </td>
-                          <td className="font-semibold text-white max-w-[200px] truncate">{item.name}</td>
-                          <td>{item.brand}</td>
-                          <td>
-                            <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] uppercase text-gray-300">
-                              {item.audience || 'Mens'}
-                            </span>
-                          </td>
-                          <td><span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-gold">{item.factory}</span></td>
-                          <td>{item.priceUSD}</td>
-                          <td>{item.priceAED}</td>
-                          <td>
-                            {item.inStock ? (
-                              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase font-bold">In Stock</span>
-                            ) : (
-                              <span className="text-red-400 text-[10px] bg-red-500/10 px-2 py-0.5 rounded-full uppercase font-bold">Sold Out</span>
-                            )}
-                          </td>
-                          <td>
-                            {item.isVisible !== false ? (
-                              <span className="inline-flex items-center gap-1.5 text-sky-300 text-[10px] bg-sky-500/10 px-2 py-0.5 rounded-full uppercase font-bold">
-                                <Eye className="h-3 w-3" />
-                                Visible
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 text-gray-400 text-[10px] bg-white/5 px-2 py-0.5 rounded-full uppercase font-bold">
-                                <EyeOff className="h-3 w-3" />
-                                Hidden
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-4 text-right pr-4">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => handleToggleVisibility(item)}
-                                className={`p-2 border rounded transition-all duration-300 cursor-pointer ${
-                                  item.isVisible !== false
-                                    ? 'border-white/5 hover:border-amber-400/30 hover:text-amber-300'
-                                    : 'border-emerald-500/20 text-emerald-400 hover:border-emerald-400/50'
-                                }`}
-                                title={item.isVisible !== false ? 'Hide from storefront' : 'Show on storefront'}
-                                aria-label={item.isVisible !== false ? `Hide ${item.name} from storefront` : `Show ${item.name} on storefront`}
-                              >
-                                {item.isVisible !== false ? (
-                                  <EyeOff className="w-3.5 h-3.5" />
-                                ) : (
-                                  <Eye className="w-3.5 h-3.5" />
-                                )}
-                              </button>
-                              <button
-                                onClick={() => openProductModal(item)}
-                                className="p-2 border border-white/5 hover:border-gold/30 hover:text-gold rounded transition-all duration-300 cursor-pointer"
-                                title="Edit specs"
-                              >
-                                <FileEdit className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => setDeleteConfirmId(item.id)}
-                                className="p-2 border border-white/5 hover:border-red-500/30 hover:text-red-400 rounded transition-all duration-300 cursor-pointer"
-                                title="Delete model"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
+                <div className="space-y-4">
+                  {/* Data Table */}
+                  <div className="overflow-x-auto -mx-1 sm:mx-0">
+                    <table className="w-full min-w-[700px] md:min-w-[900px] text-left border-collapse text-xs sm:text-sm font-mono text-gray-300">
+                      <thead>
+                        <tr className="border-b border-white/5 text-xs text-gray-400 uppercase tracking-wider font-bold whitespace-nowrap">
+                          <th className="pb-3 pl-4 whitespace-nowrap">Watch Preview</th>
+                          <th className="pb-3 whitespace-nowrap">Model Name</th>
+                          <th className="pb-3 whitespace-nowrap">Brand</th>
+                          <th className="pb-3 whitespace-nowrap">Category</th>
+                          <th className="pb-3 hidden lg:table-cell whitespace-nowrap">Edition</th>
+                          <th className="pb-3 whitespace-nowrap">Price USD</th>
+                          <th className="pb-3 whitespace-nowrap">Price AED</th>
+                          <th className="pb-3 whitespace-nowrap">Stock</th>
+                          <th className="pb-3 whitespace-nowrap">Storefront</th>
+                          <th className="pb-3 text-right pr-4 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {products.map((item) => (
+                          <tr
+                            key={item.id}
+                            className={`hover:bg-white/[0.01] transition-all duration-200 ${
+                              item.isVisible === false ? 'opacity-55' : ''
+                            }`}
+                          >
+                            <td className="py-4 pl-4 whitespace-nowrap">
+                              <a 
+                                href={item.image} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="group/thumb relative block w-12 h-12 rounded bg-black border border-white/5 p-1 flex items-center justify-center cursor-zoom-in"
+                                title="Click to view full size"
+                              >
+                                <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover/thumb:scale-110" />
+                                <div className="hidden group-hover/thumb:block absolute left-24 top-0 z-[100] w-48 h-48 p-2 bg-[#0e0e11] border border-white/10 rounded-xl shadow-2xl pointer-events-none">
+                                  <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                                </div>
+                              </a>
+                            </td>
+                            <td className="font-semibold text-white max-w-[160px] sm:max-w-[200px] md:max-w-[260px] truncate whitespace-nowrap">{item.name}</td>
+                            <td className="whitespace-nowrap">{item.brand}</td>
+                            <td className="whitespace-nowrap">
+                              <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] uppercase text-gray-300">
+                                {item.audience || 'Mens'}
+                              </span>
+                            </td>
+                            <td className="hidden lg:table-cell whitespace-nowrap">
+                              <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-gold">{item.factory}</span>
+                            </td>
+                            <td className="whitespace-nowrap">{item.priceUSD}</td>
+                            <td className="whitespace-nowrap">{item.priceAED}</td>
+                            <td className="whitespace-nowrap">
+                              {item.inStock ? (
+                                <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase font-bold">In Stock</span>
+                              ) : (
+                                <span className="text-red-400 text-[10px] bg-red-500/10 px-2 py-0.5 rounded-full uppercase font-bold">Sold Out</span>
+                              )}
+                            </td>
+                            <td className="whitespace-nowrap">
+                              {item.isVisible !== false ? (
+                                <span className="inline-flex items-center gap-1.5 text-sky-300 text-[10px] bg-sky-500/10 px-2 py-0.5 rounded-full uppercase font-bold">
+                                  <Eye className="h-3 w-3" />
+                                  Visible
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 text-gray-400 text-[10px] bg-white/5 px-2 py-0.5 rounded-full uppercase font-bold">
+                                  <EyeOff className="h-3 w-3" />
+                                  Hidden
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-4 text-right pr-4 whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleToggleVisibility(item)}
+                                  className={`p-2 border rounded transition-all duration-300 cursor-pointer ${
+                                    item.isVisible !== false
+                                      ? 'border-white/5 hover:border-amber-400/30 hover:text-amber-300'
+                                      : 'border-emerald-500/20 text-emerald-400 hover:border-emerald-400/50'
+                                  }`}
+                                  title={item.isVisible !== false ? 'Hide from storefront' : 'Show on storefront'}
+                                  aria-label={item.isVisible !== false ? `Hide ${item.name} from storefront` : `Show ${item.name} on storefront`}
+                                >
+                                  {item.isVisible !== false ? (
+                                    <EyeOff className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <Eye className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => openProductModal(item)}
+                                  className="p-2 border border-white/5 hover:border-gold/30 hover:text-gold rounded transition-all duration-300 cursor-pointer"
+                                  title="Edit specs"
+                                >
+                                  <FileEdit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirmId(item.id)}
+                                  className="p-2 border border-white/5 hover:border-red-500/30 hover:text-red-400 rounded transition-all duration-300 cursor-pointer"
+                                  title="Delete model"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
                   {/* Pagination control footer */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
-                      <span className="text-[10px] text-gray-500 font-mono uppercase">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t border-white/5">
+                      <span className="text-[10px] text-gray-500 font-mono uppercase text-center sm:text-left">
                         Page {page} of {totalPages} ({totalItems} watches listed)
                       </span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setPage(p => Math.max(1, p - 1))}
                           disabled={page === 1}
-                          className="px-3 py-1 bg-white/5 border border-white/10 disabled:opacity-30 disabled:pointer-events-none hover:border-gold rounded text-[10px] transition-all duration-300 font-mono text-white cursor-pointer"
+                          className="px-3 py-1.5 bg-white/5 border border-white/10 disabled:opacity-30 disabled:pointer-events-none hover:border-gold rounded text-[10px] transition-all duration-300 font-mono text-white cursor-pointer"
                         >
                           PREV
                         </button>
                         <button
                           onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                           disabled={page === totalPages}
-                          className="px-3 py-1 bg-white/5 border border-white/10 disabled:opacity-30 disabled:pointer-events-none hover:border-gold rounded text-[10px] transition-all duration-300 font-mono text-white cursor-pointer"
+                          className="px-3 py-1.5 bg-white/5 border border-white/10 disabled:opacity-30 disabled:pointer-events-none hover:border-gold rounded text-[10px] transition-all duration-300 font-mono text-white cursor-pointer"
                         >
                           NEXT
                         </button>
@@ -1274,10 +1279,10 @@ export default function AdminDashboard() {
           {/* TAB: MASTER BRAND AND MODEL FILTER MANAGEMENT */}
           {activeTab === 'brands' && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div>
-                  <h2 className="text-2xl font-light text-white">Master Brands</h2>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">
+                  <h2 className="text-xl sm:text-2xl font-light text-white">Master Brands</h2>
+                  <p className="text-[11px] sm:text-xs text-gray-500 font-mono mt-0.5">
                     CONTROL STOREFRONT BRAND ORDER AND MODEL FILTERS
                   </p>
                 </div>
@@ -1285,7 +1290,7 @@ export default function AdminDashboard() {
                   type="button"
                   onClick={handleSaveMasterBrands}
                   disabled={masterBrandsSaving || masterBrandsLoading || masterBrands.length === 0}
-                  className="px-5 py-3 bg-gold hover:bg-gold-light disabled:opacity-50 disabled:pointer-events-none text-black text-xs font-mono font-bold tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-gold/10 flex items-center gap-2 cursor-pointer shrink-0"
+                  className="w-full sm:w-fit px-5 py-3 bg-gold hover:bg-gold-light disabled:opacity-50 disabled:pointer-events-none text-black text-xs font-mono font-bold tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-gold/10 flex items-center justify-center gap-2 cursor-pointer shrink-0"
                 >
                   {masterBrandsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   SAVE MASTER BRANDS
@@ -1296,7 +1301,7 @@ export default function AdminDashboard() {
                 Active brands appear in the storefront “Filter by Brand” list in the order shown below. Their model tags appear under “Filter by Model”. Removing a brand here never deletes its watch records.
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/5 bg-black/20 p-3">
+              <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/5 bg-black/20 p-2.5 sm:p-3">
                 <input
                   type="text"
                   value={newMasterBrandName}
@@ -1308,12 +1313,12 @@ export default function AdminDashboard() {
                     }
                   }}
                   placeholder="Add a brand, e.g. Breguet"
-                  className="flex-1 px-4 py-2.5 text-xs rounded-lg bg-white/[0.03] border border-white/10 hover:border-gold/30 focus:border-gold focus:outline-none font-mono text-white"
+                  className="flex-1 px-3.5 sm:px-4 py-2.5 text-xs rounded-lg bg-white/[0.03] border border-white/10 hover:border-gold/30 focus:border-gold focus:outline-none font-mono text-white"
                 />
                 <button
                   type="button"
                   onClick={handleAddMasterBrand}
-                  className="px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-gold/40 hover:text-gold text-xs font-mono font-bold transition-all flex items-center justify-center gap-2"
+                  className="px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-gold/40 hover:text-gold text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" /> ADD BRAND
                 </button>
@@ -1328,32 +1333,32 @@ export default function AdminDashboard() {
                   {masterBrands.map((brand, brandIndex) => (
                     <div
                       key={brand.name}
-                      className={`rounded-2xl border p-4 sm:p-5 transition-all ${
+                      className={`rounded-2xl border p-3.5 sm:p-5 transition-all ${
                         brand.isActive
                           ? 'border-white/10 bg-white/[0.02]'
                           : 'border-white/5 bg-black/20 opacity-60'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="w-7 h-7 rounded-lg bg-gold/10 border border-gold/20 text-gold flex items-center justify-center text-[10px] font-mono font-bold shrink-0">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                          <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gold/10 border border-gold/20 text-gold flex items-center justify-center text-[10px] font-mono font-bold shrink-0">
                             {brandIndex + 1}
                           </span>
                           <div className="min-w-0">
-                            <h3 className="text-sm text-white font-semibold truncate">{brand.name}</h3>
-                            <p className="text-[10px] text-gray-500 font-mono mt-0.5">
+                            <h3 className="text-xs sm:text-sm text-white font-semibold truncate">{brand.name}</h3>
+                            <p className="text-[9px] sm:text-[10px] text-gray-500 font-mono mt-0.5">
                               {brand.productCount || 0} WATCH RECORD{brand.productCount === 1 ? '' : 'S'} • {brand.models.length} MODEL FILTER{brand.models.length === 1 ? '' : 'S'}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
                           <button
                             type="button"
                             onClick={() => setMasterBrands((current) => current.map((item, index) => (
                               index === brandIndex ? { ...item, isActive: !item.isActive } : item
                             )))}
-                            className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-2.5 sm:px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                               brand.isActive
                                 ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
                                 : 'border-white/10 bg-white/5 text-gray-500'
@@ -1367,7 +1372,7 @@ export default function AdminDashboard() {
                             onClick={() => handleMoveMasterBrand(brandIndex, -1)}
                             disabled={brandIndex === 0}
                             aria-label={`Move ${brand.name} up`}
-                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-gold hover:border-gold/30 disabled:opacity-25 disabled:pointer-events-none transition-all"
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-gold hover:border-gold/30 disabled:opacity-25 disabled:pointer-events-none transition-all cursor-pointer"
                           >
                             <ChevronUp className="w-3.5 h-3.5" />
                           </button>
@@ -1376,7 +1381,7 @@ export default function AdminDashboard() {
                             onClick={() => handleMoveMasterBrand(brandIndex, 1)}
                             disabled={brandIndex === masterBrands.length - 1}
                             aria-label={`Move ${brand.name} down`}
-                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-gold hover:border-gold/30 disabled:opacity-25 disabled:pointer-events-none transition-all"
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-gold hover:border-gold/30 disabled:opacity-25 disabled:pointer-events-none transition-all cursor-pointer"
                           >
                             <ChevronDown className="w-3.5 h-3.5" />
                           </button>
@@ -1385,7 +1390,7 @@ export default function AdminDashboard() {
                             onClick={() => handleRemoveMasterBrand(brandIndex)}
                             disabled={masterBrands.length === 1}
                             aria-label={`Remove ${brand.name} from master brands`}
-                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-500/30 disabled:opacity-25 disabled:pointer-events-none transition-all"
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-500/30 disabled:opacity-25 disabled:pointer-events-none transition-all cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1405,7 +1410,7 @@ export default function AdminDashboard() {
                                 type="button"
                                 onClick={() => handleRemoveMasterModel(brandIndex, modelIndex)}
                                 aria-label={`Remove ${model} model filter`}
-                                className="text-gray-600 hover:text-red-400 transition-colors"
+                                className="text-gray-600 hover:text-red-400 transition-colors cursor-pointer"
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -1434,7 +1439,7 @@ export default function AdminDashboard() {
                           <button
                             type="button"
                             onClick={() => handleAddMasterModel(brandIndex)}
-                            className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:border-gold/30 hover:text-gold text-[10px] font-mono font-bold transition-all"
+                            className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:border-gold/30 hover:text-gold text-[10px] font-mono font-bold transition-all cursor-pointer"
                           >
                             + ADD MODEL
                           </button>
@@ -1450,10 +1455,10 @@ export default function AdminDashboard() {
           {/* TAB: ACCESSORIES INVENTORY MANAGEMENT */}
           {activeTab === 'accessories' && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div>
-                  <h2 className="text-2xl font-light text-white">Accessories & Custom Sets</h2>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">
+                  <h2 className="text-xl sm:text-2xl font-light text-white">Accessories & Custom Sets</h2>
+                  <p className="text-[11px] sm:text-xs text-gray-500 font-mono mt-0.5">
                     MANAGE LUXURY STRAPS AND PRESENTATION BOXES IN THE DATABASE
                   </p>
                 </div>
@@ -1461,7 +1466,7 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => handleOpenAccessoryModal()}
-                  className="px-4 py-2.5 bg-gold text-black rounded-xl text-xs font-mono font-bold tracking-wider hover:bg-gold-light transition-all duration-300 flex items-center gap-2 shadow-lg shadow-gold/20 cursor-pointer shrink-0"
+                  className="w-full sm:w-fit px-4 py-2.5 bg-gold text-black rounded-xl text-xs font-mono font-bold tracking-wider hover:bg-gold-light transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-gold/20 cursor-pointer shrink-0"
                 >
                   <Plus className="w-4 h-4" /> ADD NEW ACCESSORY
                 </button>
@@ -1473,7 +1478,7 @@ export default function AdminDashboard() {
                   <button
                     key={cat}
                     onClick={() => setAccessoryCategoryFilter(cat)}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all duration-300 ${
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all duration-300 cursor-pointer ${
                       accessoryCategoryFilter === cat
                         ? 'bg-gold text-black font-bold'
                         : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
@@ -1535,7 +1540,7 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleToggleAccessoryStock(item)}
-                              className={`px-2 py-1 rounded text-[9px] font-mono font-bold uppercase transition-colors ${
+                              className={`px-2 py-1 rounded text-[9px] font-mono font-bold uppercase transition-colors cursor-pointer ${
                                 item.inStock
                                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20'
                                   : 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'
@@ -1547,7 +1552,7 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => handleToggleAccessoryVisibility(item)}
                               title={item.isVisible ? 'Hide from storefront' : 'Show on storefront'}
-                              className={`p-1.5 rounded-lg border transition-colors ${
+                              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                                 item.isVisible
                                   ? 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
                                   : 'bg-red-500/10 border-red-500/30 text-red-400'
@@ -1560,14 +1565,14 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => handleOpenAccessoryModal(item)}
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold transition-colors"
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold transition-colors cursor-pointer"
                               title="Edit Accessory"
                             >
                               <FileEdit className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setAccessoryDeleteConfirmId(item.id)}
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 text-gray-300 hover:text-red-400 transition-colors"
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 text-gray-300 hover:text-red-400 transition-colors cursor-pointer"
                               title="Delete Accessory"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1591,10 +1596,10 @@ export default function AdminDashboard() {
             <div className="space-y-6">
               
               {/* Header Title */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-white/5 pb-4">
                 <div>
-                  <h2 className="text-2xl font-light text-white">
-                    Edit Homepage Content &bull; <span className="text-gold font-normal uppercase text-lg">
+                  <h2 className="text-xl sm:text-2xl font-light text-white">
+                    Edit Homepage Content &bull; <span className="text-gold font-normal uppercase text-base sm:text-lg">
                       {activeSubTab === 'hero' && 'Hero & Specs'}
                       {activeSubTab === 'arrivals' && 'New Arrivals'}
                       {activeSubTab === 'heritage' && 'Architecture & RM'}
@@ -1604,14 +1609,14 @@ export default function AdminDashboard() {
                       {activeSubTab === 'footer' && 'Footer & Contacts'}
                     </span>
                   </h2>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">
+                  <p className="text-[11px] sm:text-xs text-gray-500 font-mono mt-0.5">
                     CMS PANELS TO MODIFY TEXT AND ATTACH CLOUDINARY IMAGES
                   </p>
                 </div>
                 <button
                   onClick={handleHomepageSubmit}
                   disabled={homepageLoading}
-                  className="px-8 py-4 bg-gold hover:bg-gold-light text-black text-sm font-mono font-bold tracking-widest rounded-xl transition-all duration-300 shadow-lg shadow-gold/20 flex items-center justify-center gap-2 cursor-pointer shadow-lg w-fit"
+                  className="w-full sm:w-fit px-6 sm:px-8 py-3 sm:py-4 bg-gold hover:bg-gold-light text-black text-xs sm:text-sm font-mono font-bold tracking-widest rounded-xl transition-all duration-300 shadow-lg shadow-gold/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
                 >
                   {homepageLoading ? (
                     <>
@@ -2772,8 +2777,8 @@ export default function AdminDashboard() {
       </main>
 
       {isModalOpen && (
-        <div key={editingProduct ? `edit-${editingProduct.id}` : 'new-product'} className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 sm:p-6 md:p-10 flex items-start justify-center overflow-y-auto" data-lenis-prevent>
-          <div className="relative w-full max-w-3xl max-h-none sm:max-h-[calc(100vh-5rem)] bg-[#0e0e11] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-xs font-mono text-white my-4 sm:my-8">
+        <div key={editingProduct ? `edit-${editingProduct.id}` : 'new-product'} className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-2 sm:p-6 md:p-10 flex items-start justify-center overflow-y-auto" data-lenis-prevent>
+          <div className="relative w-full max-w-3xl max-h-none sm:max-h-[calc(100vh-5rem)] bg-[#0e0e11] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-xs font-mono text-white my-2 sm:my-8">
             
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/30 rounded-tl-2xl pointer-events-none z-10" />
@@ -2782,12 +2787,12 @@ export default function AdminDashboard() {
             <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-gold/30 rounded-br-2xl pointer-events-none z-10" />
 
             {/* Header */}
-            <div className="p-5 md:p-7 flex justify-between items-start border-b border-white/10 bg-[#121216] shrink-0">
+            <div className="p-4 sm:p-5 md:p-7 flex justify-between items-start border-b border-white/10 bg-[#121216] shrink-0">
               <div>
-                <h3 className="text-base md:text-lg font-light text-white">
+                <h3 className="text-sm sm:text-base md:text-lg font-light text-white">
                   {editingProduct ? 'Edit Watch Specifications' : 'Register New Watch Listing'}
                 </h3>
-                <p className="text-[10px] text-gray-500 font-mono mt-0.5 uppercase">
+                <p className="text-[9px] sm:text-[10px] text-gray-500 font-mono mt-0.5 uppercase">
                   {editingProduct ? `Modifying Catalog Watch ID: ${editingProduct.id}` : 'Fill in the replica spec card details'}
                 </p>
               </div>
@@ -2801,7 +2806,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Scrollable Container */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-5 md:p-8 custom-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 md:p-8 custom-scrollbar">
               <form onSubmit={handleProductSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
@@ -3463,8 +3468,8 @@ export default function AdminDashboard() {
       )}
 
       {deleteConfirmId !== null && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 flex items-center justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center" data-lenis-prevent>
+          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-red-500/30 rounded-tl-2xl pointer-events-none" />
             <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-red-500/30 rounded-tr-2xl pointer-events-none" />
@@ -3509,20 +3514,20 @@ export default function AdminDashboard() {
 
       {/* ACCESSORY ADD / EDIT MODAL */}
       {isAccessoryModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 overflow-y-auto flex items-center justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-2xl bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl my-8 mx-auto font-mono text-xs">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto flex items-center justify-center" data-lenis-prevent>
+          <div className="relative w-full max-w-2xl bg-[#0e0e11] border border-white/10 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl my-4 sm:my-8 mx-auto font-mono text-xs">
             <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
               <div>
-                <h3 className="text-lg font-light text-white">
+                <h3 className="text-base sm:text-lg font-light text-white">
                   {editingAccessory ? 'Edit Luxury Accessory' : 'Add New Luxury Accessory'}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">
                   STRAP, PRESENTATION BOX, OR WATCH WINDER
                 </p>
               </div>
               <button
                 onClick={() => setIsAccessoryModalOpen(false)}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -3611,7 +3616,7 @@ export default function AdminDashboard() {
               {/* Image Input with Upload support */}
               <div className="space-y-2">
                 <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Image URL / Upload *</label>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <input
                     type="text"
                     required
@@ -3620,7 +3625,7 @@ export default function AdminDashboard() {
                     placeholder="https://images.unsplash.com/... or upload"
                     className="flex-1 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none text-white"
                   />
-                  <label className="px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold cursor-pointer transition-colors flex items-center gap-1.5 shrink-0">
+                  <label className="px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold cursor-pointer transition-colors flex items-center justify-center gap-1.5 shrink-0">
                     <Upload className="w-4 h-4" />
                     <span>Upload</span>
                     <input
@@ -3717,8 +3722,8 @@ export default function AdminDashboard() {
 
       {/* ACCESSORY DELETE CONFIRMATION MODAL */}
       {accessoryDeleteConfirmId !== null && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-4 flex items-center justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center" data-lenis-prevent>
+          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
                 <Trash2 className="w-6 h-6" />

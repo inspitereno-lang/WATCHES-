@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 interface SeoProps {
   title: string
   description: string
-  keywords?: string[]
   canonicalPath?: string
   image?: string
   type?: 'website' | 'article'
@@ -23,7 +22,6 @@ const setMeta = (selector: string, attribute: 'name' | 'property', key: string, 
 export default function Seo({
   title,
   description,
-  keywords = [],
   canonicalPath,
   image,
   type = 'website',
@@ -32,11 +30,9 @@ export default function Seo({
   useEffect(() => {
     document.title = title
     setMeta('meta[name="description"]', 'name', 'description', description)
-    if (keywords.length) {
-      setMeta('meta[name="keywords"]', 'name', 'keywords', keywords.join(', '))
-    }
+    document.head.querySelector('meta[name="keywords"]')?.remove()
 
-    const canonicalUrl = new URL(canonicalPath || window.location.pathname, window.location.origin).toString()
+    const canonicalUrl = new URL(canonicalPath || window.location.pathname, `${import.meta.env.VITE_SITE_URL}/`).toString()
     let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (!canonical) {
       canonical = document.createElement('link')
@@ -54,7 +50,7 @@ export default function Seo({
     setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', description)
 
     if (image) {
-      const imageUrl = new URL(image, window.location.origin).toString()
+      const imageUrl = new URL(image, `${import.meta.env.VITE_SITE_URL}/`).toString()
       setMeta('meta[property="og:image"]', 'property', 'og:image', imageUrl)
       setMeta('meta[name="twitter:image"]', 'name', 'twitter:image', imageUrl)
     }
@@ -68,7 +64,7 @@ export default function Seo({
       schema.text = JSON.stringify(structuredData)
       document.head.appendChild(schema)
     }
-  }, [canonicalPath, description, image, keywords, structuredData, title, type])
+  }, [canonicalPath, description, image, structuredData, title, type])
 
   return null
 }

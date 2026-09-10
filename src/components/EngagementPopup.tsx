@@ -189,8 +189,12 @@ export function EngagementPopup({
           <div className="flex items-center gap-3">
             <div className="h-[1px] w-10 bg-gradient-to-r from-transparent via-[#d4af37]/60 to-[#d4af37]" />
             <img
-              src="/dubai-watches-gallery-logo.png"
+              src="/dubai-watches-gallery-logo.webp"
               alt="Dubai Watches Gallery"
+              width={840}
+              height={472}
+              loading="lazy"
+              decoding="async"
               className="h-10 w-auto object-contain filter drop-shadow-[0_2px_12px_rgba(212,175,55,0.45)]"
             />
             <div className="h-[1px] w-10 bg-gradient-to-l from-transparent via-[#d4af37]/60 to-[#d4af37]" />
@@ -200,7 +204,7 @@ export function EngagementPopup({
         {/* Status Badges */}
         <div className="relative z-10 flex items-center gap-2 mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#161208]/90 border border-[#d4af37]/40 text-[#ebcb7a] text-[10px] font-mono tracking-widest uppercase font-bold shadow-[0_0_15px_rgba(212,175,55,0.15)]">
-            <img src="/dubai-watches-gallery-logo.png" alt="" className="w-3.5 h-3.5 object-contain" />
+            <img src="/dubai-watches-gallery-logo.webp" alt="" width={28} height={16} loading="lazy" decoding="async" className="w-3.5 h-3.5 object-contain" />
             {translate("DUBAI WATCHES GALLERY", currentLang)}
           </span>
           <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">

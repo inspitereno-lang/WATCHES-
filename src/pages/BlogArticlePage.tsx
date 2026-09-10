@@ -69,7 +69,6 @@ export default function BlogArticlePage() {
       <Seo
         title={translate(post.seoTitle || post.title, currentLang)}
         description={translate(post.seoDescription || post.excerpt, currentLang)}
-        keywords={post.keywords}
         canonicalPath={`/blog/${post.slug}`}
         image={post.heroImage}
         type="article"
@@ -106,7 +105,7 @@ export default function BlogArticlePage() {
           </div>
 
           <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-white/10 bg-[#111] sm:rounded-3xl lg:aspect-auto lg:min-h-[25rem]">
-            <img src={post.heroImage} alt={translate(post.title, currentLang)} className="absolute inset-0 h-full w-full object-cover" />
+            <img src={post.heroImage} alt={translate(post.title, currentLang)} width={1600} height={1000} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
           </div>
         </div>

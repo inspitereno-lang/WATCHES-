@@ -37,14 +37,8 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[#070706] pb-24 pt-20 text-white">
       <Seo
-        title={isArabic ? 'مجلة الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Watch Journal Dubai | Dubai Watches Gallery'}
-        description={isArabic ? 'اقرأ أدلة عملية للشراء وشرحًا لموديلات الساعات ونصائح للعناية بالساعات الفاخرة في دبي.' : 'Read practical buying guides, watch-reference explainers, and care advice for replica watches and luxury-inspired timepieces in Dubai.'}
-        keywords={[
-          'watch blog Dubai',
-          'replica watch guides',
-          'Rolex Daytona guide',
-          'luxury watch care Dubai',
-        ]}
+        title={isArabic ? 'مجلة الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Watch Blog & Guides | Dubai Watches Gallery'}
+        description={isArabic ? 'اقرأ أدلة عملية للشراء وشرحًا لموديلات الساعات ونصائح للعناية بالساعات الفاخرة في دبي.' : 'Read luxury watch guides, buying tips, care advice and insights from Dubai Watches Gallery to help you choose and maintain the right timepiece.'}
         canonicalPath="/blog"
         image="/images/blog/watch-buying-guide-2026.png"
       />
@@ -54,6 +48,10 @@ export default function BlogPage() {
           <img
             src="/images/blog/mechanical-movement-2026.png"
             alt=""
+            width={1672}
+            height={941}
+            loading="eager"
+            decoding="async"
             className="h-full w-full object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-[#070706]/75 to-[#070706]" />
@@ -193,4 +191,3 @@ export default function BlogPage() {
     </div>
   )
 }
-

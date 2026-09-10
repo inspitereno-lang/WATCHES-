@@ -58,11 +58,11 @@ const productSchema = new mongoose.Schema(
     },
     priceUSD: {
       type: String,
-      required: true,
+      default: '',
     },
     priceAED: {
       type: String,
-      required: true,
+      default: '',
     },
     url: {
       type: String,

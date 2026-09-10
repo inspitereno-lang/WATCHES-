@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
+import Seo from '../components/Seo'
 
 interface Watch {
   id: number
@@ -72,6 +73,7 @@ const BRAND_MODELS: Record<string, string[]> = {
 
 export default function WatchesPage() {
   const currentLang = localStorage.getItem('t24_lang') || 'en'
+  const isArabic = currentLang === 'ar'
   
   // Dynamic categories
   const [brands, setBrands] = useState<string[]>(PRIMARY_BRANDS)
@@ -233,6 +235,12 @@ export default function WatchesPage() {
 
   return (
     <div className="bg-[#070708] min-h-screen text-white pt-8 sm:pt-16 pb-12 sm:pb-20 selection:bg-gold/30 selection:text-white">
+      <Seo
+        title={isArabic ? 'ساعات فاخرة للبيع في دبي | معرض دبي للساعات' : 'Luxury Watches for Sale in Dubai | Dubai Watches Gallery'}
+        description={isArabic ? 'تصفح الساعات الفاخرة المعروضة للبيع في دبي لدى معرض دبي للساعات، واستكشف مجموعتنا المختارة للعثور على ساعتك القادمة.' : 'Browse luxury watches for sale in Dubai at Dubai Watches Gallery. Explore our selection of premium watches and find your next timepiece.'}
+        canonicalPath="/watches"
+        image="/images/card-him.jpg"
+      />
       {/* Dynamic luxury background */}
       <div className="absolute top-0 left-0 w-full h-[500px] pointer-events-none overflow-hidden z-0">
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-gold/5 blur-[150px] rounded-full" />
@@ -433,6 +441,10 @@ export default function WatchesPage() {
                 <img 
                   src="/curated-men-women-banner-desktop.png" 
                   alt="Premium Watches For Him & Her"
+                  width={1024}
+                  height={454}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02] select-none"
                 />
               </picture>

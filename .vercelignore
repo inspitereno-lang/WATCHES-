@@ -1,5 +1,4 @@
-# Exclude server and scraper directories from Vercel frontend deployments
-server/
+# The server directory is intentionally included because api/index.js imports it.
 scrape.mjs
 scraped_products.json
 cloudinary_mappings.json
