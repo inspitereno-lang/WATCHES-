@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router'
 import { 
   LogOut, 
@@ -641,6 +642,32 @@ export default function AdminDashboard() {
       toast.error('Network error deleting accessory')
     }
   }
+
+  // Prevent background scrolling and enable ESC key close when any modal is open
+  useEffect(() => {
+    const isAnyModalOpen = isModalOpen || isAccessoryModalOpen || deleteConfirmId !== null || accessoryDeleteConfirmId !== null
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isModalOpen, isAccessoryModalOpen, deleteConfirmId, accessoryDeleteConfirmId])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsModalOpen(false)
+        setIsAccessoryModalOpen(false)
+        setDeleteConfirmId(null)
+        setAccessoryDeleteConfirmId(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Handle Logout
   const handleLogout = () => {
@@ -3112,9 +3139,9 @@ export default function AdminDashboard() {
         </section>
       </main>
 
-      {isModalOpen && (
-        <div key={editingProduct ? `edit-${editingProduct.id}` : 'new-product'} className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-2 sm:p-6 md:p-10 flex items-start justify-center overflow-y-auto" data-lenis-prevent>
-          <div className="relative w-full max-w-3xl max-h-none sm:max-h-[calc(100vh-5rem)] bg-[#0e0e11] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-xs font-mono text-white my-2 sm:my-8">
+      {isModalOpen && typeof document !== 'undefined' && createPortal(
+        <div key={editingProduct ? `edit-${editingProduct.id}` : 'new-product'} className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-6 flex items-center justify-center overflow-hidden" data-lenis-prevent>
+          <div className="relative w-full max-w-3xl max-h-[92vh] bg-[#0e0e11] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-xs font-mono text-white animate-in fade-in zoom-in-95 duration-150">
             
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/30 rounded-tl-2xl pointer-events-none z-10" />
@@ -3123,7 +3150,7 @@ export default function AdminDashboard() {
             <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-gold/30 rounded-br-2xl pointer-events-none z-10" />
 
             {/* Header */}
-            <div className="p-4 sm:p-5 md:p-7 flex justify-between items-start border-b border-white/10 bg-[#121216] shrink-0">
+            <div className="p-4 sm:p-5 flex justify-between items-center border-b border-white/10 bg-[#121216] shrink-0">
               <div>
                 <h3 className="text-sm sm:text-base md:text-lg font-light text-white">
                   {editingProduct ? 'Edit Watch Specifications' : 'Register New Watch Listing'}
@@ -3135,7 +3162,7 @@ export default function AdminDashboard() {
               <button 
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-500 hover:text-white font-mono text-xs cursor-pointer border border-white/10 hover:border-white/30 px-2.5 py-1 rounded-lg transition-all"
+                className="text-gray-400 hover:text-white font-mono text-xs cursor-pointer border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all"
               >
                 CLOSE [ESC]
               </button>
@@ -3825,12 +3852,13 @@ export default function AdminDashboard() {
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {deleteConfirmId !== null && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
+      {deleteConfirmId !== null && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md p-3 sm:p-4 flex items-center justify-center overflow-hidden" data-lenis-prevent>
+          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white animate-in fade-in zoom-in-95 duration-150">
             {/* Corner styling borders */}
             <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-red-500/30 rounded-tl-2xl pointer-events-none" />
             <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-red-500/30 rounded-tr-2xl pointer-events-none" />
@@ -3870,14 +3898,15 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ACCESSORY ADD / EDIT MODAL */}
-      {isAccessoryModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto flex items-center justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-2xl bg-[#0e0e11] border border-white/10 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl my-4 sm:my-8 mx-auto font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
+      {isAccessoryModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md p-3 sm:p-4 flex items-center justify-center overflow-hidden" data-lenis-prevent>
+          <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col bg-[#0e0e11] border border-white/10 rounded-2xl shadow-2xl overflow-hidden font-mono text-xs animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-white/5 p-4 sm:p-6 bg-[#121216] shrink-0">
               <div>
                 <h3 className="text-base sm:text-lg font-light text-white">
                   {editingAccessory ? 'Edit Luxury Accessory' : 'Add New Luxury Accessory'}
@@ -3894,8 +3923,9 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveAccessory} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+              <form onSubmit={handleSaveAccessory} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs text-gray-300 font-bold uppercase tracking-wider block">Accessory Name *</label>
                   <input
@@ -4077,14 +4107,16 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ACCESSORY DELETE CONFIRMATION MODAL */}
-      {accessoryDeleteConfirmId !== null && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center" data-lenis-prevent>
-          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white">
+      {accessoryDeleteConfirmId !== null && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md p-3 sm:p-4 flex items-center justify-center overflow-hidden" data-lenis-prevent>
+          <div className="relative w-full max-w-md bg-[#0e0e11] border border-white/10 rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-auto font-mono text-xs text-white animate-in fade-in zoom-in-95 duration-150">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
                 <Trash2 className="w-6 h-6" />
@@ -4116,7 +4148,8 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
