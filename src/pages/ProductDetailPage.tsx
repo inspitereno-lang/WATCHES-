@@ -383,13 +383,19 @@ export default function ProductDetailPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Back navigation control */}
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gold transition-colors duration-300 mb-10 group"
+        <button 
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1)
+            } else {
+              navigate('/watches')
+            }
+          }}
+          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gold transition-colors duration-300 mb-10 group cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-300" />
           {translate("BACK TO ALL COLLECTIONS", currentLang)}
-        </Link>
+        </button>
 
         {/* Core Product Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-16 items-start">

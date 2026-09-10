@@ -5,6 +5,19 @@ export default function ScrollToTop() {
   const { pathname } = useLocation()
 
   useEffect(() => {
+    // If returning to /watches with a saved scroll position, preserve it
+    if (pathname === '/watches') {
+      try {
+        const saved = sessionStorage.getItem('t24_watches_cache')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (typeof parsed.scrollY === 'number' && parsed.scrollY > 0) {
+            return
+          }
+        }
+      } catch (e) {}
+    }
+
     // Reset standard window scroll
     window.scrollTo({
       top: 0,

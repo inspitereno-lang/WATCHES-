@@ -95,20 +95,34 @@ export default function WatchesPage() {
     fetchCategories()
   }, [])
 
+  // Helper to read initial state from sessionStorage if returning from product detail
+  const getInitialCachedState = () => {
+    try {
+      const saved = sessionStorage.getItem('t24_watches_cache')
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    } catch (e) {}
+    return null
+  }
+
+  const cachedState = useRef(getInitialCachedState()).current
+  const isRestoredRef = useRef(Boolean(cachedState && cachedState.watches && cachedState.watches.length > 0))
+
   // Catalog state
-  const [watches, setWatches] = useState<Watch[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedBrand, setSelectedBrand] = useState('ALL BRANDS')
-  const [selectedAudience, setSelectedAudience] = useState<'ALL' | 'Womens' | 'Mens'>('ALL')
-  const [selectedModel, setSelectedModel] = useState('')
-  const [sortBy, setSortBy] = useState<'default' | 'priceAsc' | 'priceDesc'>('default')
-  const [counts, setCounts] = useState({ all: 0, mens: 0, womens: 0 })
+  const [watches, setWatches] = useState<Watch[]>(() => cachedState?.watches || [])
+  const [loading, setLoading] = useState(() => !cachedState || !cachedState.watches || cachedState.watches.length === 0)
+  const [searchTerm, setSearchTerm] = useState(() => cachedState?.searchTerm || '')
+  const [selectedBrand, setSelectedBrand] = useState(() => cachedState?.selectedBrand || 'ALL BRANDS')
+  const [selectedAudience, setSelectedAudience] = useState<'ALL' | 'Womens' | 'Mens'>(() => cachedState?.selectedAudience || 'ALL')
+  const [selectedModel, setSelectedModel] = useState(() => cachedState?.selectedModel || '')
+  const [sortBy, setSortBy] = useState<'default' | 'priceAsc' | 'priceDesc'>(() => cachedState?.sortBy || 'default')
+  const [counts, setCounts] = useState(() => cachedState?.counts || { all: 0, mens: 0, womens: 0 })
   
   // Pagination
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
+  const [page, setPage] = useState<number>(() => cachedState?.page || 1)
+  const [totalPages, setTotalPages] = useState<number>(() => cachedState?.totalPages || 1)
+  const [totalCount, setTotalCount] = useState<number>(() => cachedState?.totalCount || 0)
 
   // Filter Dropdowns visibility
   const brandScrollRef = useRef<HTMLDivElement>(null)
@@ -116,6 +130,47 @@ export default function WatchesPage() {
   const [brandDropdownOpen, setBrandDropdownOpen] = useState(false)
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
+
+  // Save full state snapshot to sessionStorage
+  const saveStateToSession = (customScrollY?: number) => {
+    try {
+      const currentScroll = typeof customScrollY === 'number'
+        ? customScrollY
+        : window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0
+      sessionStorage.setItem('t24_watches_cache', JSON.stringify({
+        watches,
+        page,
+        totalPages,
+        totalCount,
+        counts,
+        searchTerm,
+        selectedBrand,
+        selectedAudience,
+        selectedModel,
+        sortBy,
+        scrollY: currentScroll
+      }))
+    } catch (e) {}
+  }
+
+  // Restore scroll position after mounting if restored from cache
+  useEffect(() => {
+    if (cachedState && typeof cachedState.scrollY === 'number' && cachedState.scrollY > 0) {
+      const targetY = cachedState.scrollY
+      const timer = setTimeout(() => {
+        window.scrollTo({ top: targetY, behavior: 'instant' })
+        document.documentElement.scrollTo({ top: targetY, behavior: 'instant' })
+      }, 60)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  // Auto-sync state changes to session
+  useEffect(() => {
+    if (watches.length > 0) {
+      saveStateToSession()
+    }
+  }, [watches, page, totalPages, totalCount, counts, searchTerm, selectedBrand, selectedAudience, selectedModel, sortBy])
 
   const scrollToCatalogue = () => {
     if (catalogueRef.current) {
@@ -144,7 +199,6 @@ export default function WatchesPage() {
       brandScrollRef.current.scrollBy({ left: -160, behavior: 'smooth' })
     }
   }
-
 
   // Fetch Catalog Watches
   const fetchWatchesData = async (
@@ -188,8 +242,14 @@ export default function WatchesPage() {
     setLoading(false)
   }
 
-  // Debounced search trigger
+  // Debounced search / filter trigger
   useEffect(() => {
+    // If restoring from existing cache on mount, skip the initial reset fetch
+    if (isRestoredRef.current) {
+      isRestoredRef.current = false
+      return
+    }
+
     const timer = setTimeout(() => {
       setPage(1)
       fetchWatchesData(selectedBrand, selectedAudience, searchTerm, selectedModel, 1, false)
@@ -202,7 +262,6 @@ export default function WatchesPage() {
     setPage(nextPage)
     fetchWatchesData(selectedBrand, selectedAudience, searchTerm, selectedModel, nextPage, true)
   }
-
 
   // Client-side Price Sorting
   const processedWatches = [...watches].sort((a, b) => {
@@ -220,6 +279,7 @@ export default function WatchesPage() {
   })
 
   const resetFilters = () => {
+    sessionStorage.removeItem('t24_watches_cache')
     setSelectedBrand('ALL BRANDS')
     setSelectedModel('')
     setSelectedAudience('ALL')
@@ -1000,6 +1060,7 @@ export default function WatchesPage() {
                 <Link 
                   key={watch.id}
                   to={`/product/${watch.id}`}
+                  onClick={() => saveStateToSession()}
                   className="group relative flex flex-col justify-between rounded-xl sm:rounded-2xl bg-[#0c0c0e]/80 border border-white/[0.03] hover:border-gold/30 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] transition-all duration-500 overflow-hidden"
                 >
                   {/* Image Section with hover glow */}
