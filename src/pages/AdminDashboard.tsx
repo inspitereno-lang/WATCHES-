@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { 
   LogOut, 
   FileEdit, 
+  Pencil,
   Plus, 
   Trash2, 
   Search, 
@@ -1404,33 +1405,33 @@ export default function AdminDashboard() {
                               <div className="flex items-center justify-end gap-2">
                                 <button
                                   onClick={() => handleToggleVisibility(item)}
-                                  className={`p-2.5 rounded-lg border transition-all duration-200 cursor-pointer shadow-sm ${
+                                  className={`p-2 rounded-lg border transition-all duration-200 cursor-pointer flex items-center justify-center ${
                                     item.isVisible !== false
-                                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-300 hover:bg-sky-500/20 hover:border-sky-400'
+                                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20 hover:border-sky-400'
                                       : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 hover:border-amber-400'
                                   }`}
                                   title={item.isVisible !== false ? 'Hide from storefront' : 'Show on storefront'}
                                   aria-label={item.isVisible !== false ? `Hide ${item.name} from storefront` : `Show ${item.name} on storefront`}
                                 >
                                   {item.isVisible !== false ? (
-                                    <Eye className="w-4.5 h-4.5" />
+                                    <Eye size={15} className="w-4 h-4 shrink-0 text-sky-400" />
                                   ) : (
-                                    <EyeOff className="w-4.5 h-4.5" />
+                                    <EyeOff size={15} className="w-4 h-4 shrink-0 text-amber-400" />
                                   )}
                                 </button>
                                 <button
                                   onClick={() => openProductModal(item)}
-                                  className="p-2.5 rounded-lg border border-gold/30 bg-gold/10 text-gold hover:bg-gold/25 hover:border-gold transition-all duration-200 cursor-pointer shadow-sm"
-                                  title="Edit specs"
+                                  className="p-2 rounded-lg border border-gold/40 bg-gold/10 text-gold hover:bg-gold/25 hover:border-gold transition-all duration-200 cursor-pointer flex items-center justify-center"
+                                  title="Edit watch"
                                 >
-                                  <FileEdit className="w-4.5 h-4.5" />
+                                  <Pencil size={15} className="w-4 h-4 shrink-0 text-gold" />
                                 </button>
                                 <button
                                   onClick={() => setDeleteConfirmId(item.id)}
-                                  className="p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/25 hover:border-red-500 transition-all duration-200 cursor-pointer shadow-sm"
-                                  title="Delete model"
+                                  className="p-2 rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/25 hover:border-red-500 transition-all duration-200 cursor-pointer flex items-center justify-center"
+                                  title="Delete watch"
                                 >
-                                  <Trash2 className="w-4.5 h-4.5" />
+                                  <Trash2 size={15} className="w-4 h-4 shrink-0 text-red-400" />
                                 </button>
                               </div>
                             </td>
@@ -1750,30 +1751,30 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => handleToggleAccessoryVisibility(item)}
                               title={item.isVisible ? 'Hide from storefront' : 'Show on storefront'}
-                              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+                              className={`p-2 rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
                                 item.isVisible
-                                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300 hover:bg-sky-500/20'
+                                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20'
                                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
                               }`}
                             >
-                              {item.isVisible ? <Eye className="w-4.5 h-4.5" /> : <EyeOff className="w-4.5 h-4.5" />}
+                              {item.isVisible ? <Eye size={15} className="w-4 h-4 shrink-0 text-sky-400" /> : <EyeOff size={15} className="w-4 h-4 shrink-0 text-amber-400" />}
                             </button>
                           </div>
 
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => handleOpenAccessoryModal(item)}
-                              className="p-2 rounded-lg bg-gold/10 hover:bg-gold/25 border border-gold/30 hover:border-gold text-gold transition-colors cursor-pointer"
+                              className="p-2 rounded-lg bg-gold/10 hover:bg-gold/25 border border-gold/40 hover:border-gold text-gold transition-colors cursor-pointer flex items-center justify-center"
                               title="Edit Accessory"
                             >
-                              <FileEdit className="w-4.5 h-4.5" />
+                              <Pencil size={15} className="w-4 h-4 shrink-0 text-gold" />
                             </button>
                             <button
                               onClick={() => setAccessoryDeleteConfirmId(item.id)}
-                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/25 border border-red-500/30 hover:border-red-500 text-red-400 transition-colors cursor-pointer"
+                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/25 border border-red-500/40 hover:border-red-500 text-red-400 transition-colors cursor-pointer flex items-center justify-center"
                               title="Delete Accessory"
                             >
-                              <Trash2 className="w-4.5 h-4.5" />
+                              <Trash2 size={15} className="w-4 h-4 shrink-0 text-red-400" />
                             </button>
                           </div>
                         </div>
