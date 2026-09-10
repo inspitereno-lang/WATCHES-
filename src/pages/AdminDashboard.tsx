@@ -1404,33 +1404,33 @@ export default function AdminDashboard() {
                               <div className="flex items-center justify-end gap-2">
                                 <button
                                   onClick={() => handleToggleVisibility(item)}
-                                  className={`p-2 border rounded transition-all duration-300 cursor-pointer ${
+                                  className={`p-2.5 rounded-lg border transition-all duration-200 cursor-pointer shadow-sm ${
                                     item.isVisible !== false
-                                      ? 'border-white/5 hover:border-amber-400/30 hover:text-amber-300'
-                                      : 'border-emerald-500/20 text-emerald-400 hover:border-emerald-400/50'
+                                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-300 hover:bg-sky-500/20 hover:border-sky-400'
+                                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 hover:border-amber-400'
                                   }`}
                                   title={item.isVisible !== false ? 'Hide from storefront' : 'Show on storefront'}
                                   aria-label={item.isVisible !== false ? `Hide ${item.name} from storefront` : `Show ${item.name} on storefront`}
                                 >
                                   {item.isVisible !== false ? (
-                                    <EyeOff className="w-3.5 h-3.5" />
+                                    <Eye className="w-4.5 h-4.5" />
                                   ) : (
-                                    <Eye className="w-3.5 h-3.5" />
+                                    <EyeOff className="w-4.5 h-4.5" />
                                   )}
                                 </button>
                                 <button
                                   onClick={() => openProductModal(item)}
-                                  className="p-2 border border-white/5 hover:border-gold/30 hover:text-gold rounded transition-all duration-300 cursor-pointer"
+                                  className="p-2.5 rounded-lg border border-gold/30 bg-gold/10 text-gold hover:bg-gold/25 hover:border-gold transition-all duration-200 cursor-pointer shadow-sm"
                                   title="Edit specs"
                                 >
-                                  <FileEdit className="w-3.5 h-3.5" />
+                                  <FileEdit className="w-4.5 h-4.5" />
                                 </button>
                                 <button
                                   onClick={() => setDeleteConfirmId(item.id)}
-                                  className="p-2 border border-white/5 hover:border-red-500/30 hover:text-red-400 rounded transition-all duration-300 cursor-pointer"
+                                  className="p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/25 hover:border-red-500 transition-all duration-200 cursor-pointer shadow-sm"
                                   title="Delete model"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-4.5 h-4.5" />
                                 </button>
                               </div>
                             </td>
@@ -1750,30 +1750,30 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => handleToggleAccessoryVisibility(item)}
                               title={item.isVisible ? 'Hide from storefront' : 'Show on storefront'}
-                              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                                 item.isVisible
-                                  ? 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
-                                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+                                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300 hover:bg-sky-500/20'
+                                  : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
                               }`}
                             >
-                              {item.isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                              {item.isVisible ? <Eye className="w-4.5 h-4.5" /> : <EyeOff className="w-4.5 h-4.5" />}
                             </button>
                           </div>
 
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => handleOpenAccessoryModal(item)}
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-gold/20 border border-white/10 hover:border-gold/40 text-gray-300 hover:text-gold transition-colors cursor-pointer"
+                              className="p-2 rounded-lg bg-gold/10 hover:bg-gold/25 border border-gold/30 hover:border-gold text-gold transition-colors cursor-pointer"
                               title="Edit Accessory"
                             >
-                              <FileEdit className="w-3.5 h-3.5" />
+                              <FileEdit className="w-4.5 h-4.5" />
                             </button>
                             <button
                               onClick={() => setAccessoryDeleteConfirmId(item.id)}
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 text-gray-300 hover:text-red-400 transition-colors cursor-pointer"
+                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/25 border border-red-500/30 hover:border-red-500 text-red-400 transition-colors cursor-pointer"
                               title="Delete Accessory"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4.5 h-4.5" />
                             </button>
                           </div>
                         </div>
