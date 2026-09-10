@@ -1474,7 +1474,6 @@ async function ensureDefaultAccessories() {
 // 1. Fetch Accessories List
 app.get('/api/accessories', async (req, res) => {
   try {
-    await ensureDefaultAccessories();
     const query = { isVisible: { $ne: false } };
     if (req.query.category && req.query.category !== 'ALL') {
       query.category = new RegExp(`^${req.query.category}$`, 'i');
@@ -1497,7 +1496,6 @@ app.get('/api/accessories', async (req, res) => {
 // 2. Fetch Single Accessory Details
 app.get('/api/accessories/:id', async (req, res) => {
   try {
-    await ensureDefaultAccessories();
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: 'Invalid accessory ID.' });
