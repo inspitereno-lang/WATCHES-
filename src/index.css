@@ -399,3 +399,16 @@ html[dir='rtl'] .animate-marquee-linear {
     transform: scale(1);
   }
 }
+
+/* Hero Mobile Height: Locked static height preventing mobile address bar collapse stretch */
+.hero-mobile-height {
+  height: calc(100vh - 94px);
+  height: calc(100svh - 94px);
+}
+@media (min-width: 640px) {
+  .hero-mobile-height {
+    height: auto;
+    min-height: 100vh;
+  }
+}
+

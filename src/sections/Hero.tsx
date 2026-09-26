@@ -1,7 +1,7 @@
-import { useLayoutEffect, useRef, useEffect, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, Truck, ShieldCheck, CreditCard } from 'lucide-react'
 import { translate } from '../utils/translate'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -27,37 +27,26 @@ interface HeroProps {
   }>
 }
 
-const DEFAULT_DESKTOP_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787902113/t24_watches_videos/hero_video_transition_clean.jpg'
-const DEFAULT_MOBILE_POSTER = 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_auto,f_auto,so_0/v1787901807/t24_watches_videos/hero_video_mobile_clean.jpg'
-
-// Desktop video sequence: 2 videos that alternate
-const DESKTOP_VIDEOS_WEBM = [
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787902113/t24_watches_videos/hero_video_transition_clean.webm',
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787902117/t24_watches_videos/hero_video_orbiting_clean.webm',
-]
-const DESKTOP_VIDEOS_MP4 = [
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787902113/t24_watches_videos/hero_video_transition_clean.mp4',
-  'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787902117/t24_watches_videos/hero_video_orbiting_clean.mp4',
-]
+const DEFAULT_DESKTOP_IMAGE = '/hero-banner-desktop.webp'
+const DEFAULT_DESKTOP_RTL_IMAGE = '/hero-banner-desktop-rtl.webp'
+const DEFAULT_MOBILE_IMAGE = '/hero-banner-mobile.webp'
 
 export default function Hero({
   heroTitle = 'SWISS | PRECISION',
-  heroSubtitleLabel = 'SUPER CLONE WATCHES DUBAI',
-  heroSubtitleDesc = 'Best replica watches in Dubai. Super clone watches & clone watches.',
-  heroBodyDescription = "Dubai's ultimate boutique for 1:1 super clone watches. Hand-calibrated with flawless sweep movements, premium Oystersteel, and sapphire crystals. Cash on delivery available.",
-  heroCtaLabel = 'VIEW COLLECTION',
-  heroCtaTarget = '#store',
-  heroWatchImageUrl = '/watch-diver-green.jpg',
-  heroVideoUrl,
-  heroMobileVideoUrl,
+  heroSubtitleLabel = 'SUPER CLONE BRANDS DUBAI',
+  heroSubtitleDesc = 'BEST REPLICA BRANDS IN DUBAI.',
+  heroBodyDescription = "Dubai's ultimate boutique for 1:1 super clone brands. Hand-calibrated with flawless sweep movements, premium Oystersteel, and sapphire crystals. Cash on delivery available.",
+  heroCtaLabel = 'EXPLORE COLLECTION',
+  heroCtaTarget = '#collections',
+  heroWatchImageUrl = '/hero-banner-desktop.webp',
   heroWatchLabelLine1 = 'SWISS',
   heroWatchLabelLine2 = 'DUBAI EDITION',
   heroWatchLabelLine3 = 'PREMIUM OYSTERSTEEL',
   heroWatchLabelLine4 = '1:1 BUILD',
   heroStats = [
-    { value: 'FREE', label: 'Same-day delivery' },
-    { value: '2 YR', label: 'Service warranty' },
-    { value: 'COD', label: 'Multiple payments' },
+    { value: 'FREE', label: 'SAME-DAY DELIVERY' },
+    { value: '2 YR', label: 'SERVICE WARRANTY' },
+    { value: 'COD', label: 'MULTIPLE PAYMENTS' },
   ],
 }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null)
@@ -71,35 +60,27 @@ export default function Hero({
   const statsRef = useRef<HTMLDivElement>(null)
   const markerRef = useRef<HTMLDivElement>(null)
 
-  const desktopVideoRef0 = useRef<HTMLVideoElement | null>(null)
-  const desktopVideoRef1 = useRef<HTMLVideoElement | null>(null)
-  const mobileVideoRef = useRef<HTMLVideoElement | null>(null)
-  const [activeDesktopIdx, setActiveDesktopIdx] = useState(0)
-  const [mobileVideoStarted, setMobileVideoStarted] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 640px)').matches)
-
   const currentLang = localStorage.getItem('t24_lang') || 'en'
   const isRtl = currentLang === 'ar'
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 640px)')
-    const handleBreakpointChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches)
-    mediaQuery.addEventListener('change', handleBreakpointChange)
-    return () => mediaQuery.removeEventListener('change', handleBreakpointChange)
-  }, [])
+  const isCustomImage =
+    heroWatchImageUrl &&
+    !heroWatchImageUrl.includes('eehkzalmujmziwekwq9a') &&
+    !heroWatchImageUrl.includes('/hero-watch.png') &&
+    !heroWatchImageUrl.includes('watch-diver-green.jpg') &&
+    !heroWatchImageUrl.includes('hero_banner_rm') &&
+    !heroWatchImageUrl.includes('hero-banner') &&
+    heroWatchImageUrl !== '/hero-banner-desktop.png' &&
+    heroWatchImageUrl !== '/hero-banner-desktop.webp' &&
+    heroWatchImageUrl !== '/hero-banner-desktop.jpg'
 
-  useEffect(() => {
-    const activeVideo = isDesktop
-      ? (activeDesktopIdx === 0 ? desktopVideoRef0.current : desktopVideoRef1.current)
-      : mobileVideoRef.current
+  const desktopBannerSrc = isCustomImage
+    ? heroWatchImageUrl
+    : (isRtl ? DEFAULT_DESKTOP_RTL_IMAGE : DEFAULT_DESKTOP_IMAGE)
 
-    if (!activeVideo) return
-    activeVideo.muted = true
-    activeVideo.defaultMuted = true
-    activeVideo.play().catch(() => {
-      // The optimized poster remains visible when a browser blocks autoplay.
-    })
-  }, [activeDesktopIdx, isDesktop])
+  const mobileBannerSrc = isCustomImage
+    ? heroWatchImageUrl
+    : DEFAULT_MOBILE_IMAGE
 
   const heroData = {
     title: translate(heroTitle, currentLang),
@@ -136,7 +117,7 @@ export default function Hero({
     const ctx = gsap.context(() => {
       const words = heading.querySelectorAll('.hero-word')
 
-      gsap.set(watchPanel, { opacity: 0, scale: 1.05 })
+      gsap.set(watchPanel, { opacity: 0 })
       gsap.set(glow, { opacity: 0, scale: 0.82 })
       gsap.set([eyebrow, subhead, body, cta, stats, marker], { opacity: 0, y: 28 })
       gsap.set(words, { opacity: 0, yPercent: 115, rotateX: -18 })
@@ -144,7 +125,7 @@ export default function Hero({
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
       tl.to(glow, { opacity: 1, scale: 1, duration: 0.9, ease: 'power2.out' })
-        .to(watchPanel, { opacity: 1, scale: 1, duration: 1.2, ease: 'power3.out' }, '-=0.65')
+        .to(watchPanel, { opacity: 1, duration: 1.0, ease: 'power2.out' }, '-=0.65')
         .to(eyebrow, { opacity: 1, y: 0, duration: 0.55 }, '-=0.75')
         .to(
           words,
@@ -160,19 +141,6 @@ export default function Hero({
         .to([subhead, body], { opacity: 1, y: 0, duration: 0.55, stagger: 0.07 }, '-=0.25')
         .to(cta, { opacity: 1, y: 0, duration: 0.5 }, '-=0.2')
         .to([stats, marker], { opacity: 1, y: 0, duration: 0.55, stagger: 0.08 }, '-=0.25')
-
-      gsap.matchMedia().add('(min-width: 1024px)', () => {
-        gsap.to(watchPanel, {
-          yPercent: 4,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        })
-      })
 
       gsap.to(glow, {
         rotate: 16,
@@ -221,7 +189,7 @@ export default function Hero({
     <section
       ref={sectionRef}
       id="hero"
-      className="relative isolate min-h-screen overflow-hidden bg-[#070605] pt-20 text-white flex items-center"
+      className="relative isolate hero-mobile-height overflow-hidden bg-[#070605] pt-2 sm:pt-20 text-white flex flex-col justify-between"
     >
       {/* Background soft ambient radial lighting */}
       <div 
@@ -232,180 +200,55 @@ export default function Hero({
         className={`absolute top-[-10rem] -z-20 hidden h-[45rem] w-[45rem] rounded-full bg-[conic-gradient(from_120deg,rgba(217,165,32,0),rgba(217,165,32,0.32),rgba(232,194,100,0.22),rgba(235,203,122,0.42),rgba(217,165,32,0))] blur-3xl ${isRtl ? 'left-[-16rem]' : 'right-[-16rem]'}`}
       />
 
-      {/* Cinematic Watch Advertisement Video Background Banner */}
+      {/* Cinematic Watch Background Banner */}
       <div
         ref={watchPanelRef}
         className="absolute inset-0 -z-20 overflow-hidden pointer-events-none"
       >
-        {/* Desktop / Tablet Video Player with Dual-Buffer Seamless Cross-Fade */}
-        {isDesktop ? (
-        <div className="absolute inset-0 pointer-events-none bg-cover bg-center transition-opacity duration-700">
-          {/* Video 0: Transition Watch */}
-          <video
-            ref={desktopVideoRef0}
-            autoPlay
-            muted
-            playsInline
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            preload="metadata"
-            poster={DEFAULT_DESKTOP_POSTER}
-            onCanPlay={(e) => {
-              const v = e.currentTarget
-              v.muted = true
-              if (activeDesktopIdx === 0) v.play().catch(() => {})
-            }}
-            onEnded={() => {
-              const v1 = desktopVideoRef1.current
-              if (v1) {
-                v1.currentTime = 0
-                v1.muted = true
-                v1.play().catch(() => {})
-              }
-              setActiveDesktopIdx(1)
-            }}
-            className={`absolute inset-0 h-full w-full object-cover ${
-              isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
-            } brightness-[1.10] contrast-[1.08] saturate-[1.12] transition-opacity duration-1000 ${
-              activeDesktopIdx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-            }`}
-          >
-            <source
-              src={heroVideoUrl && heroVideoUrl.startsWith('http')
-                ? heroVideoUrl.replace('.mp4', '.webm').replace('vc_h264', 'vc_vp9')
-                : DESKTOP_VIDEOS_WEBM[0]}
-              type="video/webm"
-            />
-            <source
-              src={heroVideoUrl && heroVideoUrl.startsWith('http')
-                ? heroVideoUrl
-                : DESKTOP_VIDEOS_MP4[0]}
-              type="video/mp4"
-            />
-          </video>
-
-          {/* Video 1: Orbiting Watch (Preloaded & Ready) */}
-          <video
-            ref={desktopVideoRef1}
-            muted
-            playsInline
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            preload="none"
-            poster={DEFAULT_DESKTOP_POSTER}
-            onCanPlay={(e) => {
-              const v = e.currentTarget
-              v.muted = true
-              if (activeDesktopIdx === 1) v.play().catch(() => {})
-            }}
-            onEnded={() => {
-              const v0 = desktopVideoRef0.current
-              if (v0) {
-                v0.currentTime = 0
-                v0.muted = true
-                v0.play().catch(() => {})
-              }
-              setActiveDesktopIdx(0)
-            }}
-            className={`absolute inset-0 h-full w-full object-cover ${
-              isRtl ? 'object-left md:object-center' : 'object-right md:object-center'
-            } brightness-[1.10] contrast-[1.08] saturate-[1.12] transition-opacity duration-1000 ${
-              activeDesktopIdx === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-            }`}
-          >
-            <source src={DESKTOP_VIDEOS_WEBM[1]} type="video/webm" />
-            <source src={DESKTOP_VIDEOS_MP4[1]} type="video/mp4" />
-          </video>
-
-          {/* Desktop Subtle Contrast Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050403] via-transparent to-[#050403]/60 z-20 pointer-events-none" />
-          <div
-            className={`absolute inset-0 ${
-              isRtl
-                ? 'bg-gradient-to-l from-[#050403]/90 via-[#050403]/60 to-transparent'
-                : 'bg-gradient-to-r from-[#050403]/90 via-[#050403]/60 to-transparent'
-            } w-[65%] z-20 pointer-events-none`}
+        <picture className="absolute inset-0 h-full w-full">
+          {/* Mobile View (< 640px): Specially composed with watch framed dynamically on the right and bottom */}
+          <source
+            media="(max-width: 639px)"
+            srcSet={mobileBannerSrc}
           />
-        </div>
-        ) : (
-        <div
-          className="absolute inset-0 pointer-events-none bg-cover bg-center"
-        >
-          <video
-            ref={mobileVideoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            preload="metadata"
-            poster={DEFAULT_MOBILE_POSTER}
-            onCanPlay={(e) => {
-              const v = e.currentTarget
-              v.muted = true
-              v.play().then(() => {
-                setMobileVideoStarted(true)
-              }).catch(() => {})
-            }}
-            onLoadedData={(e) => {
-              const v = e.currentTarget
-              v.muted = true
-              v.play().then(() => {
-                setMobileVideoStarted(true)
-              }).catch(() => {})
-            }}
-            onPlaying={() => setMobileVideoStarted(true)}
-            className={`absolute inset-0 h-full w-full object-cover object-center brightness-[1.15] contrast-[1.10] saturate-[1.15] pointer-events-none transition-opacity duration-700 ${
-              mobileVideoStarted ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <source
-              src="https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_vp9/v1787901807/t24_watches_videos/hero_video_mobile_clean.webm"
-              type="video/webm"
-            />
-            <source
-              src={heroMobileVideoUrl || 'https://res.cloudinary.com/dwqxzzqpn/video/upload/q_70,vc_h264/v1787901807/t24_watches_videos/hero_video_mobile_clean.mp4'}
-              type="video/mp4"
-            />
-          </video>
-          {/* Subtle Mobile Vignettes */}
-          <div className="absolute top-0 inset-x-0 h-36 bg-gradient-to-b from-[#050403]/80 via-[#050403]/30 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 inset-x-0 h-44 bg-gradient-to-t from-[#050403]/90 via-[#050403]/40 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-        </div>
-        )}
-
-        <div className="absolute inset-0 bg-[#d9a520]/[0.02] mix-blend-screen pointer-events-none" />
+          {/* Desktop View (>= 640px): Wide format with watch on right (or left for RTL) and dark text zone */}
+          <img
+            src={desktopBannerSrc}
+            alt="Dubai Super Clone Luxury Brands"
+            className="h-full w-full object-cover object-center brightness-[1.05] contrast-[1.05] saturate-[1.08] transition-opacity duration-700"
+            loading="eager"
+            fetchPriority="high"
+          />
+        </picture>
       </div>
 
       <div className={`absolute top-0 h-full w-px bg-gradient-to-b from-transparent via-[#e8c264]/50 to-transparent ${isRtl ? 'right-0 sm:right-8 lg:right-12' : 'left-0 sm:left-8 lg:left-12'}`} />
-      <div className={`absolute top-28 hidden h-40 w-40 rounded-full border border-[#ebcb7a]/20 lg:block ${isRtl ? 'left-10' : 'right-10'}`} />
-      <div className={`absolute top-40 hidden h-24 w-24 rounded-full border border-[#e8c264]/20 lg:block ${isRtl ? 'left-20' : 'right-20'}`} />
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-7 pt-8 sm:px-10 sm:py-8 lg:px-14">
-        <div className="w-full max-w-[42rem]">
-          <p
+      {/* Main Hero Content - Mobile and Desktop Responsive */}
+      <div className="relative z-10 mx-auto flex h-full sm:min-h-[calc(100vh-5rem)] w-full max-w-7xl flex-col justify-between px-5 py-5 sm:px-10 sm:py-8 lg:px-14">
+        <div className="w-full max-w-[42rem] pt-2 sm:pt-8">
+          {/* Eyebrow: Gold horizontal dash + tracked uppercase text */}
+          <div
             ref={eyebrowRef}
-            className="mb-4 sm:mb-6 inline-flex items-center gap-2.5 sm:gap-3 border border-[#e8c264]/35 bg-[#120b04]/70 px-3.5 py-1.5 sm:px-4 sm:py-2 font-body text-[10px] font-medium uppercase tracking-[0.35em] sm:tracking-[0.46em] text-[#ebcb7a] shadow-[0_0_25px_rgba(217,165,32,0.2)] backdrop-blur-md sm:text-xs rounded-full"
+            className="mb-3.5 sm:mb-6 flex items-center gap-2.5 sm:gap-3"
           >
-            <Sparkles size={13} className="text-[#e8c264]" />
-            {heroData.subtitleLabel}
-          </p>
+            <span className="w-7 sm:w-10 h-[2px] bg-gradient-to-r from-[#d9a520] to-[#e8c264]" />
+            <span className="font-body text-[10px] sm:text-xs font-semibold uppercase tracking-[0.24em] sm:tracking-[0.35em] text-[#e8c264]">
+              {heroData.subtitleLabel}
+            </span>
+          </div>
 
+          {/* Headline: SWISS in white, PRECISION in metallic luxury gold */}
           <h1
             ref={headingRef}
-            className="font-body text-[clamp(2.8rem,7vw,6.75rem)] font-semibold uppercase leading-[0.9] sm:leading-[0.88] tracking-[-0.05em] text-white drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]"
+            className="font-body text-[clamp(3.1rem,8.5vw,6.75rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-white drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]"
           >
             {titleLines.map((line, lineIndex) => (
-              <span key={line} className="block overflow-hidden pb-2 sm:pb-3">
+              <span key={line} className="block overflow-hidden pb-1 sm:pb-2">
                 {line.split(' ').map((word, wordIndex) => (
                   <span key={`${lineIndex}-${wordIndex}-${word}`}>
                     <span
-                      className={lineIndex === titleLines.length - 1 ? 'hero-word inline-block bg-gradient-to-r from-[#d9a520] via-[#e8c264] to-[#ebcb7a] bg-clip-text pr-[0.12em] text-transparent drop-shadow-[0_4px_24px_rgba(217,165,32,0.4)]' : 'hero-word inline-block pr-[0.12em]'}
+                      className={lineIndex === titleLines.length - 1 ? 'hero-word inline-block bg-gradient-to-r from-[#d9a520] via-[#f7df9c] to-[#d9a520] bg-clip-text pr-[0.08em] text-transparent drop-shadow-[0_4px_24px_rgba(217,165,32,0.4)]' : 'hero-word inline-block pr-[0.08em]'}
                     >
                       {word}
                     </span>{' '}
@@ -415,57 +258,62 @@ export default function Hero({
             ))}
           </h1>
 
+          {/* Subtitle */}
           <p
             ref={subheadRef}
-            className="mt-2 max-w-xl font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e8c264] drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:mt-2 sm:text-xs sm:tracking-[0.32em]"
+            className="mt-3 sm:mt-4 max-w-[260px] sm:max-w-xl font-body text-xs sm:text-sm font-semibold uppercase tracking-[0.14em] sm:tracking-[0.26em] text-[#e8c264] drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] leading-snug sm:leading-normal"
           >
             {heroData.subtitleDesc}
           </p>
 
+          {/* Desktop Body Description */}
           <p
             ref={bodyRef}
-            className="mt-3.5 max-w-lg font-body text-xs sm:text-[15px] leading-6 sm:leading-7 text-white/95 sm:text-[#ffffffb3] drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]"
+            className="mt-3.5 hidden sm:block max-w-lg font-body text-xs sm:text-[15px] leading-6 sm:leading-7 text-white/85 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]"
           >
             {heroData.bodyDescription}
           </p>
 
-          <div className="mt-5 sm:mt-7 flex flex-col gap-5 sm:flex-row sm:items-center">
+          {/* CTA Button: Gold Pill Button with Dark Circle Arrow Icon */}
+          <div className="mt-5 sm:mt-7 flex items-center">
             <a
               ref={ctaRef}
               href={collectionTarget}
               onClick={handleCtaClick}
-              className="relative z-20 group inline-flex w-fit items-center gap-3.5 sm:gap-4 rounded-full border border-[#ebcb7a]/80 bg-gradient-to-r from-[#d9a520] via-[#e8c264] to-[#ebcb7a] px-6 py-3.5 sm:px-7 sm:py-4 font-body text-xs font-bold uppercase tracking-[0.22em] text-[#090604] shadow-[0_12px_45px_rgba(217,165,32,0.45),0_0_35px_rgba(232,194,100,0.3)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_24px_90px_rgba(217,165,32,0.6),0_0_58px_rgba(235,203,122,0.4)] cursor-pointer"
+              className="relative z-20 group inline-flex items-center gap-3.5 sm:gap-4 rounded-full bg-gradient-to-r from-[#e5b955] via-[#f3d27d] to-[#dca738] px-6 py-3 sm:px-7 sm:py-4 font-body text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-[#140f07] shadow-[0_0_35px_rgba(232,194,100,0.45)] hover:shadow-[0_0_55px_rgba(232,194,100,0.7)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
             >
               <span>{heroData.ctaLabel}</span>
-              <ArrowRight size={16} className={`transition duration-300 ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-[#1b140b] text-[#e8c264] transition-transform duration-300 group-hover:translate-x-1">
+                <ArrowRight size={14} className={isRtl ? 'rotate-180' : ''} />
+              </span>
             </a>
           </div>
+        </div>
 
-          <div
-            ref={statsRef}
-            className="mt-6 sm:mt-8 grid max-w-2xl grid-cols-3 gap-2 border-y border-[#ebcb7a]/25 bg-black/40 py-3.5 sm:py-4 text-center font-body text-[9px] uppercase tracking-normal text-white/90 backdrop-blur-md sm:gap-3 sm:text-xs sm:tracking-[0.22em] rounded-xl"
-          >
-            {displayStats.slice(0, 3).map((stat) => (
-              <div key={`${stat.value}-${stat.label}`}>
-                <span className="mb-0.5 sm:mb-1 block text-base sm:text-xl font-black tracking-[-0.04em] text-[#ebcb7a]">
-                  {translate(stat.value, currentLang)}
-                </span>
-                {translate(stat.label, currentLang)}
-              </div>
-            ))}
+        {/* Bottom Feature Stats Strip & Pagination Dots */}
+        <div
+          ref={statsRef}
+          className="w-full border-t border-[#e8c264]/20 pt-4 sm:pt-6 mt-6 sm:mt-10"
+        >
+          <div className="grid grid-cols-3 gap-2 sm:gap-6 text-left">
+            {displayStats.slice(0, 3).map((stat, idx) => {
+              const Icon = idx === 0 ? Truck : idx === 1 ? ShieldCheck : CreditCard
+              return (
+                <div key={`${stat.value}-${stat.label}`} className="flex items-center gap-2 sm:gap-3">
+                  <Icon size={19} className="text-[#e8c264] shrink-0 sm:w-6 sm:h-6 stroke-[1.8]" />
+                  <div className="min-w-0">
+                    <span className="block text-[11px] sm:text-sm font-bold tracking-tight text-white uppercase">
+                      {translate(stat.value, currentLang)}
+                    </span>
+                    <span className="block text-[7.5px] sm:text-[10px] uppercase tracking-wider text-white/70 leading-tight truncate">
+                      {translate(stat.label, currentLang)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
-      </div>
-
-      <div
-        ref={markerRef}
-        className={`absolute bottom-8 hidden max-w-[15rem] items-center gap-4 rounded-full border border-[#ebcb7a]/25 bg-black/40 px-5 py-3 font-body text-[10px] uppercase tracking-[0.22em] text-white/85 shadow-[0_0_50px_rgba(217,165,32,0.16)] backdrop-blur-xl sm:flex ${isRtl ? 'left-6 lg:left-14' : 'right-6 lg:right-14'}`}
-      >
-        <ShieldCheck size={18} className="text-[#ebcb7a]" />
-        <span>
-          {translate(heroData.watchLabelLine1 || 'Authenticated', currentLang)}{' '}
-          <strong className="text-[#ebcb7a]">{translate(heroData.watchLabelLine4 || 'Edition', currentLang)}</strong>
-        </span>
       </div>
     </section>
   )

@@ -136,7 +136,18 @@ export default function Header({
               <span className={currentLang === 'ar' ? 'text-gold font-bold' : 'text-gray-400 hover:text-white'}>العربية</span>
             </button>
 
-            {/* WhatsApp Concierge Button */}
+            {/* Mobile WhatsApp Button */}
+            <button
+              onClick={handleWhatsAppChat}
+              aria-label="WhatsApp Concierge"
+              className={`sm:hidden p-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 transition-colors duration-300 ${
+                selectedRep?.isFeatured ? 'text-gold hover:text-gold/80 border-gold/30 bg-gold/10' : 'text-emerald-400 hover:text-emerald-300'
+              }`}
+            >
+              <MessageCircle size={16} />
+            </button>
+
+            {/* WhatsApp Concierge Button (Desktop) */}
             <button
               onClick={handleWhatsAppChat}
               className={`hidden sm:flex items-center gap-2 px-4 py-1.5 bg-emerald-600/10 hover:bg-emerald-600 border ${
@@ -147,16 +158,6 @@ export default function Header({
             >
               <MessageCircle size={14} className={selectedRep?.isFeatured ? 'text-gold' : 'animate-pulse'} />
               <span>{translate('WHATSAPP SUPPORT', currentLang)}</span>
-            </button>
-
-            <button
-              onClick={handleWhatsAppChat}
-              aria-label="WhatsApp Concierge"
-              className={`sm:hidden p-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 transition-colors duration-300 ${
-                selectedRep?.isFeatured ? 'text-gold hover:text-gold/80 border-gold/30 bg-gold/10' : 'text-emerald-400 hover:text-emerald-300'
-              }`}
-            >
-              <MessageCircle size={17} />
             </button>
           </div>
         </div>
