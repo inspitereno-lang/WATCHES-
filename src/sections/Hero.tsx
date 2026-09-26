@@ -30,6 +30,7 @@ interface HeroProps {
 const DEFAULT_DESKTOP_IMAGE = '/hero-banner-desktop.webp'
 const DEFAULT_DESKTOP_RTL_IMAGE = '/hero-banner-desktop-rtl.webp'
 const DEFAULT_MOBILE_IMAGE = '/hero-banner-mobile.webp'
+const DEFAULT_MOBILE_RTL_IMAGE = '/hero-banner-mobile-rtl.webp'
 
 export default function Hero({
   heroTitle = 'SWISS | PRECISION',
@@ -80,7 +81,7 @@ export default function Hero({
 
   const mobileBannerSrc = isCustomImage
     ? heroWatchImageUrl
-    : DEFAULT_MOBILE_IMAGE
+    : (isRtl ? DEFAULT_MOBILE_RTL_IMAGE : DEFAULT_MOBILE_IMAGE)
 
   const heroData = {
     title: translate(heroTitle, currentLang),
@@ -241,7 +242,7 @@ export default function Hero({
           {/* Headline: SWISS in white, PRECISION in metallic luxury gold */}
           <h1
             ref={headingRef}
-            className="font-body text-[clamp(3.1rem,8.5vw,6.75rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-white drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]"
+            className="font-body text-[clamp(2.35rem,6.8vw,6.75rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-white drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]"
           >
             {titleLines.map((line, lineIndex) => (
               <span key={line} className="block overflow-hidden pb-1 sm:pb-2">
@@ -261,7 +262,7 @@ export default function Hero({
           {/* Subtitle */}
           <p
             ref={subheadRef}
-            className="mt-3 sm:mt-4 max-w-[260px] sm:max-w-xl font-body text-xs sm:text-sm font-semibold uppercase tracking-[0.14em] sm:tracking-[0.26em] text-[#e8c264] drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] leading-snug sm:leading-normal"
+            className="mt-2.5 sm:mt-4 max-w-[250px] sm:max-w-xl font-body text-[11px] sm:text-sm font-semibold uppercase tracking-[0.14em] sm:tracking-[0.26em] text-[#e8c264] drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] leading-snug sm:leading-normal"
           >
             {heroData.subtitleDesc}
           </p>
@@ -275,16 +276,16 @@ export default function Hero({
           </p>
 
           {/* CTA Button: Gold Pill Button with Dark Circle Arrow Icon */}
-          <div className="mt-5 sm:mt-7 flex items-center">
+          <div className="mt-4 sm:mt-7 flex items-center">
             <a
               ref={ctaRef}
               href={collectionTarget}
               onClick={handleCtaClick}
-              className="relative z-20 group inline-flex items-center gap-3.5 sm:gap-4 rounded-full bg-gradient-to-r from-[#e5b955] via-[#f3d27d] to-[#dca738] px-6 py-3 sm:px-7 sm:py-4 font-body text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-[#140f07] shadow-[0_0_35px_rgba(232,194,100,0.45)] hover:shadow-[0_0_55px_rgba(232,194,100,0.7)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+              className="relative z-20 group inline-flex items-center gap-3 sm:gap-4 rounded-full bg-gradient-to-r from-[#e5b955] via-[#f3d27d] to-[#dca738] px-5 py-2.5 sm:px-7 sm:py-4 font-body text-[11px] sm:text-[13px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.22em] text-[#140f07] shadow-[0_0_35px_rgba(232,194,100,0.45)] hover:shadow-[0_0_55px_rgba(232,194,100,0.7)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
             >
               <span>{heroData.ctaLabel}</span>
-              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-[#1b140b] text-[#e8c264] transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight size={14} className={isRtl ? 'rotate-180' : ''} />
+              <span className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#1b140b] text-[#e8c264] transition-transform duration-300 group-hover:translate-x-1">
+                <ArrowRight size={13} className={isRtl ? 'rotate-180' : ''} />
               </span>
             </a>
           </div>
