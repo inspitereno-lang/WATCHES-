@@ -696,6 +696,8 @@ const STATIC_AR_TRANSLATIONS = new Map([
   ['Richard Mille RM 27-04 Tourbillon Rafael Nadal', 'ريتشارد ميل RM 27-04 توربيون رافائيل نادال'],
   ['Richard Mille RM 67-02 Alexander Zverev', 'ريتشارد ميل RM 67-02 ألكسندر زفيريف'],
   ['Patek Philippe Aquanaut Chronograph 5968A-001 Orange', 'باتيك فيليب أكوانوت كرونوغراف 5968A-001 برتقالي'],
+  ['Patek Philippe Aquanaut Chronograph 5968A-001 (Orange Strap Edition)', 'باتيك فيليب أكوانوت كرونوغراف 5968A-001 (إصدار الحزام البرتقالي)'],
+  ['Richard Mille RM 027 Tourbillon Rafael Nadal', 'ريتشارد ميل RM 027 توربيون رافائيل نادال'],
   ['Audemars Piguet Royal Oak Perpetual Calendar Blue Ceramic', 'أوديمار بيغيه رويال أوك بالتقويم الدائم من السيراميك الأزرق'],
   ['Instagram', 'إنستغرام'],
   ['IFL Watches', 'آي إف إل واتشز'],
@@ -1197,7 +1199,7 @@ app.get('/api/products/suggestions', async (req, res) => {
 const celebrityMatches = [
   {
     celebrity: 'Rafael Nadal',
-    productId: 100,
+    productId: 103,
     reference: 'Richard Mille RM 27-04 Tourbillon Rafael Nadal',
     image: 'https://media.gq.com.mx/photos/61f1c2e9c981b856e36972ff/16:9/w_1600,c_limit/PR27-04.jpg',
     imagePosition: 'center center',
@@ -1216,7 +1218,7 @@ const celebrityMatches = [
   },
   {
     celebrity: 'Sergio Ramos',
-    productId: 256,
+    productId: 134,
     reference: 'Patek Philippe Aquanaut Chronograph 5968A-001 Orange',
     image: '/images/collections/sergio-ramos-portrait.png',
     watchImage: '/images/collections/sergio-ramos-aquanaut-orange.png',

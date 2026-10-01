@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, ExternalLink, ShoppingBag } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { WatchImage } from '../components/WatchImage'
@@ -36,13 +36,21 @@ interface CelebrityMatch {
 const FALLBACK_MATCHES: CelebrityMatch[] = [
   {
     celebrity: 'Rafael Nadal',
-    productId: 100,
-    reference: 'Richard Mille RM 27-04 Tourbillon Rafael Nadal',
+    productId: 103,
+    reference: 'Richard Mille RM 027 Tourbillon Rafael Nadal',
     image:
       'https://media.gq.com.mx/photos/61f1c2e9c981b856e36972ff/16:9/w_1600,c_limit/PR27-04.jpg',
     imagePosition: 'center center',
     source: 'https://www.gq.com.mx/relojes/articulo/rafael-nadal-tiene-un-nuevo-reloj-richard-mille',
     sourceLabel: 'GQ',
+    product: {
+      id: 103,
+      name: 'Richard Mille RM 027 Tourbillon Rafael Nadal — Limited Edition of 50',
+      brand: 'Richard Mille',
+      image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1788523699/t24_watches_clean/rm_027_rafael_nadal_tourbillon_main_banner_1.webp',
+      priceAED: 'AED 15,600',
+      priceUSD: '$4,256',
+    },
   },
   {
     celebrity: 'Shah Rukh Khan',
@@ -56,13 +64,21 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
   },
   {
     celebrity: 'Sergio Ramos',
-    productId: 256,
+    productId: 134,
     reference: 'Patek Philippe Aquanaut Chronograph 5968A-001 Orange',
     image: '/images/collections/sergio-ramos-portrait.png',
     watchImage: '/images/collections/sergio-ramos-aquanaut-orange.png',
     imagePosition: 'center top',
     source: 'https://www.instagram.com/p/DWYm235iGkR/',
     sourceLabel: 'Instagram',
+    product: {
+      id: 134,
+      name: 'Patek Philippe Aquanaut Chronograph 5968A-001 (Orange Strap Edition)',
+      brand: 'Patek Philippe',
+      image: 'https://res.cloudinary.com/dwqxzzqpn/image/upload/v1788869514/t24_watches_clean/patek-philippe-aquanaut-5968a-001-orange_watch-01.webp',
+      priceAED: 'AED 6,200',
+      priceUSD: '$1,691.70',
+    },
   },
   {
     celebrity: 'Alexander Zverev',
@@ -76,6 +92,7 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
 ]
 
 export default function CelebrityWatches() {
+  const navigate = useNavigate()
   const sectionRef = useRef<HTMLElement>(null)
   const [matches, setMatches] = useState<CelebrityMatch[]>(FALLBACK_MATCHES)
   const currentLang = localStorage.getItem('t24_lang') || 'en'
@@ -96,7 +113,7 @@ export default function CelebrityWatches() {
         setMatches(
           FALLBACK_MATCHES.map((match) => ({
             ...match,
-            product: remoteByProductId.get(match.productId)?.product || null,
+            product: remoteByProductId.get(match.productId)?.product || match.product || null,
           }))
         )
       })
@@ -197,7 +214,10 @@ export default function CelebrityWatches() {
             >              {/* Mobile View: 2-Tile Side-by-Side Layout (< lg) */}
               <div className="grid grid-cols-2 lg:hidden">
                 {/* Mobile Tile 1: Celebrity Portrait (Uncropped Face & Wrist) */}
-                <div className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-[#111] border-r border-white/10">
+                <div
+                  onClick={() => navigate(`/product/${match.productId}`)}
+                  className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-[#111] border-r border-white/10 cursor-pointer group"
+                >
                   <img
                     src={match.image}
                     alt={`${match.celebrity} wearing ${match.reference}`}
@@ -206,7 +226,7 @@ export default function CelebrityWatches() {
                     style={{
                       objectPosition: match.imagePosition || 'center top',
                     }}
-                    className="absolute inset-0 h-full w-full object-cover object-top"
+                    className="absolute inset-0 h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent" />
                   
@@ -233,7 +253,10 @@ export default function CelebrityWatches() {
                 </div>
 
                 {/* Mobile Tile 2: Exact Matching Luxury Watch Card */}
-                <div className="relative flex flex-col justify-between overflow-hidden bg-[radial-gradient(circle_at_50%_40%,rgba(212,175,55,0.15),transparent_60%),linear-gradient(145deg,#120e09_0%,#080807_75%)] p-2.5 sm:p-4">
+                <div
+                  onClick={() => navigate(`/product/${match.productId}`)}
+                  className="relative flex flex-col justify-between overflow-hidden bg-[radial-gradient(circle_at_50%_40%,rgba(212,175,55,0.15),transparent_60%),linear-gradient(145deg,#120e09_0%,#080807_75%)] p-2.5 sm:p-4 cursor-pointer"
+                >
                   {/* Brand Watermark in Background */}
                   <div className="pointer-events-none absolute -right-2 top-2 font-display text-[2.8rem] sm:text-[3.5rem] leading-none text-white/[0.035] select-none">
                     {translate(product?.brand || match.reference.split(' ')[0], currentLang)}
@@ -251,15 +274,21 @@ export default function CelebrityWatches() {
 
                   {/* Watch Image with Larger Scale & Gold Aura */}
                   <div className="relative flex items-center justify-center py-2 flex-1 my-auto">
-                    <div className="absolute h-24 w-24 sm:h-28 sm:w-28 rounded-full border border-[#e8c264]/15" />
-                    <div className="absolute h-18 w-18 sm:h-22 sm:w-22 rounded-full border border-[#e8c264]/10" />
+                    <div className="pointer-events-none absolute h-24 w-24 sm:h-28 sm:w-28 rounded-full border border-[#e8c264]/15" />
+                    <div className="pointer-events-none absolute h-18 w-18 sm:h-22 sm:w-22 rounded-full border border-[#e8c264]/10" />
                     {match.watchImage || product?.image ? (
-                      <WatchImage
-                        src={match.watchImage || product?.image || ''}
-                        alt={match.reference}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                        className="icon-watch relative z-10 max-h-28 sm:max-h-36 max-w-[90%] object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.85)]"
-                      />
+                      <Link
+                        to={`/product/${match.productId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative z-10 flex items-center justify-center transition-transform active:scale-95"
+                      >
+                        <WatchImage
+                          src={match.watchImage || product?.image || ''}
+                          alt={match.reference}
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          className="icon-watch relative z-10 max-h-28 sm:max-h-36 max-w-[90%] object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.85)]"
+                        />
+                      </Link>
                     ) : (
                       <div className="h-20 w-20 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
                     )}
@@ -267,18 +296,31 @@ export default function CelebrityWatches() {
 
                   {/* Watch Title, Price & Shop Button */}
                   <div className="relative z-10 space-y-1.5 pt-1.5 border-t border-white/10">
-                    <h4 className="font-display text-[9.5px] sm:text-xs leading-tight text-white line-clamp-1">
-                      {translate(match.reference, currentLang)}
-                    </h4>
+                    <Link
+                      to={`/product/${match.productId}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="block group"
+                    >
+                      <h4 className="font-display text-[9.5px] sm:text-xs leading-tight text-white line-clamp-1 transition group-hover:text-[#e8c264]">
+                        {translate(match.reference, currentLang)}
+                      </h4>
+                    </Link>
                     <div className="flex items-center justify-between gap-1">
-                      <p className="font-mono text-[9.5px] sm:text-xs font-bold text-[#e8c264]">
-                        {product?.priceAED || 'View price'}
-                      </p>
                       <Link
                         to={`/product/${match.productId}`}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#e8c264] px-2.5 py-1 font-body text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e]"
+                        onClick={(e) => e.stopPropagation()}
+                        className="block"
                       >
-                        <ShoppingBag size={9} />
+                        <p className="font-mono text-[9.5px] sm:text-xs font-bold text-[#e8c264] hover:underline">
+                          {product?.priceAED || 'View price'}
+                        </p>
+                      </Link>
+                      <Link
+                        to={`/product/${match.productId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-[#e8c264] px-3 py-1.5 font-body text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e] touch-manipulation shadow-md"
+                      >
+                        <ShoppingBag size={10} />
                         <span>{translate("Shop", currentLang)}</span>
                       </Link>
                     </div>
@@ -354,15 +396,20 @@ export default function CelebrityWatches() {
                   </div>
 
                   <div className="relative flex flex-1 items-center justify-center py-8">
-                    <div className="absolute h-[21rem] w-[21rem] rounded-full border border-[#e8c264]/15" />
-                    <div className="absolute h-[17rem] w-[17rem] rounded-full border border-[#e8c264]/10" />
+                    <div className="pointer-events-none absolute h-[21rem] w-[21rem] rounded-full border border-[#e8c264]/15" />
+                    <div className="pointer-events-none absolute h-[17rem] w-[17rem] rounded-full border border-[#e8c264]/10" />
                     {match.watchImage || product?.image ? (
-                      <WatchImage
-                        src={match.watchImage || product?.image || ''}
-                        alt={match.reference}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                        className="icon-watch relative z-10 max-h-[28rem] max-w-[82%] object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.75)]"
-                      />
+                      <Link
+                        to={`/product/${match.productId}`}
+                        className="relative z-10 flex items-center justify-center transition-transform hover:scale-105 duration-300"
+                      >
+                        <WatchImage
+                          src={match.watchImage || product?.image || ''}
+                          alt={match.reference}
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          className="icon-watch relative z-10 max-h-[28rem] max-w-[82%] object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.75)] cursor-pointer"
+                        />
+                      </Link>
                     ) : (
                       <div className="h-52 w-52 animate-pulse rounded-full border border-[#e8c264]/10 bg-[#e8c264]/5" />
                     )}
@@ -372,18 +419,20 @@ export default function CelebrityWatches() {
                     <p className="font-body text-[8px] uppercase tracking-[0.2em] text-white/35">
                       {translate("The matching watch", currentLang)}
                     </p>
-                    <h3 className="mt-2 max-w-xl font-display text-3xl leading-tight text-white">
-                      {translate(match.reference, currentLang)}
-                    </h3>
+                    <Link to={`/product/${match.productId}`} className="block group">
+                      <h3 className="mt-2 max-w-xl font-display text-3xl leading-tight text-white transition group-hover:text-[#e8c264]">
+                        {translate(match.reference, currentLang)}
+                      </h3>
+                    </Link>
                     <div className="mt-6 flex flex-row items-end justify-between border-t border-white/8 pt-5">
-                      <div>
+                      <Link to={`/product/${match.productId}`} className="block group">
                         <p className="font-body text-[8px] uppercase tracking-[0.18em] text-white/35">
                           {translate("Available edition", currentLang)}
                         </p>
-                        <p className="mt-1 font-body text-xl font-semibold text-[#e8c264]">
+                        <p className="mt-1 font-body text-xl font-semibold text-[#e8c264] transition group-hover:underline">
                           {product?.priceAED || 'View price'}
                         </p>
-                      </div>
+                      </Link>
                       <Link
                         to={`/product/${match.productId}`}
                         className="group inline-flex w-fit items-center gap-3 rounded-full bg-[#e8c264] px-5 py-3 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#f1d98e]"
