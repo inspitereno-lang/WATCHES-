@@ -25,7 +25,7 @@ interface FooterProps {
 
 const essentialFooterLinks = [
   { label: 'HOME', to: '/' },
-  { label: 'WATCHES', to: '/watches' },
+  { label: 'BRANDS', to: '/watches' },
   { label: 'COLLECTIONS', to: '/collections' },
   { label: 'ACCESSORIES', to: '/accessories' },
   { label: 'JOURNAL', to: '/blog' },

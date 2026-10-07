@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -52,12 +54,14 @@ const getMasterBrandsWithCounts = async (settings) => {
   }));
 };
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Configure Cloudinary (optional)
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 // Configure Multer Memory Storage
 const storage = multer.memoryStorage();
@@ -177,15 +181,16 @@ export const connectToDatabase = async () => {
 };
 
 app.get('/api/health', async (_req, res) => {
-  const missing = ['MONGO_URI', 'JWT_SECRET', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']
-    .filter((key) => !process.env[key]);
+  const missing = ['MONGO_URI', 'JWT_SECRET'].filter((key) => !process.env[key]);
+  const hasCloudinary = Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
 
   try {
     await connectToDatabase();
     return res.status(missing.length ? 503 : 200).json({
       status: missing.length ? 'misconfigured' : 'ok',
       database: 'connected',
-      cloudinary: missing.some((key) => key.startsWith('CLOUDINARY_')) ? 'missing configuration' : 'configured',
+      storage: 'local',
+      cloudinary: hasCloudinary ? 'configured' : 'optional',
       missing,
     });
   } catch (error) {
@@ -1857,13 +1862,9 @@ app.put('/api/admin/homepage', auth, async (req, res) => {
   }
 });
 
-// 3. Image upload to Cloudinary CDN
+// 3. Image upload to Local Storage / Cloudinary CDN
 app.post('/api/admin/upload', auth, upload.single('image'), async (req, res) => {
   try {
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      return res.status(503).json({ error: 'Cloudinary is not configured on the server.' });
-    }
-
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload an image file.' });
     }
@@ -1902,19 +1903,44 @@ app.post('/api/admin/upload', auth, upload.single('image'), async (req, res) => 
       }
     }
 
-    // Stream upload buffer to Cloudinary
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: folderName },
-      (error, result) => {
-        if (error) {
-          console.error('Cloudinary stream upload error:', error);
-          return res.status(500).json({ error: 'Failed to upload image file to Cloudinary CDN.' });
+    // Save locally if LOCAL_UPLOADS_DIR configured
+    const localUploadsDir = process.env.LOCAL_UPLOADS_DIR;
+    let localUrl = null;
+    if (localUploadsDir) {
+      try {
+        const ext = path.extname(req.file.originalname) || (folderName === 't24_watches_clean' ? '.png' : '.webp');
+        const filename = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}${ext}`;
+        const targetDir = path.join(localUploadsDir, folderName);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
         }
-        return res.status(200).json({ url: result.secure_url });
+        const targetPath = path.join(targetDir, filename);
+        fs.writeFileSync(targetPath, bufferToUpload);
+        localUrl = `/uploads/${folderName}/${filename}`;
+      } catch (saveErr) {
+        console.error('Error saving uploaded file locally:', saveErr);
       }
-    );
+    }
 
-    uploadStream.end(bufferToUpload);
+    // If Cloudinary configured, also upload to Cloudinary as backup
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: folderName },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary stream upload error:', error);
+            if (localUrl) return res.status(200).json({ url: localUrl });
+            return res.status(500).json({ error: 'Failed to upload image file to Cloudinary CDN.' });
+          }
+          return res.status(200).json({ url: localUrl || result.secure_url });
+        }
+      );
+      uploadStream.end(bufferToUpload);
+    } else if (localUrl) {
+      return res.status(200).json({ url: localUrl });
+    } else {
+      return res.status(503).json({ error: 'No storage provider configured on server.' });
+    }
   } catch (err) {
     console.error('Upload API error:', err);
     return res.status(500).json({ error: 'Server upload error.' });

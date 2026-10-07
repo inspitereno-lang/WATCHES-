@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api
 
-Sitemap: https://aeterna-geneve-ten.vercel.app/sitemap.xml
+Sitemap: https://dubaiwatchesgallery.com/sitemap.xml

@@ -16,7 +16,6 @@ import Footer from './sections/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import ArabicLocalizer from './components/ArabicLocalizer'
 import { Toaster } from './components/ui/sonner'
-import { EngagementPopup } from './components/EngagementPopup'
 import Seo from './components/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -112,10 +111,6 @@ export default function App() {
       <Toaster />
       <ArabicLocalizer />
       <ScrollToTop />
-      <EngagementPopup
-        salesReps={homepageData?.salesReps}
-        footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
-      />
       <Suspense fallback={<div className="min-h-screen bg-black" aria-label="Loading page" />}>
       <Routes>
         <Route 
@@ -123,8 +118,8 @@ export default function App() {
           element={
             <>
               <Seo
-                title="Luxury Watches in Dubai | Dubai Watches Gallery"
-                description="Explore Dubai Watches Gallery for a curated selection of luxury and premium watches in Dubai. Discover our collections and find the right watch for your style."
+                title="Dubai Clone Watches | 1:1 Super Clone Watches Dubai | Dubai Watches Gallery"
+                description="Shop 1:1 super clone watches in Dubai at Dubai Watches Gallery. Premium Swiss replica timepieces, flawless sweep calibers, sapphire glass & cash on delivery in UAE."
                 canonicalPath="/"
                 image="/watch-grid-1.jpg"
               />
@@ -223,6 +218,30 @@ export default function App() {
         />
         <Route 
           path="/watches" 
+          element={
+            <>
+              <Header 
+                salesReps={homepageData?.salesReps}
+                defaultWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                defaultWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+              />
+              <main>
+                <WatchesPage />
+              </main>
+              <Footer 
+                footerHeading={homepageData?.footerHeading}
+                footerWhatsAppNumber={homepageData?.footerWhatsAppNumber}
+                footerWhatsAppMessage={homepageData?.footerWhatsAppMessage}
+                footerLinks={homepageData?.footerLinks}
+                footerCopyright={homepageData?.footerCopyright}
+                footerContactImage={homepageData?.footerContactImage}
+                salesReps={homepageData?.salesReps}
+              />
+            </>
+          } 
+        />
+        <Route 
+          path="/brands" 
           element={
             <>
               <Header 

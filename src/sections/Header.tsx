@@ -6,8 +6,8 @@ import { getSelectedRep, getWhatsAppUrl, type SalesRep } from '../utils/whatsapp
 
 const navLinks: Array<{ label: string; path?: string; sectionId?: string }> = [
   { label: 'HOME', path: '/' },
+  { label: 'BRANDS', path: '/watches' },
   { label: 'COLLECTIONS', path: '/collections' },
-  { label: 'WATCHES', path: '/watches' },
   { label: 'ACCESSORIES', path: '/accessories' },
   { label: 'BLOG', path: '/blog' },
 ]
@@ -31,6 +31,9 @@ export default function Header({
   const isLinkActive = (link: (typeof navLinks)[number]) => {
     if (link.path === '/') {
       return location.pathname === '/'
+    }
+    if (link.path === '/watches' || link.path === '/brands') {
+      return location.pathname === '/watches' || location.pathname === '/brands'
     }
     return link.path && (location.pathname === link.path || location.pathname.startsWith(`${link.path}/`))
   }

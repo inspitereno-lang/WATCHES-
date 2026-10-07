@@ -120,13 +120,13 @@ export default function SignatureCollection({
 
   const scrollBrandsNext = () => {
     if (brandScrollRef.current) {
-      brandScrollRef.current.scrollBy({ left: 160, behavior: 'smooth' })
+      brandScrollRef.current.scrollBy({ left: 220, behavior: 'smooth' })
     }
   }
 
   const scrollBrandsPrev = () => {
     if (brandScrollRef.current) {
-      brandScrollRef.current.scrollBy({ left: -160, behavior: 'smooth' })
+      brandScrollRef.current.scrollBy({ left: -220, behavior: 'smooth' })
     }
   }
 
@@ -472,11 +472,11 @@ export default function SignatureCollection({
 
       <div className="relative z-10 w-full px-3.5 sm:px-6 lg:px-12 xl:px-20">
         
-        {/* MOBILE VIEW (< md): Compact Header + Dual Side-by-Side Gender Cards */}
+        {/* MOBILE VIEW (< md): Compact Header + Brand Filter First + Dual Gender Cards */}
         <div className="block md:hidden text-left mb-4">
           
           {/* Header Title & Subtitle */}
-          <div className="px-1 pt-1 pb-3 space-y-1">
+          <div className="px-1 pt-1 pb-2 space-y-1">
             <div className="flex items-center gap-2">
               <span className="h-[2px] w-5 bg-gold rounded-full" />
               <h2 className="font-display text-2xl font-light tracking-wide text-white uppercase">
@@ -488,8 +488,64 @@ export default function SignatureCollection({
             </p>
           </div>
 
+          {/* Mobile Scrollable Brand Filter Pills - Placed FIRST */}
+          <div className="pt-1 pb-3.5">
+            <div className="flex items-center justify-between pb-2 px-0.5">
+              <div className="flex items-center gap-1.5">
+                <span className="h-[1.5px] w-3.5 bg-[#e8c264]" />
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#e8c264] font-semibold">
+                  {translate("Filter by Brand", currentLang)}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5" dir="ltr">
+                <button
+                  type="button"
+                  onClick={scrollBrandsPrev}
+                  aria-label="Scroll brands left"
+                  className="w-6 h-6 rounded-full border border-white/20 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-300 transition-all active:scale-95 shadow-sm"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollBrandsNext}
+                  aria-label="Scroll brands right"
+                  className="w-6 h-6 rounded-full border border-white/20 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-300 transition-all active:scale-95 shadow-sm"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div 
+              ref={brandScrollRef}
+              className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1.5 scroll-smooth"
+            >
+              {brands.map((brand) => {
+                const isSelected = selectedBrand === brand;
+                return (
+                  <button
+                    key={brand}
+                    type="button"
+                    onClick={() => {
+                      handleBrandSelect(brand)
+                      scrollToCatalogue()
+                    }}
+                    className={`shrink-0 px-5 py-2.5 rounded-full text-[13.5px] font-mono tracking-wider uppercase whitespace-nowrap transition-all duration-300 border ${
+                      isSelected
+                        ? 'bg-gold border-gold text-black font-bold shadow-[0_2px_14px_rgba(212,175,55,0.45)]'
+                        : 'bg-white/[0.04] border-white/15 text-gray-200 font-semibold hover:text-white hover:border-gold/40'
+                    }`}
+                  >
+                    {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Dual 2-Column Side-by-Side Gender Cards */}
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 mb-3.5">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 mb-2">
             
             {/* Card 1: FOR MEN */}
             <button
@@ -849,70 +905,6 @@ export default function SignatureCollection({
                   <span className={`text-[9px] ${isSelected ? 'text-black/80 font-bold' : 'text-gray-500'}`}>
                     ({countValue})
                   </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Brand Filter Header & Scroll Arrows */}
-          <div className="flex items-center justify-between pt-1 px-1">
-            <div className="flex items-center gap-2">
-              <span className="h-[1px] w-4 bg-[#e8c264]" />
-              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#e8c264]">
-                {translate("Filter by Brand", currentLang)}
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5" dir="ltr">
-              <button
-                type="button"
-                onClick={scrollBrandsPrev}
-                aria-label="Scroll brands left"
-                className="w-6 h-6 rounded-full border border-white/10 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95 shadow-sm"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={scrollBrandsNext}
-                aria-label="Scroll brands right"
-                className="w-6 h-6 rounded-full border border-white/10 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95 shadow-sm"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Brand Filter Horizontal Scrolling Pills */}
-          <div 
-            ref={brandScrollRef}
-            className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 scroll-smooth"
-          >
-            {/* ALL BRANDS */}
-            <button
-              onClick={() => handleBrandSelect('ALL BRANDS')}
-              className={`shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-wider transition-all duration-300 ${
-                selectedBrand === 'ALL BRANDS'
-                  ? 'bg-gold/20 border border-gold text-gold font-bold shadow-[0_0_12px_rgba(212,175,55,0.25)]'
-                  : 'bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:border-white/20'
-              }`}
-            >
-              {translate("ALL BRANDS", currentLang)}
-            </button>
-
-            {/* All Brands Pills */}
-            {[...primaryBrandsList, ...otherBrandsList].map((brand) => {
-              const isSelected = selectedBrand === brand;
-              return (
-                <button
-                  key={brand}
-                  onClick={() => handleBrandSelect(brand)}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-wider transition-all duration-300 ${
-                    isSelected
-                      ? 'bg-gold/20 border border-gold text-gold font-bold shadow-[0_0_12px_rgba(212,175,55,0.25)]'
-                      : 'bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:border-white/20'
-                  }`}
-                >
-                  {brand}
                 </button>
               );
             })}

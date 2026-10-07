@@ -6,7 +6,7 @@ import { inspectAttr } from 'kimi-plugin-inspect-react'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const siteUrl = (env.VITE_SITE_URL || 'https://aeterna-geneve-ten.vercel.app').replace(/\/$/, '')
+  const siteUrl = (env.VITE_SITE_URL || 'https://dubaiwatchesgallery.com').replace(/\/$/, '')
 
   return {
     base: '/',

@@ -10,8 +10,8 @@ export default function CollectionsPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <Seo
-        title={isArabic ? 'مجموعات الساعات الفاخرة في دبي | معرض دبي للساعات' : 'Luxury Watch Collections in Dubai | Dubai Watches Gallery'}
-        description={isArabic ? 'تسوّق مجموعات مختارة من رولكس وريتشارد ميل وباتيك فيليب وأوديمار بيجيه في دبي مع توصيل آمن.' : 'Explore luxury watch collections in Dubai at Dubai Watches Gallery. Browse our curated selection of premium watches and find a collection suited to your style.'}
+        title={isArabic ? 'مجموعات ساعات السوبر كلون في دبي | معرض دبي للساعات' : 'Super Clone Watches Dubai Collections | Dubai Watches Gallery'}
+        description={isArabic ? 'تسوّق مجموعات مختارة من ساعات السوبر كلون رولكس وريتشارد ميل وباتيك فيليب في دبي مع توصيل آمن.' : 'Explore 1:1 super clone watch collections in Dubai at Dubai Watches Gallery. Browse curated Rolex, Patek Philippe, Audemars Piguet & Richard Mille clones.'}
         canonicalPath="/collections"
         image="/hero-brands/patek-philippe-nautilus.png"
       />

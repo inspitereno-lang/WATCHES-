@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { 
   Crown, 
   Search, 
@@ -109,11 +109,14 @@ export default function WatchesPage() {
   const cachedState = useRef(getInitialCachedState()).current
   const isRestoredRef = useRef(Boolean(cachedState && cachedState.watches && cachedState.watches.length > 0))
 
+  const [searchParams] = useSearchParams()
+  const brandParam = searchParams.get('brand')
+
   // Catalog state
   const [watches, setWatches] = useState<Watch[]>(() => cachedState?.watches || [])
   const [loading, setLoading] = useState(() => !cachedState || !cachedState.watches || cachedState.watches.length === 0)
   const [searchTerm, setSearchTerm] = useState(() => cachedState?.searchTerm || '')
-  const [selectedBrand, setSelectedBrand] = useState(() => cachedState?.selectedBrand || 'ALL BRANDS')
+  const [selectedBrand, setSelectedBrand] = useState(() => brandParam || cachedState?.selectedBrand || 'ALL BRANDS')
   const [selectedAudience, setSelectedAudience] = useState<'ALL' | 'Womens' | 'Mens'>(() => cachedState?.selectedAudience || 'ALL')
   const [selectedModel, setSelectedModel] = useState(() => cachedState?.selectedModel || '')
   const [sortBy, setSortBy] = useState<'default' | 'priceAsc' | 'priceDesc'>(() => cachedState?.sortBy || 'default')
@@ -190,13 +193,13 @@ export default function WatchesPage() {
 
   const scrollBrandsNext = () => {
     if (brandScrollRef.current) {
-      brandScrollRef.current.scrollBy({ left: 160, behavior: 'smooth' })
+      brandScrollRef.current.scrollBy({ left: 220, behavior: 'smooth' })
     }
   }
 
   const scrollBrandsPrev = () => {
     if (brandScrollRef.current) {
-      brandScrollRef.current.scrollBy({ left: -160, behavior: 'smooth' })
+      brandScrollRef.current.scrollBy({ left: -220, behavior: 'smooth' })
     }
   }
 
@@ -296,8 +299,8 @@ export default function WatchesPage() {
   return (
     <div className="bg-[#070708] min-h-screen text-white pt-8 sm:pt-16 pb-12 sm:pb-20 selection:bg-gold/30 selection:text-white">
       <Seo
-        title={isArabic ? 'ساعات فاخرة للبيع في دبي | معرض دبي للساعات' : 'Luxury Watches for Sale in Dubai | Dubai Watches Gallery'}
-        description={isArabic ? 'تصفح الساعات الفاخرة المعروضة للبيع في دبي لدى معرض دبي للساعات، واستكشف مجموعتنا المختارة للعثور على ساعتك القادمة.' : 'Browse luxury watches for sale in Dubai at Dubai Watches Gallery. Explore our selection of premium watches and find your next timepiece.'}
+        title={isArabic ? 'ساعات سوبر كلون للبيع في دبي | معرض دبي للساعات' : 'Dubai Clone Watches | 1:1 Super Clone Watches in Dubai | Dubai Watches Gallery'}
+        description={isArabic ? 'تصفح أفضل ساعات السوبر كلون والماستر كوبي للبيع في دبي لدى معرض دبي للساعات، توصيل سريع ودفع عند الاستلام.' : 'Browse 1:1 super clone watches for sale in Dubai at Dubai Watches Gallery. Swiss movements, identical weight, sapphire crystal with cash on delivery.'}
         canonicalPath="/watches"
         image="/images/card-him.jpg"
       />
@@ -310,15 +313,15 @@ export default function WatchesPage() {
       {/* Hero section with Responsive Dual Gender Cards (Mobile) & Showcase Banner (Desktop) */}
       <section className="relative z-10 max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-2 sm:pt-4 sm:pb-8 text-center">
 
-        {/* MOBILE VIEW (< md): Compact Header + Dual Side-by-Side Gender Cards */}
+        {/* MOBILE VIEW (< md): Compact Header + Brand Filter First + Dual Gender Cards */}
         <div className="block md:hidden text-left mb-4">
           
           {/* Header Title & Subtitle */}
-          <div className="px-1 pt-1 pb-3 space-y-1">
+          <div className="px-1 pt-1 pb-2 space-y-1">
             <div className="flex items-center gap-2">
               <span className="h-[2px] w-5 bg-gold rounded-full" />
               <h1 className="font-display text-2xl font-light tracking-wide text-white uppercase">
-                {translate("WATCHES", currentLang)}
+                {translate("BRANDS", currentLang)}
               </h1>
             </div>
             <p className="font-body text-[11px] text-silver/70 font-light tracking-wide pl-7">
@@ -326,8 +329,66 @@ export default function WatchesPage() {
             </p>
           </div>
 
+          {/* Mobile Scrollable Brand Filter Pills - Placed FIRST */}
+          <div className="pt-1 pb-3.5">
+            <div className="flex items-center justify-between pb-2 px-0.5">
+              <div className="flex items-center gap-1.5">
+                <span className="h-[1.5px] w-3.5 bg-[#e8c264]" />
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#e8c264] font-semibold">
+                  {translate("Filter by Brand", currentLang)}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5" dir="ltr">
+                <button
+                  type="button"
+                  onClick={scrollBrandsPrev}
+                  aria-label="Scroll brands left"
+                  className="w-6 h-6 rounded-full border border-white/20 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-300 transition-all active:scale-95"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollBrandsNext}
+                  aria-label="Scroll brands right"
+                  className="w-6 h-6 rounded-full border border-white/20 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-300 transition-all active:scale-95"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div 
+              ref={brandScrollRef}
+              className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1.5 scroll-smooth"
+            >
+              {brands.map((brand) => {
+                const isSelected = selectedBrand === brand;
+                return (
+                  <button
+                    key={brand}
+                    type="button"
+                    onClick={() => {
+                      setSelectedBrand(brand)
+                      setSelectedModel('')
+                      setPage(1)
+                      scrollToCatalogue()
+                    }}
+                    className={`shrink-0 px-5 py-2.5 rounded-full text-[13.5px] font-mono tracking-wider uppercase whitespace-nowrap transition-all duration-300 border ${
+                      isSelected
+                        ? 'bg-gold border-gold text-black font-bold shadow-[0_2px_14px_rgba(212,175,55,0.45)]'
+                        : 'bg-white/[0.04] border-white/15 text-gray-200 font-semibold hover:text-white hover:border-gold/40'
+                    }`}
+                  >
+                    {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Dual 2-Column Side-by-Side Gender Cards */}
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 mb-3.5">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 mb-2">
             
             {/* Card 1: FOR MEN */}
             <button
@@ -425,64 +486,6 @@ export default function WatchesPage() {
               </div>
             </button>
 
-          </div>
-
-          {/* Mobile Scrollable Brand Filter Pills */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between pb-1.5 px-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="h-[1px] w-3 bg-[#e8c264]" />
-                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#e8c264]">
-                  {translate("Filter by Brand", currentLang)}
-                </p>
-              </div>
-              <div className="flex items-center gap-1" dir="ltr">
-                <button
-                  type="button"
-                  onClick={scrollBrandsPrev}
-                  aria-label="Scroll brands left"
-                  className="w-5 h-5 rounded-full border border-white/15 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95"
-                >
-                  <ChevronLeft className="w-3 h-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={scrollBrandsNext}
-                  aria-label="Scroll brands right"
-                  className="w-5 h-5 rounded-full border border-white/15 bg-black/80 hover:border-gold hover:text-gold flex items-center justify-center text-gray-400 transition-all active:scale-95"
-                >
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-
-            <div 
-              ref={brandScrollRef}
-              className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 scroll-smooth"
-            >
-              {brands.map((brand) => {
-                const isSelected = selectedBrand === brand;
-                return (
-                  <button
-                    key={brand}
-                    type="button"
-                    onClick={() => {
-                      setSelectedBrand(brand)
-                      setSelectedModel('')
-                      setPage(1)
-                      scrollToCatalogue()
-                    }}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-[9px] font-mono tracking-wider uppercase transition-all duration-300 border ${
-                      isSelected
-                        ? 'bg-gold border-gold text-black font-bold shadow-[0_2px_10px_rgba(212,175,55,0.3)]'
-                        : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white hover:border-gold/30'
-                    }`}
-                  >
-                    {brand === 'ALL BRANDS' ? translate('ALL BRANDS', currentLang) : translate(brand, currentLang)}
-                  </button>
-                )
-              })}
-            </div>
           </div>
         </div>
 

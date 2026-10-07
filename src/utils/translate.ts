@@ -2,6 +2,8 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
   ar: {
     "COLLECTIONS": "المجموعات",
     "WATCHES": "الساعات",
+    "BRANDS": "الماركات",
+    "BRAND": "الماركة",
     "HOME": "الرئيسية",
     "EXPLORE": "استكشف",
     "JOURNAL": "المجلة",

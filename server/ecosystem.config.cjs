@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "dubai-watches-backend",
       script: "server.js",
-      cwd: "/var/www/your-site/data/www/your-domain/server",
+      cwd: "/var/www/fastuser/data/www/dubaiwatchesgallery.com/server",
       instances: 1,
       autorestart: true,
       watch: false,
