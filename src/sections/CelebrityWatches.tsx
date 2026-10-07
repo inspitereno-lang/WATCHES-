@@ -94,8 +94,8 @@ const FALLBACK_MATCHES: CelebrityMatch[] = [
       name: 'Richard Mille RM 67-02 Alexander Zverev',
       brand: 'Richard Mille',
       image: '/images/collections/alexander-zverev-rm67-02.png',
-      priceAED: 'AED 15,781',
-      priceUSD: '$4,300',
+      priceAED: 'AED 6,200',
+      priceUSD: '$1,690',
     },
   },
 ]
