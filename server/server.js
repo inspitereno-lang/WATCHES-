@@ -1036,12 +1036,49 @@ app.get('/api/products', async (req, res) => {
     }
 
     if (model) {
-      andConditions.push({
-        $or: [
-          { model: { $regex: model, $options: 'i' } },
-          { name: { $regex: model, $options: 'i' } }
-        ]
-      });
+      const trimmedModel = model.trim();
+      const escapedModel = trimmedModel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      if (/^royal oak$/i.test(trimmedModel)) {
+        // "Royal Oak" should NOT include "Royal Oak Offshore" or "Royal Oak Concept"
+        andConditions.push({
+          $or: [
+            { model: new RegExp('^royal oak$', 'i') },
+            {
+              $and: [
+                { name: { $regex: '\\broyal oak\\b', $options: 'i' } },
+                { name: { $not: /offshore|concept/i } },
+                { model: { $not: /offshore|concept/i } },
+              ]
+            }
+          ],
+          model: { $not: /offshore|concept/i },
+          name: { $not: /offshore|concept/i }
+        });
+      } else if (/^big bang$/i.test(trimmedModel)) {
+        // "Big Bang" should NOT include "Spirit of Big Bang"
+        andConditions.push({
+          $or: [
+            { model: new RegExp('^big bang$', 'i') },
+            {
+              $and: [
+                { name: { $regex: '\\bbig bang\\b', $options: 'i' } },
+                { name: { $not: /spirit of/i } },
+                { model: { $not: /spirit of/i } },
+              ]
+            }
+          ],
+          model: { $not: /spirit of/i },
+          name: { $not: /spirit of/i }
+        });
+      } else {
+        andConditions.push({
+          $or: [
+            { model: { $regex: escapedModel, $options: 'i' } },
+            { name: { $regex: escapedModel, $options: 'i' } }
+          ]
+        });
+      }
     }
 
     if (search) {
