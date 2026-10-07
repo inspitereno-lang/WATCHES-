@@ -1236,6 +1236,7 @@ const celebrityMatches = [
     productId: 118,
     reference: 'Richard Mille RM 67-02 Alexander Zverev',
     image: '/images/collections/alexander-zverev-portrait.jpg',
+    watchImage: '/images/collections/alexander-zverev-rm67-02.png',
     imagePosition: 'center top',
     source: 'https://watchpaparazzi.com/spotted.php?id=8cb9b89f-0326-40df-84b0-86ed75542157',
     sourceLabel: 'Watch Paparazzi',
