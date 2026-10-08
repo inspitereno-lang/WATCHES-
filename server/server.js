@@ -1036,12 +1036,49 @@ app.get('/api/products', async (req, res) => {
     }
 
     if (model) {
-      andConditions.push({
-        $or: [
-          { model: { $regex: model, $options: 'i' } },
-          { name: { $regex: model, $options: 'i' } }
-        ]
-      });
+      const trimmedModel = model.trim();
+      const escapedModel = trimmedModel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      if (/^royal oak$/i.test(trimmedModel)) {
+        // "Royal Oak" should NOT include "Royal Oak Offshore" or "Royal Oak Concept"
+        andConditions.push({
+          $or: [
+            { model: new RegExp('^royal oak$', 'i') },
+            {
+              $and: [
+                { name: { $regex: '\\broyal oak\\b', $options: 'i' } },
+                { name: { $not: /offshore|concept/i } },
+                { model: { $not: /offshore|concept/i } },
+              ]
+            }
+          ],
+          model: { $not: /offshore|concept/i },
+          name: { $not: /offshore|concept/i }
+        });
+      } else if (/^big bang$/i.test(trimmedModel)) {
+        // "Big Bang" should NOT include "Spirit of Big Bang"
+        andConditions.push({
+          $or: [
+            { model: new RegExp('^big bang$', 'i') },
+            {
+              $and: [
+                { name: { $regex: '\\bbig bang\\b', $options: 'i' } },
+                { name: { $not: /spirit of/i } },
+                { model: { $not: /spirit of/i } },
+              ]
+            }
+          ],
+          model: { $not: /spirit of/i },
+          name: { $not: /spirit of/i }
+        });
+      } else {
+        andConditions.push({
+          $or: [
+            { model: { $regex: escapedModel, $options: 'i' } },
+            { name: { $regex: escapedModel, $options: 'i' } }
+          ]
+        });
+      }
     }
 
     if (search) {
@@ -1215,8 +1252,8 @@ const celebrityMatches = [
     celebrity: 'Shah Rukh Khan',
     productId: 149,
     reference: 'Audemars Piguet Royal Oak Perpetual Calendar Blue Ceramic',
-    image: '/images/collections/shah-rukh-khan-portrait.png',
-    watchImage: '/images/collections/shah-rukh-khan-royal-oak-blue.png',
+    image: '/images/collections/shah-rukh-khan-portrait.webp',
+    watchImage: '/images/collections/shah-rukh-khan-royal-oak-blue.webp',
     imagePosition: 'center top',
     source: 'https://blog.iflwatches.com/a-peek-into-shah-rukh-khan-watch-collection/',
     sourceLabel: 'IFL Watches',
@@ -1225,8 +1262,8 @@ const celebrityMatches = [
     celebrity: 'Sergio Ramos',
     productId: 134,
     reference: 'Patek Philippe Aquanaut Chronograph 5968A-001 Orange',
-    image: '/images/collections/sergio-ramos-portrait.png',
-    watchImage: '/images/collections/sergio-ramos-aquanaut-orange.png',
+    image: '/images/collections/sergio-ramos-portrait.webp',
+    watchImage: '/images/collections/sergio-ramos-aquanaut-orange.webp',
     imagePosition: 'center top',
     source: 'https://www.instagram.com/p/DWYm235iGkR/',
     sourceLabel: 'Instagram',
@@ -1236,6 +1273,7 @@ const celebrityMatches = [
     productId: 118,
     reference: 'Richard Mille RM 67-02 Alexander Zverev',
     image: '/images/collections/alexander-zverev-portrait.jpg',
+    watchImage: '/images/collections/alexander-zverev-rm67-02.webp',
     imagePosition: 'center top',
     source: 'https://watchpaparazzi.com/spotted.php?id=8cb9b89f-0326-40df-84b0-86ed75542157',
     sourceLabel: 'Watch Paparazzi',
@@ -1253,10 +1291,24 @@ app.get('/api/collections/celebrity-matches', async (req, res) => {
 
     let matches = celebrityMatches
         .filter((match) => productsById.has(match.productId))
-        .map((match) => ({
-          ...match,
-          product: productsById.get(match.productId),
-        }));
+        .map((match) => {
+          const prod = productsById.get(match.productId);
+          if (match.celebrity === 'Shah Rukh Khan' && prod) {
+            return {
+              ...match,
+              product: {
+                ...prod,
+                brand: 'Audemars Piguet',
+                brandAr: 'أوديمار بيغيه',
+                name: match.reference,
+              }
+            };
+          }
+          return {
+            ...match,
+            product: prod,
+          };
+        });
     if (req.query.lang === 'ar') {
       matches = await Promise.all(matches.map(async (match) => ({
         ...match,

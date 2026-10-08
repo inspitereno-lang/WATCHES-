@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 import { useParams, useNavigate, Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ArrowLeft, MessageCircle, Check, Compass, Loader2, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, MessageCircle, Check, Compass, Loader2, ShieldCheck, ChevronLeft, ChevronRight, Share2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { getSelectedRep, getWhatsAppUrl } from '../utils/whatsapp'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -374,6 +375,50 @@ export default function ProductDetailPage({
     window.open(url, '_blank')
   }
 
+  // Share timepiece handler using Web Share API with clipboard copy fallback
+  const handleShare = async () => {
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : (watch.url || '')
+    const shareTitle = `${displayName} | Dubai Watches Gallery`
+    const shareText = isAr
+      ? `شاهد هذه الساعة الفاخرة: ${displayName} (${watch.priceAED}) لدى Dubai Watches Gallery`
+      : `Check out the ${displayName} (${watch.priceAED}) at Dubai Watches Gallery`
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: currentUrl,
+        })
+        toast.success(translate("Shared successfully!", currentLang))
+        return
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          return
+        }
+      }
+    }
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(currentUrl)
+      } else {
+        const textArea = document.createElement('textarea')
+        textArea.value = currentUrl
+        textArea.style.position = 'fixed'
+        textArea.style.opacity = '0'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      toast.success(translate("Link copied to clipboard!", currentLang))
+    } catch {
+      toast.error(translate("Failed to copy link", currentLang))
+    }
+  }
+
   return (
     <div ref={containerRef} className="min-h-screen bg-black pt-8 sm:pt-16 pb-20 text-white relative overflow-hidden">
       {/* Background radial highlights */}
@@ -382,20 +427,32 @@ export default function ProductDetailPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
-        {/* Back navigation control */}
-        <button 
-          onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1)
-            } else {
-              navigate('/watches')
-            }
-          }}
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gold transition-colors duration-300 mb-10 group cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-300" />
-          {translate("BACK TO ALL COLLECTIONS", currentLang)}
-        </button>
+        {/* Top Back navigation & Share control */}
+        <div className="flex items-center justify-between mb-8 sm:mb-10">
+          <button 
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1)
+              } else {
+                navigate('/watches')
+              }
+            }}
+            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gold transition-colors duration-300 group cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-300" />
+            {translate("BACK TO ALL COLLECTIONS", currentLang)}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label={translate("Share this watch", currentLang)}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 hover:border-gold/40 bg-white/5 hover:bg-gold/10 text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-gold transition-all duration-300 shadow-sm cursor-pointer active:scale-95"
+          >
+            <Share2 className="w-3.5 h-3.5 text-gold" />
+            <span>{translate("Share", currentLang)}</span>
+          </button>
+        </div>
 
         {/* Core Product Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-16 items-start">
@@ -534,10 +591,22 @@ export default function ProductDetailPage({
               </div>
             </div>
 
-            {/* Price Tags */}
-            <div className="flex flex-wrap items-baseline gap-4 py-4 px-6 rounded-2xl bg-gold/5 border border-gold/10 inline-block w-fit anim-fade">
-              <span className="text-3xl font-light text-gold tracking-tight">{watch.priceAED}</span>
-              <span className="text-sm text-gray-400 font-mono">/ {watch.priceUSD}</span>
+            {/* Price Tags & Quick Share */}
+            <div className="flex flex-wrap items-center justify-between gap-4 anim-fade">
+              <div className="flex flex-wrap items-baseline gap-4 py-4 px-6 rounded-2xl bg-gold/5 border border-gold/10 inline-block w-fit">
+                <span className="text-3xl font-light text-gold tracking-tight">{watch.priceAED}</span>
+                <span className="text-sm text-gray-400 font-mono">/ {watch.priceUSD}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                aria-label={translate("Share this watch", currentLang)}
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-gold/30 bg-gold/5 hover:bg-gold hover:text-black text-gold text-xs font-mono uppercase tracking-wider transition-all duration-300 shadow-sm active:scale-95 cursor-pointer font-semibold group"
+              >
+                <Share2 className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                <span>{translate("Share Watch", currentLang)}</span>
+              </button>
             </div>
 
             {/* Tabs Control */}
@@ -703,16 +772,27 @@ export default function ProductDetailPage({
               <ShippingLogosBar />
             </div>
 
-            {/* Direct WhatsApp Call to Action Button */}
+            {/* Direct WhatsApp Call to Action & Share Actions */}
             <div className="space-y-4 anim-fade pt-4">
-              <button
-                onClick={triggerWhatsAppOrder}
-                className="w-full flex items-center justify-center gap-3 px-8 py-5 rounded-xl text-black bg-[#25D366] hover:bg-[#20ba56] transition-all duration-300 font-semibold tracking-wider shadow-[0_4px_20px_rgba(37,211,102,0.3)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.4)] group relative overflow-hidden"
-              >
-                <MessageCircle className="w-6 h-6 fill-black" />
-                {translate("ORDER SECURELY VIA WHATSAPP", currentLang)}
-                <span className="absolute right-6 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-black animate-ping" />
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={triggerWhatsAppOrder}
+                  className="flex-1 flex items-center justify-center gap-3 px-8 py-5 rounded-xl text-black bg-[#25D366] hover:bg-[#20ba56] transition-all duration-300 font-semibold tracking-wider shadow-[0_4px_20px_rgba(37,211,102,0.3)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.4)] group relative overflow-hidden active:scale-98 cursor-pointer"
+                >
+                  <MessageCircle className="w-6 h-6 fill-black" />
+                  {translate("ORDER SECURELY VIA WHATSAPP", currentLang)}
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-black animate-ping" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  aria-label={translate("Share this watch", currentLang)}
+                  className="sm:w-auto flex items-center justify-center gap-2.5 px-6 py-4 sm:py-5 rounded-xl text-white bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/40 transition-all duration-300 font-mono text-xs uppercase tracking-widest font-semibold hover:text-gold active:scale-95 group shadow-lg cursor-pointer"
+                >
+                  <Share2 className="w-5 h-5 text-gold group-hover:scale-110 transition-transform duration-300" />
+                  <span>{translate("Share", currentLang)}</span>
+                </button>
+              </div>
             </div>
 
           </div>
