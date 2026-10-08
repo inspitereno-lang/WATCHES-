@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowRight, Check, ExternalLink, ShoppingBag } from 'lucide-react'
+import { ArrowRight, Check, ExternalLink, ShoppingBag, Share2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -203,6 +204,49 @@ export default function CelebrityWatches() {
     return () => ctx.revert()
   }, [matches])
 
+  const handleShareWatch = async (e: React.MouseEvent, match: CelebrityMatch) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const watchUrl = `${window.location.origin}/product/${match.productId}`
+    const shareTitle = `${match.celebrity} - ${match.reference} | Dubai Watches Gallery`
+    const shareText = currentLang === 'ar'
+      ? `شاهد ساعة ${match.celebrity}: ${match.reference} لدى Dubai Watches Gallery`
+      : `Check out the ${match.reference} seen on ${match.celebrity} at Dubai Watches Gallery`
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: watchUrl,
+        })
+        toast.success(translate("Shared successfully!", currentLang))
+        return
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(watchUrl)
+      } else {
+        const textArea = document.createElement('textarea')
+        textArea.value = watchUrl
+        textArea.style.position = 'fixed'
+        textArea.style.opacity = '0'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      toast.success(translate("Link copied to clipboard!", currentLang))
+    } catch {
+      toast.error(translate("Failed to copy link", currentLang))
+    }
+  }
+
   return (
     <section ref={sectionRef} className="relative overflow-hidden bg-[#050505] pb-12 pt-6 sm:pb-20 sm:pt-20 lg:pb-32 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(212,175,55,0.09),transparent_28%)]" />
@@ -332,14 +376,24 @@ export default function CelebrityWatches() {
                           {product?.priceAED || 'View price'}
                         </p>
                       </Link>
-                      <Link
-                        to={`/product/${match.productId}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-[#e8c264] px-3 py-1.5 font-body text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e] touch-manipulation shadow-md"
-                      >
-                        <ShoppingBag size={10} />
-                        <span>{translate("Shop", currentLang)}</span>
-                      </Link>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => handleShareWatch(e, match)}
+                          aria-label={translate("Share this watch", currentLang)}
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-silver hover:border-gold/40 hover:text-gold transition active:scale-90"
+                        >
+                          <Share2 size={11} />
+                        </button>
+                        <Link
+                          to={`/product/${match.productId}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[#e8c264] px-3 py-1.5 font-body text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e] touch-manipulation shadow-md"
+                        >
+                          <ShoppingBag size={10} />
+                          <span>{translate("Shop", currentLang)}</span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -450,14 +504,25 @@ export default function CelebrityWatches() {
                           {product?.priceAED || 'View price'}
                         </p>
                       </Link>
-                      <Link
-                        to={`/product/${match.productId}`}
-                        className="group inline-flex w-fit items-center gap-3 rounded-full bg-[#e8c264] px-5 py-3 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#f1d98e]"
-                      >
-                        <ShoppingBag size={14} />
-                        {translate("Shop this watch", currentLang)}
-                        <ArrowRight size={13} className="transition group-hover:translate-x-1" />
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={(e) => handleShareWatch(e, match)}
+                          aria-label={translate("Share this watch", currentLang)}
+                          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-3 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-white hover:border-gold/40 hover:text-gold transition active:scale-95"
+                        >
+                          <Share2 size={13} className="text-gold" />
+                          <span>{translate("Share", currentLang)}</span>
+                        </button>
+                        <Link
+                          to={`/product/${match.productId}`}
+                          className="group inline-flex w-fit items-center gap-3 rounded-full bg-[#e8c264] px-5 py-3 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#f1d98e]"
+                        >
+                          <ShoppingBag size={14} />
+                          {translate("Shop this watch", currentLang)}
+                          <ArrowRight size={13} className="transition group-hover:translate-x-1" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

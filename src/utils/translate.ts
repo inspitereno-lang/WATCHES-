@@ -480,7 +480,16 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     "Secure Packaging": "تغليف آمن",
     "Hi Dubai Watches Gallery! I'm visiting your website and would like to inquire about your premium watch collection.": "مرحبًا معرض دبي للساعات! أنا أزور موقعكم وأود الاستفسار عن مجموعة الساعات الفاخرة المتاحة لديكم.",
     "Hi Dubai Watches Gallery! I'm visiting your website and would like to inquire about your premium 1:1 Swiss Clone watch collection.": "مرحبًا معرض دبي للساعات! أنا أزور موقعكم وأود الاستفسار عن مجموعة ساعات الماستر كوبي الفاخرة.",
-
+    "Share": "مشاركة",
+    "SHARE": "مشاركة",
+    "Share Watch": "مشاركة الساعة",
+    "SHARE WATCH": "مشاركة الساعة",
+    "Share this watch": "مشاركة هذه الساعة",
+    "Share Article": "مشاركة المقال",
+    "Share this article": "مشاركة هذا المقال",
+    "Shared successfully!": "تمت المشاركة بنجاح!",
+    "Link copied to clipboard!": "تم نسخ الرابط إلى الحافظة!",
+    "Failed to copy link": "تعذر نسخ الرابط",
   }
 };
 

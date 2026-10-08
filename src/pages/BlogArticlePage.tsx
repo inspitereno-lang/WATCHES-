@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Clock, Loader2 } from 'lucide-react'
+import { ArrowLeft, Clock, Loader2, Share2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Link, useParams } from 'react-router'
 import Seo from '../components/Seo'
 import { translate } from '../utils/translate'
@@ -46,6 +47,45 @@ export default function BlogArticlePage() {
   }
 
   const publishedDate = new Date(post.publishedAt)
+
+  const handleShare = async () => {
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
+    const shareTitle = `${translate(post.title, currentLang)} | Dubai Watches Gallery`
+    const shareText = translate(post.excerpt, currentLang)
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: currentUrl,
+        })
+        toast.success(translate("Shared successfully!", currentLang))
+        return
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(currentUrl)
+      } else {
+        const textArea = document.createElement('textarea')
+        textArea.value = currentUrl
+        textArea.style.position = 'fixed'
+        textArea.style.opacity = '0'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      toast.success(translate("Link copied to clipboard!", currentLang))
+    } catch {
+      toast.error(translate("Failed to copy link", currentLang))
+    }
+  }
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -94,13 +134,25 @@ export default function BlogArticlePage() {
             <p className="mt-6 max-w-xl font-body text-sm leading-7 text-white/55">
               {translate(post.excerpt, currentLang)}
             </p>
-            <div className="mt-8 flex items-center gap-5 font-body text-[9px] uppercase tracking-[0.14em] text-white/40">
-              <span>{translate(post.author, currentLang)}</span>
-              <span>{publishedDate.toLocaleDateString(isArabic ? 'ar-AE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={12} />
-                {post.readingMinutes} {translate('min', currentLang)}
-              </span>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6 font-body text-[9px] uppercase tracking-[0.14em] text-white/40">
+              <div className="flex items-center gap-5">
+                <span>{translate(post.author, currentLang)}</span>
+                <span>{publishedDate.toLocaleDateString(isArabic ? 'ar-AE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock size={12} />
+                  {post.readingMinutes} {translate('min', currentLang)}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                aria-label={translate("Share Article", currentLang)}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 hover:border-gold/40 bg-white/5 hover:bg-gold/10 text-white hover:text-gold transition-all duration-300 font-mono text-[10px] tracking-widest cursor-pointer active:scale-95"
+              >
+                <Share2 size={12} className="text-gold" />
+                <span>{translate("Share Article", currentLang)}</span>
+              </button>
             </div>
           </div>
 
