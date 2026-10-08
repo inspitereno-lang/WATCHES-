@@ -3204,7 +3204,7 @@ export default function AdminDashboard() {
                       >
                         <SelectValue placeholder={masterBrandsLoading ? 'Loading brands...' : 'Select brand'} />
                       </SelectTrigger>
-                      <SelectContent className="z-[100] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
+                      <SelectContent position="popper" className="z-[100000] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
                         {productBrandOptions.map((brand) => (
                           <SelectItem
                             key={brand.name}
@@ -3245,45 +3245,101 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="space-y-1 sm:col-span-2">
-                    <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Sub-brand / Model</label>
-                    <Select
-                      value={productForm.model?.trim() || NO_MODEL_SELECTED}
-                      onValueChange={(model) => setProductForm((current) => ({
-                        ...current,
-                        model: model === NO_MODEL_SELECTED ? '' : model,
-                      }))}
-                      disabled={!productForm.brand || productModelOptions.length === 0}
-                    >
-                      <SelectTrigger
-                        aria-label="Sub-brand or model"
-                        className="h-auto w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border-white/10 hover:border-gold/40 focus:border-gold focus:ring-0 transition-all duration-300 font-mono text-white"
-                      >
-                        <SelectValue placeholder="Select sub-brand / model" />
-                      </SelectTrigger>
-                      <SelectContent className="z-[100] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
-                        <SelectItem
-                          value={NO_MODEL_SELECTED}
-                          className="cursor-pointer py-2.5 text-gray-400 focus:bg-white/5 focus:text-white"
+                  <div className="space-y-2 sm:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider">Sub-brand / Model</label>
+                      {productForm.model && (
+                        <button
+                          type="button"
+                          onClick={() => setProductForm((current) => ({ ...current, model: '' }))}
+                          className="text-[10px] text-gray-500 hover:text-red-400 font-mono transition-colors cursor-pointer"
                         >
-                          No sub-brand / model selected
-                        </SelectItem>
-                        {productModelOptions.map((model) => (
+                          Clear Selection
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Select
+                        value={productForm.model?.trim() || NO_MODEL_SELECTED}
+                        onValueChange={(model) => setProductForm((current) => ({
+                          ...current,
+                          model: model === NO_MODEL_SELECTED ? '' : model,
+                        }))}
+                        disabled={!productForm.brand || productModelOptions.length === 0}
+                      >
+                        <SelectTrigger
+                          aria-label="Sub-brand or model"
+                          className="h-auto w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border-white/10 hover:border-gold/40 focus:border-gold focus:ring-0 transition-all duration-300 font-mono text-white"
+                        >
+                          <SelectValue placeholder="Select sub-brand / model" />
+                        </SelectTrigger>
+                        <SelectContent position="popper" className="z-[100000] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
                           <SelectItem
-                            key={model}
-                            value={model}
-                            className="cursor-pointer py-2.5 focus:bg-gold/15 focus:text-gold"
+                            value={NO_MODEL_SELECTED}
+                            className="cursor-pointer py-2.5 text-gray-400 focus:bg-white/5 focus:text-white"
                           >
-                            {model}
+                            No sub-brand / model selected
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                          {productModelOptions.map((model) => (
+                            <SelectItem
+                              key={model}
+                              value={model}
+                              className="cursor-pointer py-2.5 focus:bg-gold/15 focus:text-gold"
+                            >
+                              {model}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <input
+                        type="text"
+                        placeholder="Or custom model (e.g. RM 011)..."
+                        value={productForm.model}
+                        onChange={(e) => setProductForm((prev) => ({ ...prev, model: e.target.value }))}
+                        className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white placeholder:text-gray-600"
+                      />
+                    </div>
+
+                    {/* Quick-select chips if models are configured */}
+                    {productForm.brand && productModelOptions.length > 0 && (
+                      <div className="pt-1">
+                        <span className="text-[9px] text-gray-500 font-mono uppercase tracking-wider block mb-1.5">
+                          Quick Select {productForm.brand} Models:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {productModelOptions.map((model) => {
+                            const isSelected = productForm.model?.trim().toLowerCase() === model.toLowerCase()
+                            return (
+                              <button
+                                key={model}
+                                type="button"
+                                onClick={() => {
+                                  setProductForm((prev) => ({
+                                    ...prev,
+                                    model: isSelected ? '' : model,
+                                  }))
+                                }}
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-mono border transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-gold text-black border-gold font-bold shadow-md shadow-gold/20'
+                                    : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white hover:border-gold/30 hover:bg-white/5'
+                                }`}
+                              >
+                                {model}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <p className="text-[9px] text-gray-600 font-mono">
                       {productForm.brand
                         ? productModelOptions.length > 0
-                          ? `Showing models configured under ${productForm.brand}`
-                          : `No models configured under ${productForm.brand}`
+                          ? `Showing ${productModelOptions.length} models configured under ${productForm.brand}`
+                          : `No models configured under ${productForm.brand} (you can type a custom model above or configure in Master Brands tab)`
                         : 'Select a brand first'}
                     </p>
                   </div>
