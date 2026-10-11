@@ -809,8 +809,18 @@ async function populateProductArabicFields(product) {
     product.warrantyAr = await translateText(product.warranty, 'ar');
 
     if (Array.isArray(product.features)) {
+      product.features = product.features.map(f =>
+        (/^warranty/i.test(f.trim()) || /international warranty/i.test(f))
+          ? `Warranty: ${product.warranty}`
+          : f
+      );
       product.featuresAr = await Promise.all(
-        product.features.map(f => translateText(f, 'ar'))
+        product.features.map(async f => {
+          if (/^warranty/i.test(f.trim()) || /international warranty/i.test(f)) {
+            return `الضمان: ${product.warrantyAr || (await translateText(product.warranty, 'ar'))}`;
+          }
+          return translateText(f, 'ar');
+        })
       );
     }
   } catch (err) {
@@ -909,22 +919,47 @@ async function translateHomepage(homepage, to = 'ar') {
 
 async function translateProduct(product, to = 'ar') {
   if (!product) return product;
-  const plain = typeof product.toObject === 'function' ? product.toObject() : product;
+  const plain = typeof product.toObject === 'function' ? product.toObject() : { ...product };
 
-  const stringFields = [
-    'name', 'brand', 'factory', 'model', 'reference', 'material', 'size',
-    'caliber', 'warranty', 'movement', 'casing', 'bezel', 'glass',
-    'waterResistance', 'description'
-  ];
+  if (to === 'ar') {
+    if (plain.nameAr) plain.name = plain.nameAr;
+    else if (plain.name) plain.name = await translateText(plain.name, to);
 
-  for (const field of stringFields) {
-    if (plain[field]) {
-      plain[field] = await translateText(plain[field], to);
+    if (plain.brandAr) plain.brand = plain.brandAr;
+    else if (plain.brand) plain.brand = await translateText(plain.brand, to);
+
+    if (plain.modelAr) plain.model = plain.modelAr;
+    else if (plain.model) plain.model = await translateText(plain.model, to);
+
+    if (plain.materialAr) plain.material = plain.materialAr;
+    else if (plain.material) plain.material = await translateText(plain.material, to);
+
+    if (plain.movementAr) plain.movement = plain.movementAr;
+    else if (plain.movement) plain.movement = await translateText(plain.movement, to);
+
+    if (plain.casingAr) plain.casing = plain.casingAr;
+    else if (plain.casing) plain.casing = await translateText(plain.casing, to);
+
+    if (plain.bezelAr) plain.bezel = plain.bezelAr;
+    else if (plain.bezel) plain.bezel = await translateText(plain.bezel, to);
+
+    if (plain.glassAr) plain.glass = plain.glassAr;
+    else if (plain.glass) plain.glass = await translateText(plain.glass, to);
+
+    if (plain.waterResistanceAr) plain.waterResistance = plain.waterResistanceAr;
+    else if (plain.waterResistance) plain.waterResistance = await translateText(plain.waterResistance, to);
+
+    if (plain.descriptionAr) plain.description = plain.descriptionAr;
+    else if (plain.description) plain.description = await translateText(plain.description, to);
+
+    if (plain.warrantyAr) plain.warranty = plain.warrantyAr;
+    else if (plain.warranty) plain.warranty = await translateText(plain.warranty, to);
+
+    if (Array.isArray(plain.featuresAr) && plain.featuresAr.length > 0) {
+      plain.features = plain.featuresAr;
+    } else if (Array.isArray(plain.features)) {
+      plain.features = await Promise.all(plain.features.map(f => translateText(f, to)));
     }
-  }
-
-  if (Array.isArray(plain.features)) {
-    plain.features = await Promise.all(plain.features.map(f => translateText(f, to)));
   }
 
   return plain;
@@ -2154,22 +2189,22 @@ app.put('/api/products/:id', auth, async (req, res) => {
       }
     }
 
-    watch.name = name || watch.name;
-    watch.brand = brand || watch.brand;
-    watch.factory = factory || watch.factory;
-    watch.priceUSD = priceUSD || watch.priceUSD;
-    watch.priceAED = priceAED || watch.priceAED;
+    watch.name = name !== undefined ? name : watch.name;
+    watch.brand = brand !== undefined ? brand : watch.brand;
+    watch.factory = factory !== undefined ? factory : watch.factory;
+    watch.priceUSD = priceUSD !== undefined ? priceUSD : watch.priceUSD;
+    watch.priceAED = priceAED !== undefined ? priceAED : watch.priceAED;
     watch.url = url !== undefined ? url : watch.url;
-    watch.image = image || watch.image;
+    watch.image = image !== undefined ? image : watch.image;
     watch.thumbnail = thumbnail !== undefined ? thumbnail : (image ? image : watch.thumbnail);
     watch.images = images !== undefined ? images : (image ? [image] : watch.images);
-    watch.movement = movement || watch.movement;
-    watch.casing = casing || watch.casing;
-    watch.bezel = bezel || watch.bezel;
-    watch.glass = glass || watch.glass;
-    watch.waterResistance = waterResistance || watch.waterResistance;
-    watch.description = description || watch.description;
-    watch.features = features || watch.features;
+    watch.movement = movement !== undefined ? movement : watch.movement;
+    watch.casing = casing !== undefined ? casing : watch.casing;
+    watch.bezel = bezel !== undefined ? bezel : watch.bezel;
+    watch.glass = glass !== undefined ? glass : watch.glass;
+    watch.waterResistance = waterResistance !== undefined ? waterResistance : watch.waterResistance;
+    watch.description = description !== undefined ? description : watch.description;
+    watch.features = features !== undefined ? features : watch.features;
     watch.inStock = inStock !== undefined ? inStock : watch.inStock;
     watch.isVisible = isVisible !== undefined ? isVisible : watch.isVisible;
     watch.model = model !== undefined ? model : watch.model;
@@ -2179,8 +2214,40 @@ app.put('/api/products/:id', auth, async (req, res) => {
     watch.caliber = caliber !== undefined ? caliber : watch.caliber;
     watch.warranty = warranty !== undefined ? warranty : watch.warranty;
 
+    if (watch.warranty && Array.isArray(watch.features)) {
+      watch.features = watch.features.map(f => /^Warranty:\s*/i.test(f) ? `Warranty: ${watch.warranty}` : f);
+    }
+
     await populateProductArabicFields(watch);
     await watch.save();
+
+    // Synchronize this product across Homepage newArrivals if featured
+    try {
+      const homeSettings = await Homepage.findOne();
+      if (homeSettings && Array.isArray(homeSettings.newArrivals)) {
+        let homeChanged = false;
+        homeSettings.newArrivals = homeSettings.newArrivals.map(item => {
+          if (item.id === watch.id) {
+            homeChanged = true;
+            return {
+              ...(typeof item.toObject === 'function' ? item.toObject() : item),
+              name: watch.name,
+              brand: watch.brand,
+              image: watch.image,
+              priceUSD: watch.priceUSD,
+              priceAED: watch.priceAED,
+              type: watch.movement || item.type || '1:1 Super Clone Edition'
+            };
+          }
+          return item;
+        });
+        if (homeChanged) {
+          await homeSettings.save();
+        }
+      }
+    } catch (hErr) {
+      console.error('Error syncing watch to Homepage.newArrivals:', hErr);
+    }
     return res.status(200).json({ message: 'Watch specs updated successfully.', product: watch });
   } catch (err) {
     console.error('PUT /api/products/:id error:', err);

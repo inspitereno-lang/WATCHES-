@@ -352,8 +352,19 @@ export default function ProductDetailPage({
   const displayGlass = isAr && watch.glassAr ? watch.glassAr : watch.glass
   const displayWater = isAr && watch.waterResistanceAr ? watch.waterResistanceAr : watch.waterResistance
   const displayDescription = isAr && watch.descriptionAr ? watch.descriptionAr : watch.description
-  const displayFeatures = isAr && watch.featuresAr && watch.featuresAr.length > 0 ? watch.featuresAr : (watch.features || [])
   const displayWarranty = isAr && watch.warrantyAr ? watch.warrantyAr : (watch.warranty || '2-Year Service Warranty')
+  const rawFeatures = isAr && watch.featuresAr && watch.featuresAr.length > 0 ? watch.featuresAr : (watch.features || [])
+  const displayFeatures = rawFeatures.map(f => {
+    if (/^warranty/i.test(f.trim()) || /international warranty/i.test(f)) {
+      const cleanVal = displayWarranty.replace(/^(Warranty|Service\s*Warranty|الضمان)[\s:-]*/i, '')
+      return isAr ? `الضمان: ${cleanVal}` : `Warranty: ${cleanVal}`
+    }
+    if (/^الضمان/i.test(f.trim())) {
+      const cleanVal = displayWarranty.replace(/^(Warranty|Service\s*Warranty|الضمان)[\s:-]*/i, '')
+      return `الضمان: ${cleanVal}`
+    }
+    return f
+  })
 
   // Format prefilled WhatsApp order text
   const triggerWhatsAppOrder = () => {

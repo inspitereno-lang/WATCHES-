@@ -1027,8 +1027,18 @@ export default function AdminDashboard() {
         : '/api/products'
       const method = editingProduct ? 'PUT' : 'POST'
 
+      const currentWarranty = productForm.warranty || '2-Year Service Warranty'
+      const updatedFeatures = (productForm.features || []).map((f) => {
+        if (/^warranty/i.test(f.trim()) || /international warranty/i.test(f)) {
+          return `Warranty: ${currentWarranty}`
+        }
+        return f
+      })
+
       const payload = {
         ...productForm,
+        warranty: currentWarranty,
+        features: updatedFeatures,
         addToNewArrivals: addToArrivalsOnCreate,
         newArrivalLabel: newArrivalCustomBadge || 'NEW ARRIVAL'
       }
@@ -3694,8 +3704,19 @@ export default function AdminDashboard() {
                   <label className="text-xs text-gray-300 font-bold font-mono uppercase tracking-wider mb-1">Warranty Term</label>
                   <input
                     type="text"
-                    value={productForm.warranty || '2-Year Service Warranty'}
-                    onChange={(e) => setProductForm(prev => ({ ...prev, warranty: e.target.value }))}
+                    value={productForm.warranty ?? ''}
+                    onChange={(e) => {
+                      const newWarranty = e.target.value
+                      setProductForm(prev => ({
+                        ...prev,
+                        warranty: newWarranty,
+                        features: (prev.features || []).map(f =>
+                          /^warranty/i.test(f.trim()) || /international warranty/i.test(f)
+                            ? `Warranty: ${newWarranty}`
+                            : f
+                        )
+                      }))
+                    }}
                     placeholder="e.g. 2-Year Service Warranty"
                     className="w-full px-4 py-3 text-sm rounded-xl bg-white/[0.03] border border-white/10 hover:border-gold/40 focus:border-gold focus:outline-none transition-all duration-300 font-mono text-white"
                   />

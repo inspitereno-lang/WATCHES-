@@ -17,7 +17,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 // ── ENV ──────────────────────────────────────────────────────
 dotenv.config({ path: path.join(__dirname, 'server/.env') });
@@ -25,38 +25,38 @@ dotenv.config({ path: path.join(__dirname, 'server/.env') });
 // ── CLOUDINARY ───────────────────────────────────────────────
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // ── MONGOOSE MODEL (inline to avoid ESM path issues) ─────────
 const productSchema = new mongoose.Schema(
   {
-    id:             { type: Number, required: true, unique: true, index: true },
-    name:           { type: String, required: true, trim: true },
-    brand:          { type: String, required: true, trim: true, index: true },
-    audience:       { type: String, enum: ['Womens', 'Mens', 'Ladies', 'Gents'], required: true, default: 'Mens', index: true },
-    factory:        { type: String, required: true, trim: true },
-    model:          { type: String, default: '' },
-    reference:      { type: String, default: '' },
-    material:       { type: String, default: '' },
-    size:           { type: String, default: '' },
-    caliber:        { type: String, default: '' },
-    warranty:       { type: String, default: '2-Year Service Warranty' },
-    priceUSD:       { type: String, required: true },
-    priceAED:       { type: String, required: true },
-    url:            { type: String },
-    image:          { type: String, required: true },
-    thumbnail:      { type: String, default: '' },
-    images:         { type: [String], default: [] },
-    movement:       { type: String, required: true },
-    casing:         { type: String, required: true },
-    bezel:          { type: String, required: true },
-    glass:          { type: String, required: true },
-    waterResistance:{ type: String, required: true, default: '50m waterproof vacuum tested' },
-    description:    { type: String, required: true },
-    features:       { type: [String], default: [] },
-    inStock:        { type: Boolean, required: true, default: true },
+    id: { type: Number, required: true, unique: true, index: true },
+    name: { type: String, required: true, trim: true },
+    brand: { type: String, required: true, trim: true, index: true },
+    audience: { type: String, enum: ['Womens', 'Mens', 'Ladies', 'Gents'], required: true, default: 'Mens', index: true },
+    factory: { type: String, required: true, trim: true },
+    model: { type: String, default: '' },
+    reference: { type: String, default: '' },
+    material: { type: String, default: '' },
+    size: { type: String, default: '' },
+    caliber: { type: String, default: '' },
+    warranty: { type: String, default: '2-Year Service Warranty' },
+    priceUSD: { type: String, required: true },
+    priceAED: { type: String, required: true },
+    url: { type: String },
+    image: { type: String, required: true },
+    thumbnail: { type: String, default: '' },
+    images: { type: [String], default: [] },
+    movement: { type: String, required: true },
+    casing: { type: String, required: true },
+    bezel: { type: String, required: true },
+    glass: { type: String, required: true },
+    waterResistance: { type: String, required: true, default: '50m waterproof vacuum tested' },
+    description: { type: String, required: true },
+    features: { type: [String], default: [] },
+    inStock: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }
 );
@@ -179,18 +179,18 @@ function detectBrand(name, categories = []) {
   const cats = categories.map(c => c.name?.toLowerCase() ?? '');
   const all = n + ' ' + cats.join(' ');
 
-  if (all.includes('rolex'))                                        return 'Rolex';
+  if (all.includes('rolex')) return 'Rolex';
   if (all.includes('patek') || all.includes('nautilus') || all.includes('aquanaut')) return 'Patek Philippe';
-  if (all.includes('audemars') || all.includes('royal oak'))        return 'Audemars Piguet';
-  if (all.includes('richard mille') || /\brm[ -]?\d/.test(all))    return 'Richard Mille';
-  if (all.includes('hublot'))                                       return 'Hublot';
-  if (all.includes('vacheron'))                                     return 'Vacheron Constantin';
-  if (all.includes('cartier'))                                      return 'Cartier';
-  if (all.includes('omega'))                                        return 'Omega';
-  if (all.includes('iwc'))                                          return 'IWC';
-  if (all.includes('breitling'))                                    return 'Breitling';
-  if (all.includes('tag heuer') || all.includes('tagheuer'))        return 'TAG Heuer';
-  if (all.includes('panerai'))                                      return 'Panerai';
+  if (all.includes('audemars') || all.includes('royal oak')) return 'Audemars Piguet';
+  if (all.includes('richard mille') || /\brm[ -]?\d/.test(all)) return 'Richard Mille';
+  if (all.includes('hublot')) return 'Hublot';
+  if (all.includes('vacheron')) return 'Vacheron Constantin';
+  if (all.includes('cartier')) return 'Cartier';
+  if (all.includes('omega')) return 'Omega';
+  if (all.includes('iwc')) return 'IWC';
+  if (all.includes('breitling')) return 'Breitling';
+  if (all.includes('tag heuer') || all.includes('tagheuer')) return 'TAG Heuer';
+  if (all.includes('panerai')) return 'Panerai';
   return null; // skip unknown brands
 }
 
@@ -207,18 +207,18 @@ function detectAudience(name, desc, shortDesc, categories) {
 // ── FACTORY LABEL ─────────────────────────────────────────────
 function factoryFor(brand) {
   const map = {
-    'Rolex':              'Swiss Precision Edition',
-    'Patek Philippe':     'Swiss Precision Edition',
-    'Audemars Piguet':    'Swiss Precision Edition',
-    'Richard Mille':      'Swiss Precision Edition',
-    'Hublot':             'Swiss Precision Edition',
-    'Vacheron Constantin':'Swiss Precision Edition',
-    'Cartier':            'Swiss Precision Edition',
-    'Omega':              'Swiss Precision Edition',
-    'IWC':                'Swiss Precision Edition',
-    'Breitling':          'Swiss Precision Edition',
-    'TAG Heuer':          'Swiss Precision Edition',
-    'Panerai':            'Swiss Precision Edition',
+    'Rolex': 'Swiss Precision Edition',
+    'Patek Philippe': 'Swiss Precision Edition',
+    'Audemars Piguet': 'Swiss Precision Edition',
+    'Richard Mille': 'Swiss Precision Edition',
+    'Hublot': 'Swiss Precision Edition',
+    'Vacheron Constantin': 'Swiss Precision Edition',
+    'Cartier': 'Swiss Precision Edition',
+    'Omega': 'Swiss Precision Edition',
+    'IWC': 'Swiss Precision Edition',
+    'Breitling': 'Swiss Precision Edition',
+    'TAG Heuer': 'Swiss Precision Edition',
+    'Panerai': 'Swiss Precision Edition',
   };
   return map[brand] ?? 'Swiss Precision Edition';
 }
@@ -230,7 +230,7 @@ function formatPrice(p) {
     const raw = parseFloat(p.prices.price);
     if (raw > 0) val = raw / 100;
   }
-  if (val < 500)   val = 1490;
+  if (val < 500) val = 1490;
   if (val > 20000) val = val / 10;
   return {
     priceUSD: `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
@@ -259,34 +259,34 @@ async function main() {
   const formatted = [];
 
   for (const p of raw) {
-    const name  = decodeHtml(p.name ?? '');
+    const name = decodeHtml(p.name ?? '');
     const brand = detectBrand(name, p.categories ?? []);
     if (!brand) continue;               // skip unsupported brands
     if (seen.has(name.toLowerCase())) continue;
     seen.add(name.toLowerCase());
 
-    const desc      = stripHtml(p.description    ?? '');
+    const desc = stripHtml(p.description ?? '');
     const shortDesc = stripHtml(p.short_description ?? '');
-    const audience  = detectAudience(name, desc, shortDesc, p.categories ?? []);
+    const audience = detectAudience(name, desc, shortDesc, p.categories ?? []);
     const { priceUSD, priceAED } = formatPrice(p);
 
     // Collect raw image URLs (strip weserv proxies — we'll upload directly)
     const rawImages = (p.images ?? []).map(img => img.src).filter(Boolean);
     const mainImage = rawImages[0] ?? '';
-    const thumbSrc  = p.images?.[0]?.thumbnail ?? mainImage;
+    const thumbSrc = p.images?.[0]?.thumbnail ?? mainImage;
 
     formatted.push({
       name, brand, audience,
       priceUSD, priceAED,
       url: p.permalink ?? 'https://dubaiwatchstores.com/',
-      rawImage:  mainImage,
-      rawThumb:  thumbSrc,
+      rawImage: mainImage,
+      rawThumb: thumbSrc,
       rawImages,
-      factory:   factoryFor(brand),
-      movement:  `Clone Caliber movement custom-engineered for 1:1 ${brand} sweeps`,
-      casing:    '904L anti-corrosive stainless steel casing',
-      bezel:     'Hand-finished structural bezel with genuine texture luster',
-      glass:     'Ultra-clear sapphire glass with anti-scratch and anti-glare finish',
+      factory: factoryFor(brand),
+      movement: `Clone Caliber movement custom-engineered for 1:1 ${brand} sweeps`,
+      casing: '904L anti-corrosive stainless steel casing',
+      bezel: 'Hand-finished structural bezel with genuine texture luster',
+      glass: 'Ultra-clear sapphire glass with anti-scratch and anti-glare finish',
       waterResistance: '50m waterproof vacuum tested',
       description: (desc || shortDesc || `Superb execution of the iconic ${name}. Engineered to exact millimeter tolerances.`).substring(0, 500),
       features: [
@@ -301,11 +301,11 @@ async function main() {
   // ── Sort: Mens first, then Ladies ─────────────────────────
   formatted.sort((a, b) => {
     if (a.audience === 'Mens' && b.audience !== 'Mens') return -1;
-    if (a.audience !== 'Mens' && b.audience === 'Mens') return  1;
+    if (a.audience !== 'Mens' && b.audience === 'Mens') return 1;
     return 0;
   });
 
-  const mensCount   = formatted.filter(p => p.audience === 'Mens').length;
+  const mensCount = formatted.filter(p => p.audience === 'Mens').length;
   const womensCount = formatted.filter(p => p.audience !== 'Mens').length;
   console.log(`\n🧍 Men's watches  : ${mensCount}`);
   console.log(`👩 Women's watches: ${womensCount}`);
@@ -323,7 +323,7 @@ async function main() {
 
     try {
       // Upload images
-      const cloudMain  = await uploadImage(item.rawImage);
+      const cloudMain = await uploadImage(item.rawImage);
       const cloudThumb = item.rawThumb !== item.rawImage
         ? await uploadImage(item.rawThumb)
         : cloudMain;
@@ -335,31 +335,31 @@ async function main() {
       }
 
       await Product.create({
-        id:             idNum,
-        name:           item.name,
-        brand:          item.brand,
-        audience:       item.audience,
-        factory:        item.factory,
-        priceUSD:       item.priceUSD,
-        priceAED:       item.priceAED,
-        url:            item.url,
-        image:          cloudMain  || item.rawImage,
-        thumbnail:      cloudThumb || cloudMain || item.rawImage,
-        images:         cloudGallery.length ? cloudGallery : [cloudMain || item.rawImage],
-        movement:       item.movement,
-        casing:         item.casing,
-        bezel:          item.bezel,
-        glass:          item.glass,
-        waterResistance:item.waterResistance,
-        description:    item.description,
-        features:       item.features,
-        model:          '',
-        reference:      '',
-        material:       '',
-        size:           '',
-        caliber:        '',
-        warranty:       '2-Year Service Warranty',
-        inStock:        true,
+        id: idNum,
+        name: item.name,
+        brand: item.brand,
+        audience: item.audience,
+        factory: item.factory,
+        priceUSD: item.priceUSD,
+        priceAED: item.priceAED,
+        url: item.url,
+        image: cloudMain || item.rawImage,
+        thumbnail: cloudThumb || cloudMain || item.rawImage,
+        images: cloudGallery.length ? cloudGallery : [cloudMain || item.rawImage],
+        movement: item.movement,
+        casing: item.casing,
+        bezel: item.bezel,
+        glass: item.glass,
+        waterResistance: item.waterResistance,
+        description: item.description,
+        features: item.features,
+        model: '',
+        reference: '',
+        material: '',
+        size: '',
+        caliber: '',
+        warranty: '2-Year Service Warranty',
+        inStock: true,
       });
 
       saved++;
