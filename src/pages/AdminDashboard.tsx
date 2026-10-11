@@ -3204,7 +3204,7 @@ export default function AdminDashboard() {
                       >
                         <SelectValue placeholder={masterBrandsLoading ? 'Loading brands...' : 'Select brand'} />
                       </SelectTrigger>
-                      <SelectContent className="z-[100] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
+                      <SelectContent position="popper" className="z-[100000] w-[var(--radix-select-trigger-width)] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
                         {productBrandOptions.map((brand) => (
                           <SelectItem
                             key={brand.name}
@@ -3261,7 +3261,10 @@ export default function AdminDashboard() {
                       >
                         <SelectValue placeholder="Select sub-brand / model" />
                       </SelectTrigger>
-                      <SelectContent className="z-[100] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl">
+                      <SelectContent
+                        position="popper"
+                        className="z-[100000] w-[var(--radix-select-trigger-width)] max-h-72 border-white/10 bg-[#18181c] text-white font-mono shadow-2xl"
+                      >
                         <SelectItem
                           value={NO_MODEL_SELECTED}
                           className="cursor-pointer py-2.5 text-gray-400 focus:bg-white/5 focus:text-white"
