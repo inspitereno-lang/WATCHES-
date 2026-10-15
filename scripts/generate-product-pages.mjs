@@ -42,6 +42,12 @@ function optimizeOgImage(rawImage) {
         ? match.replace('/upload/', '/upload/f_jpg,q_auto,w_1200/')
         : '/upload/f_jpg,q_auto,w_1200/';
     });
+    img = img.replace(/\.webp$/i, '.jpg');
+    return img;
+  }
+  // Local images: use converted .jpg file for 100% WhatsApp crawler compatibility
+  if (img.endsWith('.webp')) {
+    img = img.replace(/\.webp$/i, '.jpg');
   }
   return img;
 }

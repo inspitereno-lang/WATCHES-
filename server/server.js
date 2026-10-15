@@ -1430,6 +1430,7 @@ const slugifyText = (text = '') =>
 // 3. Fetch specific watch details (by numeric ID or slug)
 app.get('/api/products/:id', async (req, res) => {
   try {
+    await connectToDatabase();
     const rawParam = String(req.params.id || '').trim();
     let watch = null;
 
@@ -1454,6 +1455,23 @@ app.get('/api/products/:id', async (req, res) => {
           const pSlug = slugifyText(p.name);
           return pSlug === cleanSlug || pSlug.endsWith(cleanSlug) || cleanSlug.endsWith(pSlug);
         });
+        if (!watch) {
+          const paramTokens = cleanSlug.split('-').filter((t) => t.length > 2);
+          let bestMatch = null;
+          let maxMatches = 0;
+          for (const p of allVisible) {
+            const pTokens = new Set(slugifyText(p.name).split('-').filter((t) => t.length > 2));
+            let matchCount = 0;
+            for (const token of paramTokens) {
+              if (pTokens.has(token)) matchCount++;
+            }
+            if (matchCount > maxMatches && matchCount >= 2) {
+              maxMatches = matchCount;
+              bestMatch = p;
+            }
+          }
+          watch = bestMatch;
+        }
       }
     }
 
@@ -2366,6 +2384,11 @@ const escapeHtml = (str = '') =>
     .replace(/'/g, '&#039;');
 
 app.get(['/product/:id', '/product/:id/*'], async (req, res, next) => {
+  try {
+    await connectToDatabase();
+  } catch (dbErr) {
+    console.error('Crawler DB connect error:', dbErr);
+  }
   const userAgent = req.headers['user-agent'] || '';
   const isCrawler = CRAWLER_USER_AGENTS.test(userAgent) || req.query.crawler === '1';
 
@@ -2386,6 +2409,23 @@ app.get(['/product/:id', '/product/:id/*'], async (req, res, next) => {
         const pSlug = slugifyText(p.name);
         return pSlug === cleanSlug || pSlug.endsWith(cleanSlug) || cleanSlug.endsWith(pSlug);
       });
+      if (!watch) {
+        const paramTokens = cleanSlug.split('-').filter((t) => t.length > 2);
+        let bestMatch = null;
+        let maxMatches = 0;
+        for (const p of allVisible) {
+          const pTokens = new Set(slugifyText(p.name).split('-').filter((t) => t.length > 2));
+          let matchCount = 0;
+          for (const token of paramTokens) {
+            if (pTokens.has(token)) matchCount++;
+          }
+          if (matchCount > maxMatches && matchCount >= 2) {
+            maxMatches = matchCount;
+            bestMatch = p;
+          }
+        }
+        watch = bestMatch;
+      }
     }
   }
 
@@ -2405,9 +2445,12 @@ app.get(['/product/:id', '/product/:id/*'], async (req, res, next) => {
     if (ogImage.startsWith('/')) {
       ogImage = `${siteUrl}${ogImage}`;
     }
-    // Optimize Cloudinary for WhatsApp crawler (JPG, 1200px, auto quality)
+    // Optimize Cloudinary and local images for WhatsApp crawler (JPEG format, 1200px)
     if (ogImage.includes('res.cloudinary.com') && ogImage.includes('/upload/')) {
       ogImage = ogImage.replace(/\/upload\/(?:v\d+\/)?/, (m) => m.replace('/upload/', '/upload/f_jpg,q_auto,w_1200/'));
+      ogImage = ogImage.replace(/\.webp$/i, '.jpg');
+    } else if (ogImage.endsWith('.webp')) {
+      ogImage = ogImage.replace(/\.webp$/i, '.jpg');
     }
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2474,6 +2517,7 @@ app.use((error, _req, res, next) => {
 
 // Start listening
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  connectToDatabase().catch((err) => console.error('Initial DB connection error:', err));
   app.listen(PORT, () => {
     console.log(`T24 Watches Express Server running on port ${PORT}`);
   });
