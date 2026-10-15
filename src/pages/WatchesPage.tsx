@@ -17,6 +17,7 @@ import {
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
 import Seo from '../components/Seo'
+import { getProductUrl } from '../utils/productSlug'
 
 interface Watch {
   id: number
@@ -1062,7 +1063,7 @@ export default function WatchesPage() {
               return (
                 <Link 
                   key={watch.id}
-                  to={`/product/${watch.id}`}
+                  to={getProductUrl(watch)}
                   onClick={() => saveStateToSession()}
                   className="group relative flex flex-col justify-between rounded-xl sm:rounded-2xl bg-[#0c0c0e]/80 border border-white/[0.03] hover:border-gold/30 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] transition-all duration-500 overflow-hidden"
                 >

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { WatchImage } from '../components/WatchImage'
 import { translate } from '../utils/translate'
+import { getProductUrl } from '../utils/productSlug'
 
 interface NewArrivalItem {
   id: number
@@ -144,7 +145,7 @@ export default function NewArrivals({
                   className="shrink-0 w-[155px] sm:w-[280px] rounded-xl sm:rounded-2xl bg-[#0d0d0f] border border-white/5 backdrop-blur-md p-2.5 sm:p-6 flex flex-col justify-between group hover:border-[#e8c264]/20 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
                 >
                   {/* Link wrapper around entire card */}
-                  <Link to={`/product/${item.id}`} className="flex flex-col h-full justify-between">
+                  <Link to={getProductUrl(item)} className="flex flex-col h-full justify-between">
                     
                     {/* Watch Image */}
                     <div className="relative w-full aspect-[4/5] bg-[#0a0a0c] rounded-lg sm:rounded-xl flex items-center justify-center p-2 sm:p-4 mb-2 sm:mb-5 overflow-hidden">

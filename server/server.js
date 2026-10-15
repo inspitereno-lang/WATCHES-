@@ -1419,17 +1419,44 @@ app.get('/api/blogs/:slug', async (req, res) => {
   }
 });
 
-// 3. Fetch specific watch details
+const slugifyText = (text = '') =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+// 3. Fetch specific watch details (by numeric ID or slug)
 app.get('/api/products/:id', async (req, res) => {
   try {
-    const productId = parseInt(req.params.id);
-    if (isNaN(productId)) {
-      return res.status(400).json({ error: 'Invalid product ID.' });
+    const rawParam = String(req.params.id || '').trim();
+    let watch = null;
+
+    // 1. Try matching numeric ID (e.g. "214" or "214-slug")
+    const numericMatch = rawParam.match(/^(\d+)(?:-.*)?$/);
+    if (numericMatch) {
+      const productId = parseInt(numericMatch[1], 10);
+      if (!isNaN(productId)) {
+        watch = await Product.findOne({
+          id: productId,
+          isVisible: { $ne: false },
+        });
+      }
     }
-    const watch = await Product.findOne({
-      id: productId,
-      isVisible: { $ne: false },
-    });
+
+    // 2. If not found by numeric ID, match by product name slug
+    if (!watch) {
+      const cleanSlug = slugifyText(rawParam);
+      if (cleanSlug) {
+        const allVisible = await Product.find({ isVisible: { $ne: false } });
+        watch = allVisible.find((p) => {
+          const pSlug = slugifyText(p.name);
+          return pSlug === cleanSlug || pSlug.endsWith(cleanSlug) || cleanSlug.endsWith(pSlug);
+        });
+      }
+    }
+
     if (!watch) {
       return res.status(404).json({ error: 'Requested watch model not found in catalogue.' });
     }
@@ -2325,6 +2352,109 @@ app.get('/api/proxy-image', async (req, res) => {
     console.error('Image proxy error:', err);
     return res.status(500).send('Server error proxying image');
   }
+});
+
+// Social Crawler OpenGraph preview handler for /product/:id or /product/:slug
+const CRAWLER_USER_AGENTS = /facebookexternalhit|WhatsApp|Twitterbot|LinkedInBot|TelegramBot|Slackbot|Discordbot|SkypeUriPreview|Googlebot|bingbot|Applebot/i;
+
+const escapeHtml = (str = '') =>
+  String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+app.get(['/product/:id', '/product/:id/*'], async (req, res, next) => {
+  const userAgent = req.headers['user-agent'] || '';
+  const isCrawler = CRAWLER_USER_AGENTS.test(userAgent) || req.query.crawler === '1';
+
+  const rawParam = String(req.params.id || '').trim();
+  let watch = null;
+  const numericMatch = rawParam.match(/^(\d+)(?:-.*)?$/);
+  if (numericMatch) {
+    const productId = parseInt(numericMatch[1], 10);
+    if (!isNaN(productId)) {
+      watch = await Product.findOne({ id: productId, isVisible: { $ne: false } });
+    }
+  }
+  if (!watch) {
+    const cleanSlug = slugifyText(rawParam);
+    if (cleanSlug) {
+      const allVisible = await Product.find({ isVisible: { $ne: false } });
+      watch = allVisible.find((p) => {
+        const pSlug = slugifyText(p.name);
+        return pSlug === cleanSlug || pSlug.endsWith(cleanSlug) || cleanSlug.endsWith(pSlug);
+      });
+    }
+  }
+
+  if (watch) {
+    const siteUrl = 'https://dubaiwatchesgallery.com';
+    const slug = slugifyText(watch.name);
+    const canonicalUrl = `${siteUrl}/product/${slug || watch.id}`;
+    const name = escapeHtml(watch.name);
+    const price = escapeHtml(watch.priceAED || '');
+    const title = escapeHtml(price ? `${watch.name} (${watch.priceAED}) | Dubai Watches Gallery` : `${watch.name} | Dubai Watches Gallery`);
+    const description = escapeHtml(
+      watch.description ||
+      `Shop 1:1 super clone ${watch.name} in Dubai at Dubai Watches Gallery. Premium Swiss replica timepieces, sapphire glass & cash on delivery.`
+    );
+
+    let ogImage = watch.image || `${siteUrl}/watch-grid-1.jpg`;
+    if (ogImage.startsWith('/')) {
+      ogImage = `${siteUrl}${ogImage}`;
+    }
+    // Optimize Cloudinary for WhatsApp crawler (JPG, 1200px, auto quality)
+    if (ogImage.includes('res.cloudinary.com') && ogImage.includes('/upload/')) {
+      ogImage = ogImage.replace(/\/upload\/(?:v\d+\/)?/, (m) => m.replace('/upload/', '/upload/f_jpg,q_auto,w_1200/'));
+    }
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(`<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${title}</title>
+    <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="description" content="${description}" />
+    
+    <!-- Open Graph / WhatsApp / Facebook -->
+    <meta property="og:type" content="product" />
+    <meta property="og:site_name" content="Dubai Watches Gallery" />
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
+    <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:secure_url" content="${ogImage}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="${name}" />
+    <meta property="og:url" content="${canonicalUrl}" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:image" content="${ogImage}" />
+
+    <!-- Instant client redirect if opened by a human browser -->
+    <script>
+      if (!${isCrawler}) {
+        window.location.replace("${canonicalUrl}");
+      }
+    </script>
+  </head>
+  <body>
+    <h1>${name}</h1>
+    <p>${description}</p>
+    <img src="${ogImage}" alt="${name}" />
+  </body>
+</html>`);
+  }
+
+  return next();
 });
 
 app.use('/api', (_req, res) => {

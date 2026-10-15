@@ -6,6 +6,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { WatchImage } from '../components/WatchImage'
 import { translate } from '../utils/translate'
+import { getProductUrl, createProductSlug } from '../utils/productSlug'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -204,10 +205,15 @@ export default function CelebrityWatches() {
     return () => ctx.revert()
   }, [matches])
 
+  const getMatchUrl = (match: CelebrityMatch) => {
+    return getProductUrl({ id: match.productId, name: match.product?.name || match.reference })
+  }
+
   const handleShareWatch = async (e: React.MouseEvent, match: CelebrityMatch) => {
     e.preventDefault()
     e.stopPropagation()
-    const watchUrl = `${window.location.origin}/product/${match.productId}`
+    const slug = createProductSlug(match.product?.name || match.reference)
+    const watchUrl = slug ? `${window.location.origin}/product/${slug}` : `${window.location.origin}/product/${match.productId}`
     const shareTitle = `${match.celebrity} - ${match.reference} | Dubai Watches Gallery`
     const shareText = currentLang === 'ar'
       ? `شاهد ساعة ${match.celebrity}: ${match.reference} لدى Dubai Watches Gallery`
@@ -276,7 +282,7 @@ export default function CelebrityWatches() {
               <div className="grid grid-cols-2 lg:hidden">
                 {/* Mobile Tile 1: Celebrity Portrait (Uncropped Face & Wrist) */}
                 <div
-                  onClick={() => navigate(`/product/${match.productId}`)}
+                  onClick={() => navigate(getMatchUrl(match))}
                   className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-[#111] border-r border-white/10 cursor-pointer group"
                 >
                   <img
@@ -315,7 +321,7 @@ export default function CelebrityWatches() {
 
                 {/* Mobile Tile 2: Exact Matching Luxury Watch Card */}
                 <div
-                  onClick={() => navigate(`/product/${match.productId}`)}
+                  onClick={() => navigate(getMatchUrl(match))}
                   className="relative flex flex-col justify-between overflow-hidden bg-[radial-gradient(circle_at_50%_40%,rgba(212,175,55,0.15),transparent_60%),linear-gradient(145deg,#120e09_0%,#080807_75%)] p-2.5 sm:p-4 cursor-pointer"
                 >
                   {/* Brand Watermark in Background */}
@@ -339,7 +345,7 @@ export default function CelebrityWatches() {
                     <div className="pointer-events-none absolute h-18 w-18 sm:h-22 sm:w-22 rounded-full border border-[#e8c264]/10" />
                     {match.watchImage || product?.image ? (
                       <Link
-                        to={`/product/${match.productId}`}
+                        to={getMatchUrl(match)}
                         onClick={(e) => e.stopPropagation()}
                         className="relative z-10 flex items-center justify-center transition-transform active:scale-95"
                       >
@@ -358,7 +364,7 @@ export default function CelebrityWatches() {
                   {/* Watch Title, Price & Shop Button */}
                   <div className="relative z-10 space-y-1.5 pt-1.5 border-t border-white/10">
                     <Link
-                      to={`/product/${match.productId}`}
+                      to={getMatchUrl(match)}
                       onClick={(e) => e.stopPropagation()}
                       className="block group"
                     >
@@ -368,7 +374,7 @@ export default function CelebrityWatches() {
                     </Link>
                     <div className="flex items-center justify-between gap-1">
                       <Link
-                        to={`/product/${match.productId}`}
+                        to={getMatchUrl(match)}
                         onClick={(e) => e.stopPropagation()}
                         className="block"
                       >
@@ -386,7 +392,7 @@ export default function CelebrityWatches() {
                           <Share2 size={11} />
                         </button>
                         <Link
-                          to={`/product/${match.productId}`}
+                          to={getMatchUrl(match)}
                           onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1.5 rounded-full bg-[#e8c264] px-3 py-1.5 font-body text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-black transition active:scale-95 shrink-0 hover:bg-[#f1d98e] touch-manipulation shadow-md"
                         >
@@ -471,7 +477,7 @@ export default function CelebrityWatches() {
                     <div className="pointer-events-none absolute h-[17rem] w-[17rem] rounded-full border border-[#e8c264]/10" />
                     {match.watchImage || product?.image ? (
                       <Link
-                        to={`/product/${match.productId}`}
+                        to={getMatchUrl(match)}
                         className="relative z-10 flex items-center justify-center transition-transform hover:scale-105 duration-300"
                       >
                         <WatchImage
@@ -490,13 +496,13 @@ export default function CelebrityWatches() {
                     <p className="font-body text-[8px] uppercase tracking-[0.2em] text-white/35">
                       {translate("The matching watch", currentLang)}
                     </p>
-                    <Link to={`/product/${match.productId}`} className="block group">
+                    <Link to={getMatchUrl(match)} className="block group">
                       <h3 className="mt-2 max-w-xl font-display text-3xl leading-tight text-white transition group-hover:text-[#e8c264]">
                         {translate(match.reference, currentLang)}
                       </h3>
                     </Link>
                     <div className="mt-6 flex flex-row items-end justify-between border-t border-white/8 pt-5">
-                      <Link to={`/product/${match.productId}`} className="block group">
+                      <Link to={getMatchUrl(match)} className="block group">
                         <p className="font-body text-[8px] uppercase tracking-[0.18em] text-white/35">
                           {translate("Available edition", currentLang)}
                         </p>
@@ -515,7 +521,7 @@ export default function CelebrityWatches() {
                           <span>{translate("Share", currentLang)}</span>
                         </button>
                         <Link
-                          to={`/product/${match.productId}`}
+                          to={getMatchUrl(match)}
                           className="group inline-flex w-fit items-center gap-3 rounded-full bg-[#e8c264] px-5 py-3 font-body text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#f1d98e]"
                         >
                           <ShoppingBag size={14} />

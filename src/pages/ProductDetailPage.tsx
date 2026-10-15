@@ -11,6 +11,8 @@ gsap.registerPlugin(ScrollTrigger)
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
 import { ShippingLogosBar } from '../components/ShippingLogos'
+import Seo from '../components/Seo'
+import { createProductSlug, getProductUrl, extractProductId } from '../utils/productSlug'
 
 interface Watch {
   id: number
@@ -37,6 +39,7 @@ interface Watch {
   size?: string
   caliber?: string
   warranty?: string
+  inStock?: boolean
   audience?: 'Ladies' | 'Gents' | 'Womens' | 'Mens'
   nameAr?: string
   brandAr?: string
@@ -226,12 +229,14 @@ export default function ProductDetailPage({
     }, 800)
   }
 
-  // Fetch watch details from database
+  // Fetch watch details from database (supports numeric ID or slug)
   useEffect(() => {
     if (!id) return
     setLoading(true)
     const lang = localStorage.getItem('t24_lang') || 'en'
-    fetch(`/api/products/${id}?lang=${lang}`)
+
+    // First attempt: direct fetch by id or slug
+    fetch(`/api/products/${encodeURIComponent(id)}?lang=${lang}`)
       .then((res) => {
         if (!res.ok) throw new Error('Product not found')
         return res.json()
@@ -241,11 +246,46 @@ export default function ProductDetailPage({
         setActiveImage(data.image || '')
         setSelectedBrand(MIXED_BRANDS)
         setLoading(false)
+
+        // If accessed via numeric ID (e.g. /product/214), update address bar to friendly slug
+        const friendlySlug = createProductSlug(data.name)
+        if (friendlySlug && (id === String(data.id) || id.startsWith(`${data.id}-`))) {
+          window.history.replaceState(null, '', `/product/${friendlySlug}`)
+        }
       })
-      .catch((err) => {
-        console.error('Failed to load watch specifications:', err)
-        setLoading(false)
-        navigate('/')
+      .catch(() => {
+        // Fallback: search across all products by slug or id
+        fetch(`/api/products?limit=500&lang=${lang}`)
+          .then((r) => r.json())
+          .then((catalogue) => {
+            const list = Array.isArray(catalogue) ? catalogue : (catalogue?.products || [])
+            const numericId = extractProductId(id)
+            const targetSlug = id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+
+            const matched = list.find((p: Watch) => {
+              if (numericId !== null && p.id === numericId) return true
+              const pSlug = createProductSlug(p.name)
+              return pSlug === targetSlug || pSlug.endsWith(targetSlug) || targetSlug.endsWith(pSlug)
+            })
+
+            if (matched) {
+              setWatch(matched)
+              setActiveImage(matched.image || '')
+              setSelectedBrand(MIXED_BRANDS)
+              setLoading(false)
+              const friendlySlug = createProductSlug(matched.name)
+              if (friendlySlug && (id === String(matched.id) || id.startsWith(`${matched.id}-`))) {
+                window.history.replaceState(null, '', `/product/${friendlySlug}`)
+              }
+            } else {
+              throw new Error('Watch not found in catalogue')
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to load watch specifications:', err)
+            setLoading(false)
+            navigate('/')
+          })
       })
   }, [id, navigate])
 
@@ -388,7 +428,9 @@ export default function ProductDetailPage({
 
   // Share timepiece handler using Web Share API with clipboard copy fallback
   const handleShare = async () => {
-    const currentUrl = typeof window !== 'undefined' ? window.location.href : (watch.url || '')
+    const slug = createProductSlug(watch.name)
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : (import.meta.env.VITE_SITE_URL || 'https://dubaiwatchesgallery.com')
+    const shareUrl = slug ? `${baseUrl}/product/${slug}` : (typeof window !== 'undefined' ? window.location.href : `${baseUrl}/product/${watch.id}`)
     const shareTitle = `${displayName} | Dubai Watches Gallery`
     const shareText = isAr
       ? `شاهد هذه الساعة الفاخرة: ${displayName} (${watch.priceAED}) لدى Dubai Watches Gallery`
@@ -399,7 +441,7 @@ export default function ProductDetailPage({
         await navigator.share({
           title: shareTitle,
           text: shareText,
-          url: currentUrl,
+          url: shareUrl,
         })
         toast.success(translate("Shared successfully!", currentLang))
         return
@@ -412,10 +454,10 @@ export default function ProductDetailPage({
 
     try {
       if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(currentUrl)
+        await navigator.clipboard.writeText(shareUrl)
       } else {
         const textArea = document.createElement('textarea')
-        textArea.value = currentUrl
+        textArea.value = shareUrl
         textArea.style.position = 'fixed'
         textArea.style.opacity = '0'
         document.body.appendChild(textArea)
@@ -430,8 +472,37 @@ export default function ProductDetailPage({
     }
   }
 
+  const productSlug = createProductSlug(watch.name)
+  const canonicalPath = `/product/${productSlug || watch.id}`
+  const rawPriceNumber = watch.priceAED ? watch.priceAED.replace(/[^0-9]/g, '') : ''
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: displayName,
+    image: watch.image ? [watch.image] : [],
+    description: displayDescription,
+    brand: {
+      '@type': 'Brand',
+      name: displayBrand,
+    },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'AED',
+      price: rawPriceNumber || '0',
+      availability: watch.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `https://dubaiwatchesgallery.com${canonicalPath}`,
+    },
+  }
+
   return (
     <div ref={containerRef} className="min-h-screen bg-black pt-8 sm:pt-16 pb-20 text-white relative overflow-hidden">
+      <Seo
+        title={`${displayName} (${watch.priceAED}) | Dubai Watches Gallery`}
+        description={displayDescription || `Shop 1:1 super clone ${displayName} in Dubai at Dubai Watches Gallery.`}
+        canonicalPath={canonicalPath}
+        image={watch.image}
+        structuredData={productSchema}
+      />
       {/* Background radial highlights */}
       <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
@@ -892,7 +963,7 @@ export default function ProductDetailPage({
                     key={idx}
                     className="shrink-0 w-[240px] p-4 rounded-2xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] hover:border-gold/30 transition-all duration-500 shadow-lg flex flex-col justify-between group"
                   >
-                    <Link to={`/product/${item.id}`} className="block h-full flex flex-col justify-between">
+                    <Link to={getProductUrl(item)} className="block h-full flex flex-col justify-between">
                       <div className="aspect-square w-full rounded-xl bg-white/[0.01] border border-white/5 p-4 flex items-center justify-center overflow-hidden mb-4 relative">
                         <WatchImage 
                           src={item.image} 
@@ -960,7 +1031,7 @@ export default function ProductDetailPage({
                     key={idx}
                     className="shrink-0 w-[240px] p-4 rounded-2xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] hover:border-gold/30 transition-all duration-500 shadow-lg flex flex-col justify-between group"
                   >
-                    <Link to={`/product/${item.id}`} className="block h-full flex flex-col justify-between">
+                    <Link to={getProductUrl(item)} className="block h-full flex flex-col justify-between">
                       <div className="aspect-square w-full rounded-xl bg-white/[0.01] border border-white/5 p-4 flex items-center justify-center overflow-hidden mb-4 relative">
                         <WatchImage 
                           src={item.image} 

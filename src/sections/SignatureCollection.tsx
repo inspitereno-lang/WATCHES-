@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Search, Compass, Loader2, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Crown, ArrowRight } from 'lucide-react'
 import { translate } from '../utils/translate'
 import { WatchImage } from '../components/WatchImage'
+import { getProductUrl } from '../utils/productSlug'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -970,7 +971,7 @@ export default function SignatureCollection({
                   return (
                     <Link
                       key={watch.id}
-                      to={`/product/${watch.id}`}
+                      to={getProductUrl(watch)}
                       className="collection-card group cursor-pointer watch-card block"
                     >
                       <div className="relative bg-[#0d0d0f]/60 backdrop-blur-sm border border-white/5 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-500 hover:border-gold/30 shadow-2xl flex flex-col justify-between h-full">
