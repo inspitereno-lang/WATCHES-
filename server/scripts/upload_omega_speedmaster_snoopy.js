@@ -280,7 +280,7 @@ async function run() {
   try {
     fs.rmSync(TEMP_DIR, { recursive: true, force: true });
     console.log('  ✓ Cleaned up temporary WebP files.');
-  } catch {}
+  } catch { }
 
   console.log('\n========================================================================');
   console.log('✅ OMEGA SPEEDMASTER SNOOPY HAS BEEN SUCCESSFULLY ADDED & PUBLISHED');
